@@ -12,7 +12,7 @@ Distribution is one stylesheet, published as a GitHub release asset. Tags are
 never moved; a broken release gets the next patch tag.
 
 Every pull request passes the shared quality gate (`quality / verdict`, from
-`overnightworks/quality`): secret scan and SonarCloud analysis of the CSS and HTML.
+`overnightworks/quality`): secret scan, workflow-security scan and SonarCloud analysis of the CSS and HTML.
 
 Pin:
 
