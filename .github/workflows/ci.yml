@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # A push is checked against its previous tip; the all-zero SHA marks a
+      # branch's first push, which falls back to the parent commit.
+      - name: Check for whitespace errors and conflict markers
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PULL_REQUEST_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          if [ "${EVENT_NAME}" = "pull_request" ]; then
+            base="${PULL_REQUEST_BASE}"
+          elif [ "${PUSH_BEFORE}" = "0000000000000000000000000000000000000000" ]; then
+            base="HEAD^"
+          else
+            base="${PUSH_BEFORE}"
+          fi
+          git diff --check "${base}" HEAD
+
+  quality:
+    name: quality
+    needs: [checks]
+    if: always()
+    permissions:
+      contents: read
+      actions: read
+    uses: overnightworks/quality/.github/workflows/gate.yml@75467b7888ab8158dda370c770d3323dfc1f594e # v0.1.1
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
