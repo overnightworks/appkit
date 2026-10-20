@@ -8,7 +8,7 @@ tokens, for the signed-out, no-access and login-failed pages. `grammar.html`
 shows the three states and a narrow variant. The wordmark text, icons and
 wording stay in the product. `.actions`, `.wordmark` and `.linkish` are global,
 generic class names: a product that already has its own should check at
-cutover.
+cutover. The host gives `.login` its width through block/stretch layout or an explicit width, and `.actions` stacks when `.login`'s content box is 520px or less.
 
 ## v0.2.0
 
