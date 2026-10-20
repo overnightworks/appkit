@@ -65,7 +65,7 @@ variant.
 
 ## What it leaves to each product
 
-- **Wording.** Catalogs carry every string; the grammar and stylesheet have none. Sign-in wording is ruled identical in every app: each catalog copies the list under the grammar table verbatim, and no app rewords it.
+- **Wording.** Catalogs carry every string; the stylesheet has none, and grammar.html's text is sample text. Each catalog copies the sign-in wording list above verbatim.
 - **Page layout.** App bar, deck page, Pico forms, and the
   column tracks `.row--src` / `.row--user` stay in the product (or later in
   webauth Users/Account and gitmirror Sources).
