@@ -49,6 +49,13 @@ load it before the product stylesheet.
 
 `.login` takes the full width of its parent and is an inline-size container, so it works in block, flex and grid parents; inside an inline-block or float parent, which has no width of its own, it collapses. `.actions` stacks when `.login`'s content box (its width minus side padding) is 520px or less.
 
+Sign-in wording is identical in every app. Each catalog carries these strings verbatim (operator ruling 19.10.2026, ui-console#6); no button names Keycloak:
+
+- en: "Log in", "Log out", "You are logged out.", "No access", "Login failed", "Try again"
+- de: "Anmelden", "Abmelden", "Du bist abgemeldet.", "Kein Zugang", "Anmeldung fehlgeschlagen", "Erneut versuchen"
+
+Which state shows when, and where its buttons lead, is in webauth's [Signed out and refused](https://github.com/overnightworks/webauth/blob/main/README.md#signed-out-and-refused).
+
 `grammar.html` is the fixture of those skeletons: a zero-action title, the
 five state shapes, empty, a fail banner, Settings General (title plus tabs),
 Sources (state, pill, row action), sources-empty, a fail banner as on a
@@ -58,7 +65,7 @@ variant.
 
 ## What it leaves to each product
 
-- **Wording.** Catalogs own every string. The grammar has none.
+- **Wording.** Catalogs carry every string; the stylesheet has none, and grammar.html's text is sample text. Each catalog copies the sign-in wording list above verbatim.
 - **Page layout.** App bar, deck page, Pico forms, and the
   column tracks `.row--src` / `.row--user` stay in the product (or later in
   webauth Users/Account and gitmirror Sources).
