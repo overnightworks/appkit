@@ -1,0 +1,7 @@
+claim_id = "44406ea57c1d4557a665298e34ff78d3"
+agent = "claude-ui-console-head"
+role = "builder"
+base = "3183181d85d3eb72fc905adf7575336de328264f"
+branch = "docs/sign-in-wording"
+scope = ["README.md"]
+opened_commit = "53c898e6baf83b1db55305dec01d5a07e7f7eb8b"
