@@ -1,8 +1,0 @@
-claim_id = "189e99c078c94888a821855b62e5f54e"
-agent = "claude-ui-console-head"
-role = "builder"
-base = "169c709128bab81d65f63aa6afed98a52f46b13e"
-branch = "claude-ui-console-head/issue-6-sign-in-states"
-scope = ["CHANGELOG.md", "README.md", "grammar.html", "sonar-project.properties", "ui-console.css"]
-opened_commit = "9a6be418570d4ee6b8d2cd583988d96051316851"
-whole_reason = "One minor release: the stylesheet, its fixture page, the README contract, the changelog entry and the fixture's duplication exclusion change together and land as one tag."
