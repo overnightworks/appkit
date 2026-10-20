@@ -47,7 +47,7 @@ load it before the product stylesheet.
   | Error | `.banner.banner--fail` (and `.banner--ok`, `.banner--busy`) |
   | Sign-in | `.login` > `.login-card` (`.wordmark`, `h1`, `.banner.banner--fail`, `.actions` or `.btn--primary.btn--wide`), then `.legal-links` > `a.linkish`. Three states: signed out, no access, login failed. |
 
-The host must give `.login` its available width through block/stretch layout or an explicit width. `.login` is an inline-size container, so in a shrink-to-fit parent (flex row, inline-block, float) it collapses. `.actions` stacks when `.login`'s content box (its width minus side padding) is 520px or less.
+`.login` takes the full width of its parent and is an inline-size container, so it works in block, flex and grid parents; inside an inline-block or float parent, which has no width of its own, it collapses. `.actions` stacks when `.login`'s content box (its width minus side padding) is 520px or less.
 
 `grammar.html` is the fixture of those skeletons: a zero-action title, the
 five state shapes, empty, a fail banner, Settings General (title plus tabs),
