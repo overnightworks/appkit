@@ -6,7 +6,9 @@ Sign-in states: `.login`, `.login-card`, `.wordmark`, `.actions`,
 `.btn--wide`, `.legal-links` and `.linkish`, coloured only through the
 tokens, for the signed-out, no-access and login-failed pages. `grammar.html`
 shows the three states and a narrow variant. The wordmark text, icons and
-wording stay in the product.
+wording stay in the product. `.actions`, `.wordmark` and `.linkish` are global,
+generic class names: a product that already has its own should check at
+cutover.
 
 ## v0.2.0
 

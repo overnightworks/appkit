@@ -1,8 +1,8 @@
 # ui-console
 
 This package carries design tokens and the grammar of a console page: lists
-of things with states, facts and fields. It refuses components, layout,
-JavaScript and fonts; a product renders through this grammar with its own
+of things with states, facts and fields. It refuses components, product-specific
+page layout, JavaScript and fonts; a product renders through this grammar with its own
 markup.
 
 Design tokens and the settings grammar shared by overnightworks products.
