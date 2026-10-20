@@ -1,8 +1,8 @@
 # ui-console
 
 This package carries design tokens and the grammar of a console page: lists
-of things with states, facts and fields. It refuses components, layout,
-JavaScript and fonts; a product renders through this grammar with its own
+of things with states, facts and fields. It refuses components, product-specific
+page layout, JavaScript and fonts; a product renders through this grammar with its own
 markup.
 
 Design tokens and the settings grammar shared by overnightworks products.
@@ -17,7 +17,7 @@ Every pull request passes the shared quality gate (`quality / verdict`, from
 Pin:
 
 ```
-https://github.com/overnightworks/ui-console/releases/download/v0.2.0/ui-console.css
+https://github.com/overnightworks/ui-console/releases/download/v0.3.0/ui-console.css
 ```
 
 Jinja and Svelte products vendor that file (do not hot-link it at runtime) and
@@ -45,16 +45,21 @@ load it before the product stylesheet.
   | Right-aligned outline buttons | `.btn`, `.btn--primary`, `.btn--s`, `.row-act`, `.pair` |
   | Empty | `.empty`, `.empty-mark` |
   | Error | `.banner.banner--fail` (and `.banner--ok`, `.banner--busy`) |
+  | Sign-in | `.login` > `.login-card` (`.wordmark`, `h1`, `.banner.banner--fail`, `.actions` or `.btn--primary.btn--wide`), then `.legal-links` > `a.linkish`. Three states: signed out, no access, login failed. |
+
+`.login` takes the full width of its parent and is an inline-size container, so it works in block, flex and grid parents; inside an inline-block or float parent, which has no width of its own, it collapses. `.actions` stacks when `.login`'s content box (its width minus side padding) is 520px or less.
 
 `grammar.html` is the fixture of those skeletons: a zero-action title, the
 five state shapes, empty, a fail banner, Settings General (title plus tabs),
 Sources (state, pill, row action), sources-empty, a fail banner as on a
-failed source check, and a narrow Users row whose state is not clipped.
+failed source check, a narrow Users row whose state is not clipped, and the
+three sign-in states (signed out, no access, login failed) with a narrow
+variant.
 
 ## What it leaves to each product
 
 - **Wording.** Catalogs own every string. The grammar has none.
-- **Page layout.** App bar, login column, deck page, Pico forms, and the
+- **Page layout.** App bar, deck page, Pico forms, and the
   column tracks `.row--src` / `.row--user` stay in the product (or later in
   webauth Users/Account and gitmirror Sources).
 - **Components and JavaScript.** No Svelte, no Jinja macros, no htmx. Markup
@@ -112,9 +117,9 @@ Tags are never moved. Publish a tag and attach the stylesheet as the release
 asset, the same recipe webauth uses:
 
 ```sh
-git tag v0.2.0
-git push origin v0.2.0
-gh release create v0.2.0 ui-console.css --title v0.2.0 --generate-notes
+git tag v0.3.0
+git push origin v0.3.0
+gh release create v0.3.0 ui-console.css --title v0.3.0 --generate-notes
 ```
 
 Consumers pin that asset URL. A broken release gets the next patch tag.

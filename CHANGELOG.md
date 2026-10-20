@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.3.0
+
+Sign-in states: `.login`, `.login-card`, `.wordmark`, `.actions`,
+`.btn--wide`, `.legal-links` and `.linkish`, coloured only through the
+tokens, for the signed-out, no-access and login-failed pages. `grammar.html`
+shows the three states and a narrow variant. The wordmark text, icons and
+wording stay in the product. `.actions`, `.wordmark` and `.linkish` are global,
+generic class names: a product that already has its own should check at
+cutover. `.login` takes the full width of its parent (inside an inline-block or float parent, which has no width of its own, it collapses), and `.actions` stacks when `.login`'s content box is 520px or less.
+
 ## v0.2.0
 
 Renamed from `ui-tokens` to `ui-console`: the package carries design tokens
