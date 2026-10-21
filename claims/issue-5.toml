@@ -1,7 +1,0 @@
-claim_id = "2eee8194681c4916a6b0fb7e103a71fd"
-agent = "claude-ui-console-head"
-role = "builder"
-base = "169c709128bab81d65f63aa6afed98a52f46b13e"
-branch = "claude-ui-console-head/issue-5-quality-v0-2-1"
-scope = [".github/workflows/ci.yml"]
-opened_commit = "8cfbc8903d2a9da8b2ae483ad5e8b7dc890a0fc1"
