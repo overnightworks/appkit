@@ -17,7 +17,7 @@ Every pull request passes the shared quality gate (`quality / verdict`, from
 Pin:
 
 ```
-https://github.com/overnightworks/ui-console/releases/download/v0.3.0/ui-console.css
+https://github.com/overnightworks/ui-console/releases/download/v0.3.1/ui-console.css
 ```
 
 Jinja and Svelte products vendor that file (do not hot-link it at runtime) and
@@ -47,14 +47,14 @@ load it before the product stylesheet.
   | Error | `.banner.banner--fail` (and `.banner--ok`, `.banner--busy`) |
   | Sign-in | `.login` > `.login-card` (`.wordmark`, `h1`, `.banner.banner--fail`, `.actions` or `.btn--primary.btn--wide`), then `.legal-links` > `a.linkish`. Three states: signed out, no access, login failed. |
 
-`.login` takes the full width of its parent and is an inline-size container, so it works in block, flex and grid parents; inside an inline-block or float parent, which has no width of its own, it collapses. `.actions` stacks when `.login`'s content box (its width minus side padding) is 520px or less.
-
 Sign-in wording is identical in every app. Each catalog carries these strings verbatim (operator ruling 19.10.2026, ui-console#6); no button names Keycloak:
 
 - en: "Log in", "Log out", "You are logged out.", "No access", "Login failed", "Try again"
 - de: "Anmelden", "Abmelden", "Du bist abgemeldet.", "Kein Zugang", "Anmeldung fehlgeschlagen", "Erneut versuchen"
 
-Which state shows when, and where its buttons lead, is in webauth's [Signed out and refused](https://github.com/overnightworks/webauth/blob/main/README.md#signed-out-and-refused).
+Each state has one way out: Signed out shows "Log in" and never redirects by itself; No access shows "Log out" (no "Back": the page is reached through the Keycloak redirect chain, so going back returns to Keycloak, which sends a live session straight back here); Login failed shows "Try again". `.actions` stacks at a viewport of 520px or less.
+
+Which refusal shows which page, and the redirect rule, are in webauth's [Signed out and refused](https://github.com/overnightworks/webauth/blob/main/README.md#signed-out-and-refused).
 
 `grammar.html` is the fixture of those skeletons: a zero-action title, the
 five state shapes, empty, a fail banner, Settings General (title plus tabs),
@@ -124,9 +124,9 @@ Tags are never moved. Publish a tag and attach the stylesheet as the release
 asset, the same recipe webauth uses:
 
 ```sh
-git tag v0.3.0
-git push origin v0.3.0
-gh release create v0.3.0 ui-console.css --title v0.3.0 --generate-notes
+git tag v0.3.1
+git push origin v0.3.1
+gh release create v0.3.1 ui-console.css --title v0.3.1 --generate-notes
 ```
 
 Consumers pin that asset URL. A broken release gets the next patch tag.

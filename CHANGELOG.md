@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.3.1
+
+No access shows only "Log out": "Back" is dropped because the page is reached
+through the Keycloak redirect chain, so going back lands on Keycloak, which
+returns a live session straight here. `.actions` stacks at a 520px viewport
+again (a media query, as in the picture). `.login` is no longer a size
+container and needs no width of its own, so it works in every parent.
+
 ## v0.3.0
 
 Sign-in states: `.login`, `.login-card`, `.wordmark`, `.actions`,
