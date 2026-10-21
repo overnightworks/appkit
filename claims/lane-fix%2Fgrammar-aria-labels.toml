@@ -1,7 +1,0 @@
-claim_id = "09e664f76fa44de29b05b2e1e9c14035"
-agent = "claude-ui-console-head"
-role = "builder"
-base = "df708b160ff1b2d038bc65adb062617c873cd6a8"
-branch = "fix/grammar-aria-labels"
-scope = ["grammar.html"]
-opened_commit = "cfc51f761b30f74829a27a4d136fcfbf7b67370e"
