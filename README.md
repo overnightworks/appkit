@@ -80,7 +80,7 @@ variant.
   Pico in its own leftover CSS.
 - **Meaning that differs.** State words (reachable vs ready vs active),
   accent hue, which `.state--*` a domain uses.
-- **Not in v0.1.** `.info` / `.pop`, `.toast`, `.block`, `.radios` / `.dot`,
+- **Not yet.** `.info` / `.pop`, `.toast`, `.block`, `.radios` / `.dot`,
   `.later`. The picture has them; no second product has asked yet.
 
 ## Override
@@ -107,16 +107,6 @@ Atelier-2's ink-only state vocabulary:
   }
 }
 ```
-
-## First caller in agent-presentator
-
-This package is vendored there as a visual no-op. The lobby still renders
-with Pico leftover classes (`main > header`, `[data-tabs]`, `[data-state]`).
-The first surface that adopts the grammar classes is Settings Users
-([overnightworks/agent-presentator#61](https://github.com/overnightworks/agent-presentator/issues/61)),
-which also restyles the shared Settings tab strip and Account onto
-`.list-head` / `nav.tabs` / `.rows`. Until that item lands, the grammar CSS
-in the vendored file has no markup caller in that product.
 
 ## Release
 
