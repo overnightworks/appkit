@@ -1,7 +1,0 @@
-claim_id = "ba4d85c093bb4ed196d00423192f6676"
-agent = "claude-ui-console-head"
-role = "builder"
-base = "2c28e5661b3f47d37e612c12cd615007387ef2c4"
-branch = "fix/quality-v0.4.0"
-scope = [".github/workflows/ci.yml"]
-opened_commit = "78182d80cfe040ae048ee4b3a9734cde88d92454"
