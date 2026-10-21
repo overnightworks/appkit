@@ -483,14 +483,11 @@
  * the wordmark text, the h1 and the button words are the product's. */
 
 .login {
-  box-sizing: border-box;
-  width: 100%;
   padding: 56px 28px 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 22px;
-  container-type: inline-size;
 }
 
 .login-card {
@@ -525,7 +522,7 @@
   align-items: center;
 }
 
-@container (max-width: 520px) {
+@media (max-width: 520px) {
   .actions {
     flex-direction: column;
     align-items: stretch;
