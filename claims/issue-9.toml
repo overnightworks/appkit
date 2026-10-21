@@ -1,0 +1,8 @@
+claim_id = "54d00e5751c04ba2a21af982d4408df9"
+agent = "claude-ui-console-head"
+role = "builder"
+base = "ad29a41df7e775f62d289cd249b19c1dae7dcce2"
+branch = "claude-ui-console-head/issue-9-ways-out"
+scope = ["CHANGELOG.md", "README.md", "grammar.html", "ui-console.css"]
+opened_commit = "90d6984b463d573706a21b9ada473d19cb6dd024"
+whole_reason = "One patch release: stylesheet, fixture, README contract and changelog change together and land as one tag."
