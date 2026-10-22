@@ -1,0 +1,8 @@
+claim_id = "a4ba043cbb33482f9ee69a29639b2d6b"
+agent = "claude-ui-console-head"
+role = "builder"
+base = "d32cb6ebfaf6956ea518445caac0b17d7f5e4e02"
+branch = "claude-ui-console-head/issue-19-rename-ui-style"
+scope = ["CHANGELOG.md", "README.md", "docs/stylesheet.md", "grammar.html", "scripts/release", "sonar-project.properties", "ui-console.css", "ui-style.css"]
+opened_commit = "9fda3b888f3b2dec4f69e790dcdbf256e6128c65"
+whole_reason = "One rename across every file that names the asset; splitting would leave a release whose files disagree."
