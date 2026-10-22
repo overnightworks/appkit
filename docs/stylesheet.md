@@ -1,7 +1,8 @@
 # ui-console stylesheet reference
 
-Contract of `ui-console.css` for an engineer writing markup against it. How to
-obtain the file is in the [README](../README.md).
+Contract of `ui-console.css` for an engineer writing markup against it. "The
+picture" is the blessed mockup the [README](../README.md) names; the README
+also says how to obtain the file.
 
 ## What it owns
 
