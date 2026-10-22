@@ -65,10 +65,9 @@ variant.
 
 ## What it leaves to each product
 
-- **Wording.** Catalogs carry every string; the stylesheet has none, and grammar.html's text is sample text. Each catalog copies the sign-in wording list above verbatim.
+- **Wording.** Catalogs carry every string; the stylesheet has none, and grammar.html's text is sample text. The sign-in wording list above is the one exception: every catalog carries it verbatim.
 - **Page layout.** App bar, deck page, Pico forms, and the
-  column tracks `.row--src` / `.row--user` stay in the product (or later in
-  webauth Users/Account and gitmirror Sources).
+  column tracks `.row--src` / `.row--user` stay in the product.
 - **Components and JavaScript.** No Svelte, no Jinja macros, no htmx. Markup
   is the product's.
 - **Fonts.** No `@font-face`, no Google Fonts, no IBM Plex. The type tokens
@@ -80,8 +79,6 @@ variant.
   Pico in its own leftover CSS.
 - **Meaning that differs.** State words (reachable vs ready vs active),
   accent hue, which `.state--*` a domain uses.
-- **Not yet.** `.info` / `.pop`, `.toast`, `.block`, `.radios` / `.dot`,
-  `.later`. The picture has them; no second product has asked yet.
 
 ## Override
 
@@ -119,4 +116,4 @@ git push origin v0.3.1
 gh release create v0.3.1 ui-console.css --title v0.3.1 --generate-notes
 ```
 
-Consumers pin that asset URL. A broken release gets the next patch tag.
+Consumers pin that asset URL.
