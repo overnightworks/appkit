@@ -106,13 +106,10 @@ Atelier-2's ink-only state vocabulary:
 
 ## Release
 
-Tags are never moved. Publish a tag and attach the stylesheet as the release
-asset, the same recipe webauth uses:
-
 ```sh
-git tag v0.3.1
-git push origin v0.3.1
-gh release create v0.3.1 ui-console.css --title v0.3.1 --generate-notes
+scripts/release v<version>
 ```
 
-Consumers pin that asset URL.
+It tags `main`, pushes the tag and attaches `ui-console.css` as the release
+asset. It refuses unless you are on a clean `main` equal to `origin/main`, the
+tag is new and `gh` is logged in.

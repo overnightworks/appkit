@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Publish a release: tag, push the tag, attach ui-console.css.
+set -euo pipefail
+
+fail() { echo "release: $*" >&2; exit 1; }
+
+[[ $# -eq 1 && $1 =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "usage: scripts/release vMAJOR.MINOR.PATCH"
+tag=$1
+
+cd "$(git rev-parse --show-toplevel)"
+
+# Tags are never moved, so a tag on the wrong commit cannot be undone.
+[[ $(git branch --show-current) == main ]] || fail "not on main"
+[[ -z $(git status --porcelain) ]] || fail "working tree is not clean"
+git fetch --quiet origin main
+[[ $(git rev-parse main) == "$(git rev-parse origin/main)" ]] || fail "main differs from origin/main"
+git rev-parse --verify --quiet "refs/tags/$tag" >/dev/null && fail "tag $tag exists locally"
+[[ -z $(git ls-remote --tags origin "refs/tags/$tag") ]] || fail "tag $tag exists on origin"
+gh auth status >/dev/null 2>&1 || fail "gh is missing or not logged in"
+
+git tag "$tag"
+git push origin "$tag"
+release=(gh release create "$tag" ui-console.css --title "$tag" --generate-notes)
+"${release[@]}" || fail "tag $tag is pushed but has no release; tags are never moved, so run: ${release[*]}"
