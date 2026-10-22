@@ -1,7 +1,0 @@
-claim_id = "48fc0713633c4036a21f4f5174c845f0"
-agent = "claude-ui-console-head"
-role = "builder"
-base = "2f72e2262839b29e6decf04a2305f6c378af7b85"
-branch = "docs/docs-cleanup"
-scope = ["AGENTS.md", "CHANGELOG.md", "README.md"]
-opened_commit = "d0c9b4291122c576db6ae1db580c1c1bb570f967"
