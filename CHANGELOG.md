@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.4.0
+
+Repository renamed to `ui-style` and the release asset to `ui-style.css`
+(edge#24; naming rule in edge `docs/naming.md`). No CSS change except the
+header comment naming the repository. Consumers change their pin's path and
+file name when they bump. Existing releases keep their original asset names
+(v0.1.0 `ui-tokens.css`, v0.2.0 to v0.3.1 `ui-console.css`), and their URLs
+redirect.
+
 ## v0.3.1
 
 No access shows only "Log out": "Back" is dropped because the page is reached

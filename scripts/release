@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publish a release: tag, push the tag, attach ui-console.css.
+# Publish a release: tag, push the tag, attach ui-style.css.
 set -euo pipefail
 
 fail() { echo "release: $*" >&2; exit 1; }
@@ -20,5 +20,5 @@ gh auth status >/dev/null 2>&1 || fail "gh is missing or not logged in"
 
 git tag "$tag"
 git push origin "$tag"
-release=(gh release create "$tag" ui-console.css --title "$tag" --generate-notes)
+release=(gh release create "$tag" ui-style.css --title "$tag" --generate-notes)
 "${release[@]}" || fail "tag $tag is pushed but has no release; tags are never moved, so run: ${release[*]}"

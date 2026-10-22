@@ -1,6 +1,6 @@
-# ui-console stylesheet reference
+# ui-style stylesheet reference
 
-Contract of `ui-console.css` for an engineer writing markup against it. "The
+Contract of `ui-style.css` for an engineer writing markup against it. "The
 picture" is the blessed mockup the [README](../README.md) names; the README
 also says how to obtain the file.
 

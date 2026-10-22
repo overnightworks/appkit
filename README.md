@@ -1,4 +1,4 @@
-# ui-console
+# ui-style
 
 This package carries the design tokens and the console-page grammar that
 overnightworks products share: lists of things with states, facts and fields.
@@ -16,7 +16,7 @@ Every pull request passes the shared quality gate (`quality / verdict`, from
 Pin:
 
 ```
-https://github.com/overnightworks/ui-console/releases/download/v0.3.1/ui-console.css
+https://github.com/overnightworks/ui-style/releases/download/v0.4.0/ui-style.css
 ```
 
 Jinja and Svelte products vendor that file (do not hot-link it at runtime) and
@@ -30,6 +30,6 @@ Writing markup against it: [stylesheet reference](docs/stylesheet.md).
 scripts/release v<version>
 ```
 
-It tags `main`, pushes the tag and attaches `ui-console.css` as the release
+It tags `main`, pushes the tag and attaches `ui-style.css` as the release
 asset. It refuses unless you are on a clean `main` equal to `origin/main`, the
 tag is new and `gh` is logged in.
