@@ -16,7 +16,9 @@ git fetch --quiet origin main
 [[ $(git rev-parse main) == "$(git rev-parse origin/main)" ]] || fail "main differs from origin/main"
 git rev-parse --verify --quiet "refs/tags/$tag" >/dev/null && fail "tag $tag exists locally"
 [[ -z $(git ls-remote --tags origin "refs/tags/$tag") ]] || fail "tag $tag exists on origin"
+gh auth status >/dev/null 2>&1 || fail "gh is missing or not logged in"
 
 git tag "$tag"
 git push origin "$tag"
-gh release create "$tag" ui-console.css --title "$tag" --generate-notes
+release_command="gh release create $tag ui-console.css --title $tag --generate-notes"
+$release_command || fail "tag $tag is pushed but has no release; tags are never moved, so run: $release_command"
