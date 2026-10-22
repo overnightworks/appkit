@@ -1,0 +1,7 @@
+claim_id = "78dc8372544d42dd9794ae8c0a655819"
+agent = "claude-ui-console-head"
+role = "builder"
+base = "d32cb6ebfaf6956ea518445caac0b17d7f5e4e02"
+branch = "fix/codeql"
+scope = [".github/workflows/code-scanning.yml"]
+opened_commit = "dd138123a65a4190a6d47561a4e2c9b8ecd82ac3"
