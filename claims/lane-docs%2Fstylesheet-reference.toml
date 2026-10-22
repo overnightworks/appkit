@@ -1,0 +1,7 @@
+claim_id = "35d854ef319d4f5fb38e5c01ca980561"
+agent = "claude-ui-console-head"
+role = "builder"
+base = "c0438d7e2e535e9a398ab52d4258ad9b666ca5d1"
+branch = "docs/stylesheet-reference"
+scope = ["README.md", "docs/stylesheet.md"]
+opened_commit = "2482274fc2b4c0417080d58eab7dce55a20b826e"
