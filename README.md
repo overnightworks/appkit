@@ -1,11 +1,10 @@
 # ui-console
 
-This package carries design tokens and the grammar of a console page: lists
-of things with states, facts and fields. It refuses components, product-specific
-page layout, JavaScript and fonts; a product renders through this grammar with its own
-markup.
+This package carries the design tokens and the console-page grammar that
+overnightworks products share: lists of things with states, facts and fields.
+It refuses components, product-specific page layout, JavaScript and fonts; a
+product renders through this grammar with its own markup.
 
-Design tokens and the settings grammar shared by overnightworks products.
 Owned by agent-presentator's blessed picture `docs/mockups/m0-lobby.html`.
 
 Distribution is one stylesheet, published as a GitHub release asset. Tags are
@@ -65,7 +64,7 @@ variant.
 
 ## What it leaves to each product
 
-- **Wording.** Catalogs carry every string; the stylesheet has none, and grammar.html's text is sample text. The sign-in wording list above is the one exception: every catalog carries it verbatim.
+- **Wording.** Catalogs carry every string; the stylesheet has none, and grammar.html's text is sample text. Only the sign-in wording list above is ruled here.
 - **Page layout.** App bar, deck page, Pico forms, and the
   column tracks `.row--src` / `.row--user` stay in the product.
 - **Components and JavaScript.** No Svelte, no Jinja macros, no htmx. Markup
