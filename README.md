@@ -111,5 +111,5 @@ scripts/release v<version>
 ```
 
 It tags `main`, pushes the tag and attaches `ui-console.css` as the release
-asset. It refuses unless you are on a clean `main` equal to `origin/main` and
-the tag is new.
+asset. It refuses unless you are on a clean `main` equal to `origin/main`, the
+tag is new and `gh` is logged in.
