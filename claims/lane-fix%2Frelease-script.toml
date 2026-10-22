@@ -1,7 +1,0 @@
-claim_id = "891426ab309543c6bc11282f705bcbdf"
-agent = "claude-ui-console-head"
-role = "builder"
-base = "0050b5b6e0cdba933d9970c943c55bbe52c1ff6e"
-branch = "fix/release-script"
-scope = ["README.md", "scripts/release"]
-opened_commit = "6a5718197bb34bf0f5c554a82f6c71611fc6d3d5"
