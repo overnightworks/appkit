@@ -13,7 +13,7 @@ The wheel's `appkit.css` owns the family tokens (`--bg`, `--bg-deep`,
 Dark is under `:root`; `[data-theme='light']` switches to light; with no
 choice it stays dark. The app colour (`--primary`, `--accent`, `--on-accent`)
 and everything domain-specific stay with the app. `ui-style.css` is frozen and
-keeps its own token names; the two files are not loaded together.
+keeps its own token names.
 
 ## What `ui-style.css` owns
 
