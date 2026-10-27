@@ -3,6 +3,6 @@ agent = "Claude bcdefbb8-23d6-4272-8425-a72ef5044e27"
 role = "builder"
 base = "49be71494b5ed241e6be55e715ed8d132d115532"
 branch = "claude/issue-28-k1a-family-tokens-and-fonts"
-scope = [".github/workflows/ci.yml", ".gitignore", "CHANGELOG.md", "README.md", "docs/stylesheet.md", "pyproject.toml", "scripts/release", "sonar-project.properties", "src/appkit", "tests", "uv.lock"]
+scope = [".github/workflows/ci.yml", ".gitignore", "CHANGELOG.md", "README.md", "docs/stylesheet.md", "pyproject.toml", "scripts/release", "scripts/token-list", "sonar-project.properties", "src/appkit", "tests", "uv.lock"]
 opened_commit = "6c741a055fbdc908cd5196cc736cd2f404126f5e"
 whole_reason = "A move of one source of truth into a new package; split, the wheel would ship without its release path or its proof."
