@@ -105,6 +105,7 @@
 	--text-muted: #888;
 	--card-bg: rgba(13, 13, 13, 0.85);
 	--glow-primary: rgba(255, 50, 32, 0.03);
+	--header-bg: #0a0a0a;
 	--font-display: 'Oswald', Impact, sans-serif;
 	--font-body: 'Open Sans', Arial, sans-serif;
 }
@@ -119,4 +120,5 @@
 	--text-muted: #555;
 	--card-bg: rgba(255, 255, 255, 0.9);
 	--glow-primary: rgba(212, 26, 10, 0.04);
+	--header-bg: #f0f0f2;
 }

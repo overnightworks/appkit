@@ -16,7 +16,7 @@ FONT_FILES = {
 LICENCES = {"oswald-LICENSE", "open-sans-LICENSE"}
 FAMILY_TOKENS = {
     "--bg", "--bg-deep", "--surface", "--surface-hover", "--border", "--text",
-    "--text-muted", "--card-bg", "--glow-primary", "--font-display", "--font-body",
+    "--text-muted", "--card-bg", "--glow-primary", "--header-bg", "--font-display", "--font-body",
 }
 
 
@@ -75,3 +75,30 @@ def test_token_list_holds_exactly_the_properties_the_stylesheet_defines(installe
         text=True,
     ).stdout.split()
     assert listing == sorted(FAMILY_TOKENS)
+
+
+def top_level_rules(stylesheet):
+    """Selector to body of each top-level rule; raises when braces do not balance."""
+    rules, depth, selector_start, body_start, selector = {}, 0, 0, 0, ""
+    for index, character in enumerate(stylesheet):
+        if character == "{":
+            if depth == 0:
+                selector = stylesheet[selector_start:index].strip()
+                body_start = index + 1
+            depth += 1
+        elif character == "}":
+            depth -= 1
+            assert depth >= 0, "closing brace without opening brace"
+            if depth == 0:
+                rules.setdefault(selector, []).append(stylesheet[body_start:index])
+                selector_start = index + 1
+    assert depth == 0, "unclosed rule"
+    return rules
+
+
+def test_dark_tokens_sit_under_root_and_light_tokens_under_the_light_theme(installed_package):
+    _, static = installed_package
+    rules = top_level_rules((static / "appkit.css").read_text())
+    for selector in (":root", "[data-theme='light']"):
+        (body,) = rules[selector]
+        assert re.search(r"^\s+--bg:", body, re.MULTILINE), selector

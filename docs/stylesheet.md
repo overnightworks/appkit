@@ -8,7 +8,7 @@ also says how to obtain the file.
 
 The wheel's `appkit.css` owns the family tokens (`--bg`, `--bg-deep`,
 `--surface`, `--surface-hover`, `--border`, `--text`, `--text-muted`,
-`--card-bg`, `--glow-primary`, `--font-display`, `--font-body`) and the
+`--card-bg`, `--glow-primary`, `--header-bg`, `--font-display`, `--font-body`) and the
 `@font-face` rules for Oswald and Open Sans, with songmaker's names and values.
 Dark is under `:root`; `[data-theme='light']` switches to light; with no
 choice it stays dark. The app colour (`--primary`, `--accent`, `--on-accent`)
