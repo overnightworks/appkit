@@ -1,0 +1,8 @@
+claim_id = "e9b5f8bc908e47d2b1d99174e824d82d"
+agent = "Claude bcdefbb8-23d6-4272-8425-a72ef5044e27"
+role = "builder"
+base = "ae424fddd5242ea90a0eb36e2ec2efc408daea1a"
+branch = "claude/issue-26-rename-to-appkit"
+scope = ["CHANGELOG.md", "README.md", "docs/stylesheet.md", "grammar.html", "sonar-project.properties"]
+opened_commit = "930ac62c88c8b1ab7aa69d67c15b08124d0a02a2"
+whole_reason = "One rename touching five small files; split, the repository would name itself two ways between landings."
