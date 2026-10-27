@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+Repository renamed to `appkit` (overnightworks/appkit#25, card 2; naming rule
+in edge `docs/naming.md`). No CSS change. The release asset keeps the name
+`ui-style.css` until the file is retired, so the pin's path changes and the
+file name does not. Older releases and their URLs redirect to the new
+repository. The Sonar project key is now `overnightworks_appkit`.
+
 ## v0.4.0
 
 Repository renamed to `ui-style` and the release asset to `ui-style.css`

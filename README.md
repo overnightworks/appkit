@@ -1,4 +1,4 @@
-# ui-style
+# appkit
 
 This package carries the design tokens and the console-page grammar that
 overnightworks products share: lists of things with states, facts and fields.
@@ -16,7 +16,7 @@ Every pull request passes the shared quality gate (`quality / verdict`, from
 Pin:
 
 ```
-https://github.com/overnightworks/ui-style/releases/download/v0.4.0/ui-style.css
+https://github.com/overnightworks/appkit/releases/download/v0.4.0/ui-style.css
 ```
 
 Jinja and Svelte products vendor that file (do not hot-link it at runtime) and

@@ -1,4 +1,4 @@
-# ui-style stylesheet reference
+# appkit stylesheet reference
 
 Contract of `ui-style.css` for an engineer writing markup against it. "The
 picture" is the blessed mockup the [README](../README.md) names; the README
@@ -35,7 +35,7 @@ Sign-in wording is identical in every app. Each catalog carries these strings ve
 
 Each state has one way out: Signed out shows "Log in" and never redirects by itself; No access shows "Log out" (no "Back": the page is reached through the Keycloak redirect chain, so going back returns to Keycloak, which sends a live session straight back here); Login failed shows "Try again". `.actions` stacks at a viewport of 520px or less.
 
-Which refusal shows which page, and the redirect rule, are in webauth's [Signed out and refused](https://github.com/overnightworks/webauth/blob/main/README.md#signed-out-and-refused).
+Which refusal shows which page, and the redirect rule, are in webauth's [Signed out and refused](https://github.com/overnightworks/webauth/blob/main/docs/host-contract.md#signed-out-and-refused).
 
 [`grammar.html`](../grammar.html) is the fixture of those skeletons: a zero-action title, the
 five state shapes, empty, a fail banner, Settings General (title plus tabs),
