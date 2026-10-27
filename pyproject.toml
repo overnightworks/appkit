@@ -1,0 +1,22 @@
+[project]
+name = "overnightworks-appkit"
+version = "0.5.0"
+description = "Family design tokens and fonts shared by overnightworks products"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["uv_build>=0.10,<0.11"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "appkit"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

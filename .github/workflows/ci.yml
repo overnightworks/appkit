@@ -41,6 +41,12 @@ jobs:
           fi
           git diff --check "${base}" HEAD
 
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e  # v10.3.2
+      - name: Run the package tests and build the wheel
+        run: |
+          uv run --frozen pytest -q tests
+          uv build --wheel
+
   quality:
     name: quality
     needs: [checks]
