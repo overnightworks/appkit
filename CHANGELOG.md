@@ -1,6 +1,15 @@
 # Changelog
 
-## Unreleased
+## v0.5.0
+
+The `overnightworks-appkit` wheel (import `appkit`) carries `appkit.css`, the
+family tokens (songmaker's names and values, dark and light) with the
+`@font-face` rules, and the Oswald and Open Sans files of `@fontsource` 5.3.0
+with their licences. The release also attaches `ui-style.css` (frozen,
+unchanged) and the token list `appkit-<version>-tokens.txt`
+(overnightworks/appkit#28, slice K1a of #25). songmaker and edge keep their
+copies until K1b and K1c.
+
 
 Repository renamed to `appkit` (overnightworks/appkit#25, card 2; naming rule
 in edge `docs/naming.md`). No CSS change. The release asset keeps the name

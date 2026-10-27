@@ -4,7 +4,18 @@ Contract of `ui-style.css` for an engineer writing markup against it. "The
 picture" is the blessed mockup the [README](../README.md) names; the README
 also says how to obtain the file.
 
-## What it owns
+## Beside `appkit.css`
+
+The wheel's `appkit.css` owns the family tokens (`--bg`, `--bg-deep`,
+`--surface`, `--surface-hover`, `--border`, `--text`, `--text-muted`,
+`--card-bg`, `--glow-primary`, `--font-display`, `--font-body`) and the
+`@font-face` rules for Oswald and Open Sans, with songmaker's names and values.
+Dark is under `:root`; `[data-theme='light']` switches to light; with no
+choice it stays dark. The app colour (`--primary`, `--accent`, `--on-accent`)
+and everything domain-specific stay with the app. `ui-style.css` is frozen and
+keeps its own token names; the two files are not loaded together.
+
+## What `ui-style.css` owns
 
 - The token names and the picture's default values: surfaces (`--canvas`,
   `--canvas-2`, `--screen`, `--shadow`), ink, lines, accent, state colours,

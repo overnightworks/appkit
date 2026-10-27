@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publish a release: tag, push the tag, attach ui-style.css.
+# Publish a release: tag, push the tag, attach the wheel, ui-style.css and the token list.
 set -euo pipefail
 
 fail() { echo "release: $*" >&2; exit 1; }
@@ -8,6 +8,9 @@ fail() { echo "release: $*" >&2; exit 1; }
 tag=$1
 
 cd "$(git rev-parse --show-toplevel)"
+
+version=$(sed -nE 's/^version = "([^"]+)"$/\1/p' pyproject.toml)
+[[ $tag == "v$version" ]] || fail "tag $tag is not the package version v$version"
 
 # Tags are never moved, so a tag on the wrong commit cannot be undone.
 [[ $(git branch --show-current) == main ]] || fail "not on main"
@@ -18,7 +21,16 @@ git rev-parse --verify --quiet "refs/tags/$tag" >/dev/null && fail "tag $tag exi
 [[ -z $(git ls-remote --tags origin "refs/tags/$tag") ]] || fail "tag $tag exists on origin"
 gh auth status >/dev/null 2>&1 || fail "gh is missing or not logged in"
 
+# Everything is built before the tag, so a failing build leaves nothing to undo.
+staging=$(mktemp -d)
+trap 'rm -rf "$staging"' EXIT
+uv build --wheel --out-dir "$staging" >/dev/null
+wheel=$(ls "$staging"/*.whl)
+tokens="$staging/appkit-$version-tokens.txt"
+scripts/token-list src/appkit/static/appkit.css >"$tokens"
+
 git tag "$tag"
 git push origin "$tag"
-release=(gh release create "$tag" ui-style.css --title "$tag" --generate-notes)
+release=(gh release create "$tag" "$wheel" ui-style.css "$tokens" --title "$tag" --generate-notes)
 "${release[@]}" || fail "tag $tag is pushed but has no release; tags are never moved, so run: ${release[*]}"
+echo "wheel sha256: $(sha256sum "$wheel" | cut -d' ' -f1)"
