@@ -95,12 +95,6 @@
 		U+A720-A7FF;
 }
 
-*,
-*::before,
-*::after {
-	margin: 0;
-	padding: 0;
-
 :root {
 	--bg: #0d0d0d;
 	--bg-deep: #050508;
