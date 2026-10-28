@@ -1,0 +1,8 @@
+claim_id = "c518bbc3ec9e4539bf06cecf2a558cad"
+agent = "Claude 41655a5c-dc18-4dfd-a77f-08ffc675b475"
+role = "builder"
+base = "a161c7c49b028c462a46a9c8c3102da51a366dae"
+branch = "claude/issue-32-kit-v0-6-0"
+scope = ["CHANGELOG.md", "README.md", "docs/stylesheet.md", "pyproject.toml", "src/appkit/static/appkit.css", "tests/test_wheel.py", "uv.lock"]
+opened_commit = "540ecbeb505bf78b229a700bedfaeae400b4f170"
+whole_reason = "One breaking release of one stylesheet: its tests, docs and version must move with it, or the release lies about its contract."
