@@ -6,7 +6,10 @@ and the family tokens and fonts every product wears. It refuses components,
 product-specific page layout and JavaScript (until K7 of #25); a product renders
 through this grammar with its own markup.
 
-Owned by agent-presentator's blessed picture `docs/mockups/m0-lobby.html`.
+`appkit.css` and every shared part follow the family picture
+[`docs/family.html`](docs/family.html). `ui-style.css` and `grammar.html` stay
+frozen under agent-presentator's picture `docs/mockups/m0-lobby.html` until #30
+removes them.
 
 Distribution is a GitHub release. Tags are never moved; a broken release gets
 the next patch tag. A release carries:

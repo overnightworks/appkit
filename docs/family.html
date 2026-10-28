@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>appkit family picture</title>
+<!-- The kit ships Oswald 400/700 and Open Sans 400/600 as woff2 in
+     src/appkit/static/fonts/. This file loads those same files by relative
+     path, with the file names, weights and unicode ranges of appkit.css, and
+     falls back to Impact/Arial like the kit's stacks. -->
+<style>
+@font-face {
+	font-family: 'Oswald';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 400;
+	src: url('../src/appkit/static/fonts/oswald-latin-400-normal.woff2') format('woff2');
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+		U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: 'Oswald';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 400;
+	src: url('../src/appkit/static/fonts/oswald-latin-ext-400-normal.woff2') format('woff2');
+	unicode-range:
+		U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+		U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+		U+A720-A7FF;
+}
+
+@font-face {
+	font-family: 'Oswald';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 700;
+	src: url('../src/appkit/static/fonts/oswald-latin-700-normal.woff2') format('woff2');
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+		U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: 'Oswald';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 700;
+	src: url('../src/appkit/static/fonts/oswald-latin-ext-700-normal.woff2') format('woff2');
+	unicode-range:
+		U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+		U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+		U+A720-A7FF;
+}
+
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 400;
+	src: url('../src/appkit/static/fonts/open-sans-latin-400-normal.woff2') format('woff2');
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+		U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 400;
+	src: url('../src/appkit/static/fonts/open-sans-latin-ext-400-normal.woff2') format('woff2');
+	unicode-range:
+		U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+		U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+		U+A720-A7FF;
+}
+
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 600;
+	src: url('../src/appkit/static/fonts/open-sans-latin-600-normal.woff2') format('woff2');
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+		U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 600;
+	src: url('../src/appkit/static/fonts/open-sans-latin-ext-600-normal.woff2') format('woff2');
+	unicode-range:
+		U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+		U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+		U+A720-A7FF;
+}
+/* ------------------------------------------------------------------
+   Family values: appkit.css v0.5.0 (songmaker's names and values) plus
+   one state set. App values: the slot, filled per app below.
+   ------------------------------------------------------------------ */
+/* Family values (light, dark): appkit.css v0.5.0, songmaker's names and
+   values, plus one state set. .light and .dark force a frame; .auto follows
+   the page, which follows the device unless the switch above says otherwise. */
+:root, .light {
+	--bg: #f4f4f6; --bg-deep: #e8e8ec; --surface: #ffffff; --surface-hover: #ebebed;
+	--border: #d0d0d4; --text: #1a1a1e; --text-muted: #555555;
+	--card-bg: rgba(255, 255, 255, 0.9); --header-bg: #f0f0f2;
+	--ok: #1e7a1e;   --ok-soft: #e0f5e0;
+	--busy: #9a6200; --busy-soft: #fef3e0;
+	--fail: #c02020; --fail-soft: #fde8e8;
+	--glow-mix: 4%;
+	color-scheme: light;
+}
+:root[data-theme='dark'], .dark {
+	--bg: #0d0d0d; --bg-deep: #050508; --surface: #111111; --surface-hover: #1a1a1a;
+	--border: #333333; --text: #e0e0e0; --text-muted: #888888;
+	--card-bg: rgba(13, 13, 13, 0.85); --header-bg: #0a0a0a;
+	--ok: #44aa44;   --ok-soft: #1a3a1a;
+	--busy: #f0a030; --busy-soft: #2a1f10;
+	--fail: #ff4444; --fail-soft: #3a1a1a;
+	--glow-mix: 3%;
+	color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) {
+	--bg: #0d0d0d; --bg-deep: #050508; --surface: #111111; --surface-hover: #1a1a1a;
+	--border: #333333; --text: #e0e0e0; --text-muted: #888888;
+	--card-bg: rgba(13, 13, 13, 0.85); --header-bg: #0a0a0a;
+	--ok: #44aa44;   --ok-soft: #1a3a1a;
+	--busy: #f0a030; --busy-soft: #2a1f10;
+	--fail: #ff4444; --fail-soft: #3a1a1a;
+	--glow-mix: 3%;
+	color-scheme: dark;
+	}
+}
+
+/* The slot: each app names its colour, light and dark, and the ink on it.
+   It is resolved on the frame, so a frame shows the app around it. */
+:root, .songmaker {
+	--app-l: #7a18c0; --on-app-l: #ffffff; --primary-l: #d41a0a;
+	--app-d: #b45cf5; --on-app-d: #111111; --primary-d: #ff3220;
+}
+.presentator {
+	--app-l: #0c6c77; --on-app-l: #ffffff; --primary-l: #0c6c77;
+	--app-d: #56c3cd; --on-app-d: #06181b; --primary-d: #56c3cd;
+}
+.hopin {
+	--app-l: #1d5bbf; --on-app-l: #ffffff; --primary-l: #1d5bbf;
+	--app-d: #7aa7f0; --on-app-d: #111111; --primary-d: #7aa7f0;
+}
+:root, .light, .auto {
+	--accent: var(--app-l); --on-accent: var(--on-app-l); --primary: var(--primary-l);
+}
+:root[data-theme='dark'], :root[data-theme='dark'] .auto, .dark {
+	--accent: var(--app-d); --on-accent: var(--on-app-d); --primary: var(--primary-d);
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']), :root:not([data-theme='light']) .auto:not(.light) {
+	--accent: var(--app-d); --on-accent: var(--on-app-d); --primary: var(--primary-d);
+	}
+}
+/* --glow-primary, the faint sign-in grid: the app's colour. */
+.signin { --glow: color-mix(in srgb, var(--primary) var(--glow-mix), transparent); }
+
+/* ------------------------------------------------------------------ sheet */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+	background: var(--bg);
+	color: var(--text);
+	font-family: 'Open Sans', Arial, sans-serif;
+	font-size: 15px;
+	line-height: 1.45;
+}
+.sheet { max-width: 1280px; margin: 0 auto; padding: 24px 16px 64px; display: flex; flex-direction: column; gap: 48px; }
+@media (min-width: 760px) { .sheet { padding: 40px 32px 80px; } }
+.display, h1, h2, .label, .btn, .tab, .wm, .pill { font-family: 'Oswald', Impact, sans-serif; }
+h1 { margin: 0; font-size: clamp(26px, 4vw, 34px); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.lede { margin: 6px 0 0; max-width: 70ch; color: var(--text-muted); }
+.label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
+code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: 12.5px; }
+.top { display: flex; flex-direction: column; gap: 16px; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: var(--surface); }
+.seg button { appearance: none; border: 0; background: none; color: var(--text-muted); font: inherit; font-size: 14px; min-height: 40px; padding: 0 14px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--border); }
+.seg button[aria-pressed='true'] { color: var(--text); font-weight: 600; background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.tag { display: inline-flex; align-items: center; gap: 6px; font-family: 'Oswald', Impact, sans-serif; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-muted); white-space: nowrap; }
+.tag.fam::before { content: ''; width: 8px; height: 8px; border-radius: 2px; background: var(--text-muted); }
+.tag.app::before { content: ''; width: 8px; height: 8px; border-radius: 2px; background: var(--accent); }
+.group { display: flex; flex-direction: column; gap: 18px; }
+.group-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+.note { margin: 0; max-width: 78ch; font-size: 14px; color: var(--text-muted); }
+.note b { color: var(--text); font-weight: 600; }
+.grid3 { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); }
+.board { margin: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.board figcaption { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13px; color: var(--text-muted); }
+.board figcaption b { font-family: 'Oswald', Impact, sans-serif; font-weight: 400; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--text); }
+.frame { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--bg); color: var(--text); min-width: 0; }
+
+/* ------------------------------------------------------------------ states */
+.st { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.st i { width: 12px; height: 12px; flex: none; display: inline-block; }
+.st.ok { color: var(--ok); }     .st.ok i { border-radius: 50%; background: var(--ok); }
+.st.busy { color: var(--busy); } .st.busy i { border-radius: 50%; border: 2px solid var(--busy); border-top-color: transparent; }
+.st.busy.live i { animation: turn 1.1s linear infinite; }
+.st.fail { color: var(--fail); } .st.fail i { background: var(--fail); clip-path: polygon(50% 0%, 100% 100%, 0% 100%); }
+.st.never { color: var(--text-muted); } .st.never i { border: 2px dashed var(--text-muted); border-radius: 1px; }
+.st.off { color: var(--text-muted); }   .st.off i { border-radius: 50%; background: var(--text-muted); clip-path: polygon(0 0, 100% 0, 100% 38%, 0 38%, 0 62%, 100% 62%, 100% 100%, 0 100%); }
+@keyframes turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .st.busy.live i { animation: none; } }
+.pill { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px; border-radius: 999px; border: 1px solid currentColor; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-weight: 400; }
+.pill i { width: 8px; height: 8px; }
+.pill.st.busy i, .pill.st.never i { border-width: 1.5px; }
+
+.states { display: grid; gap: 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.srow { display: grid; grid-template-columns: 150px 150px minmax(0, 1fr); align-items: stretch; }
+.srow + .srow { border-top: 1px solid var(--border); }
+.srow .spec { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 8px; padding: 12px 14px; background: var(--surface); }
+.srow .spec .hex { color: var(--text-muted); font-size: 11.5px; }
+.srow .what { padding: 12px 16px; display: flex; flex-direction: column; justify-content: center; gap: 4px; font-size: 14px; border-left: 1px solid var(--border); }
+.srow .what .name { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.srow .what .name b { font-family: 'Oswald', Impact, sans-serif; font-size: 17px; font-weight: 400; letter-spacing: .04em; }
+.srow .what .was { font-size: 13px; color: var(--text-muted); }
+.srow .what .was s { text-decoration-thickness: 1px; }
+@media (max-width: 640px) {
+	.srow { grid-template-columns: 1fr 1fr; }
+	.srow .what { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--border); }
+}
+
+/* ------------------------------------------------------------------ app page */
+.bar { display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; background: var(--header-bg); border-bottom: 1px solid var(--border); }
+.wm { position: relative; display: inline-block; font-size: 17px; letter-spacing: .14em; text-transform: uppercase; color: var(--text); line-height: 1.1; }
+.wm::before, .wm::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; opacity: .85; }
+.wm::before { color: var(--primary); clip-path: inset(0 0 65% 0); }
+.wm::after { color: var(--accent); clip-path: inset(65% 0 0 0); }
+.tabs { display: flex; gap: 2px; margin-left: 4px; align-self: stretch; }
+.tab { display: inline-flex; align-items: center; padding: 0 8px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); border-bottom: 2px solid transparent; }
+.tab.now { color: var(--text); border-bottom-color: var(--accent); }
+.spacer { flex: 1; }
+.av { width: 30px; height: 30px; flex: none; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-family: 'Oswald', Impact, sans-serif; font-size: 13px; color: var(--on-accent); background: var(--accent); }
+.av.ring { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+.pg { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.pg-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pg-head h3 { margin: 0; font-family: 'Oswald', Impact, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: .06em; text-transform: uppercase; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; padding: 0 14px; border-radius: 4px; border: 1px solid transparent; font-size: 14px; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.secondary { background: transparent; border-color: var(--border); color: var(--text); }
+.btn.wide { width: 100%; min-height: 44px; }
+.btn.focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rows { border: 1px solid var(--border); border-radius: 6px; background: var(--surface); overflow: hidden; }
+.row { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 48px; padding: 0 12px 0 9px; border-left: 3px solid transparent; font-size: 14px; }
+.row + .row { border-top: 1px solid var(--border); }
+.row .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .mt { font-size: 12px; color: var(--text-muted); }
+.row.here { border-left-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.lnk { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; font-size: 14px; }
+.banner { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--fail); border-left-width: 3px; border-radius: 4px; background: var(--fail-soft); font-size: 13.5px; color: var(--text); }
+.banner .st { margin-top: 3px; }
+
+/* ------------------------------------------------------------------ sign-in */
+.signin { position: relative; overflow: hidden; min-height: 400px; padding: 36px 16px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: var(--bg-deep); }
+.signin .grid-bg { position: absolute; inset: 0; background-image: linear-gradient(var(--glow) 1px, transparent 1px), linear-gradient(90deg, var(--glow) 1px, transparent 1px); background-size: 40px 40px; }
+.signin .gl { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .15; pointer-events: none; }
+.signin .gl1 { width: 300px; height: 300px; background: var(--primary); top: -90px; right: -90px; }
+.signin .gl2 { width: 240px; height: 240px; background: var(--accent); bottom: -60px; left: -60px; }
+.signin > :not(.grid-bg):not(.gl) { position: relative; z-index: 1; }
+.card { width: 340px; max-width: 100%; display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 28px 22px 22px; text-align: center; background: var(--card-bg); border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border)); border-radius: 6px; }
+.card .wm { font-size: 27px; }
+.card h3 { margin: 0; font-family: 'Oswald', Impact, sans-serif; font-weight: 400; font-size: 18px; letter-spacing: .03em; overflow-wrap: anywhere; }
+.card p { margin: 0; font-size: 14px; color: var(--text-muted); }
+.card .banner { text-align: left; width: 100%; }
+.legal { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 16px; font-size: 12px; }
+.legal span { color: var(--text-muted); border-bottom: 1px solid var(--border); }
+
+/* ------------------------------------------------------------------ account menu */
+.acct { position: relative; min-height: 360px; background: var(--bg); }
+.menu { position: absolute; top: 54px; right: 10px; width: min(256px, calc(100% - 20px)); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 6px 24px rgba(0, 0, 0, .14); padding: 4px 0; font-size: 14px; }
+.mrow { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 14px; }
+.mrow svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; color: var(--text-muted); }
+.mrow.name { min-height: 48px; font-weight: 600; }
+.mrow.name .grow { flex: 1; }
+.mrow.sub { padding-left: 40px; min-height: 34px; }
+.radio { width: 16px; height: 16px; flex: none; border-radius: 50%; border: 2px solid var(--text-muted); }
+.radio.on { border-color: var(--accent); background: radial-gradient(circle, var(--accent) 0 3.5px, transparent 4.5px); }
+.mrow.out { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 4px; }
+.mlegal { display: flex; flex-wrap: wrap; gap: 2px 12px; padding: 8px 14px 6px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-muted); }
+.ghost-rows { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.ghost-rows span { display: block; height: 12px; border-radius: 3px; background: var(--surface-hover); }
+
+/* ------------------------------------------------------------------ themes */
+.themes { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+.tcase { display: flex; flex-direction: column; gap: 8px; }
+.tcase .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mini { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--bg); color: var(--text); }
+.mini .bar { min-height: 30px; padding: 0 8px; gap: 8px; }
+.mini .wm { font-size: 11px; }
+.mini .av { width: 18px; height: 18px; font-size: 9px; }
+.mini .body { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.mini .body .st { font-size: 11px; }
+.mini .body .st i { width: 9px; height: 9px; }
+.mini .body .btn { min-height: 22px; font-size: 10px; padding: 0 8px; align-self: flex-start; }
+.dev { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+.dev svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.today { width: 100%; border-collapse: collapse; font-size: 14px; }
+.today th, .today td { text-align: left; padding: 8px 10px; border-top: 1px solid var(--border); vertical-align: top; }
+.today th { font-family: 'Oswald', Impact, sans-serif; font-weight: 400; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); border-top: 0; }
+.scroll { overflow-x: auto; }
+
+/* ------------------------------------------------------------------ slot table */
+.slot { width: 100%; border-collapse: collapse; font-size: 14px; }
+.slot th, .slot td { text-align: left; vertical-align: top; padding: 8px 10px; border-top: 1px solid var(--border); }
+.slot td small { display: block; margin: 2px 0 6px; font-size: 12px; color: var(--text-muted); }
+.slot th { font-family: 'Oswald', Impact, sans-serif; font-weight: 400; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); border-top: 0; }
+.sw { display: inline-flex; align-items: center; gap: 6px; }
+.sw::before { content: ''; width: 14px; height: 14px; border-radius: 3px; background: var(--c); border: 1px solid var(--border); }
+
+/* ------------------------------------------------------------------ decided */
+.qs { margin: 0; padding: 0; list-style: none; counter-reset: q; display: flex; flex-direction: column; gap: 12px; max-width: 86ch; }
+.qs li { counter-increment: q; position: relative; padding-left: 34px; font-size: 14.5px; }
+.qs li::before { content: counter(q); position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--text-muted); color: var(--text); font-family: 'Oswald', Impact, sans-serif; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.qs .rec { color: var(--text); font-weight: 600; }
+.src { margin: 0; font-size: 12.5px; color: var(--text-muted); max-width: 100ch; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<symbol id="i-out" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+	<symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M12 3a9 9 0 0 1 0 18" fill="currentColor"/></symbol>
+	<symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+	<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+	<symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+	<symbol id="i-device" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+</svg>
+
+<main class="sheet">
+
+<header class="top">
+	<div>
+		<h1>Family picture</h1>
+		<p class="lede">What every overnightworks app shares, and the one slot each app fills with its own colour.</p>
+	</div>
+	<div class="controls">
+		<span class="label">Page theme</span>
+		<div class="seg" role="group" aria-label="Page theme">
+			<button type="button" data-set-theme="device" aria-pressed="true">Device</button>
+			<button type="button" data-set-theme="light" aria-pressed="false">Light</button>
+			<button type="button" data-set-theme="dark" aria-pressed="false">Dark</button>
+		</div>
+		<span class="tag fam">Family</span>
+		<span class="tag app">App colour</span>
+	</div>
+</header>
+
+<!-- ============================================================ 1 states -->
+<section class="group" id="states">
+	<div class="group-head">
+		<h2>1 · One word per state</h2>
+		<span class="tag fam">Family</span>
+	</div>
+	<p class="note">Five states, each a <b>shape and a colour</b>; the word only confirms it. The token is the state's one name in every app. The label a person reads stays the app's own word.</p>
+	<div class="states">
+		<div class="srow">
+			<div class="spec light"><span class="st ok"><i></i>ready</span><span class="pill st ok"><i></i>Ready</span><span class="hex">#1e7a1e</span></div>
+			<div class="spec dark"><span class="st ok"><i></i>ready</span><span class="pill st ok"><i></i>Ready</span><span class="hex">#44aa44</span></div>
+			<div class="what"><span class="name"><b>ok</b><code>--ok · --ok-soft</code></span><span>Done and fine. A filled disc.</span><span class="was">Replaces songmaker's <s>--success</s>, same values. ui-style's name survives.</span></div>
+		</div>
+		<div class="srow">
+			<div class="spec light"><span class="st busy live"><i></i>building</span><span class="pill st busy"><i></i>Queued</span><span class="hex">#9a6200</span></div>
+			<div class="spec dark"><span class="st busy live"><i></i>building</span><span class="pill st busy"><i></i>Queued</span><span class="hex">#f0a030</span></div>
+			<div class="what"><span class="name"><b>busy</b><code>--busy · --busy-soft</code></span><span>Working or waiting. An open ring; it turns only while work runs.</span><span class="was">songmaker's “Queued” ring. Light value is ui-style's: songmaker's #b07000 reads 4.1:1, below AA.</span></div>
+		</div>
+		<div class="srow">
+			<div class="spec light"><span class="st fail"><i></i>failed</span><span class="pill st fail"><i></i>Failed</span><span class="hex">#c02020</span></div>
+			<div class="spec dark"><span class="st fail"><i></i>failed</span><span class="pill st fail"><i></i>Failed</span><span class="hex">#ff4444</span></div>
+			<div class="what"><span class="name"><b>fail</b><code>--fail · --fail-soft</code></span><span>Only a person can end this. A triangle. Red means nothing else.</span><span class="was">songmaker's danger red. ui-style's own reds retire.</span></div>
+		</div>
+		<div class="srow">
+			<div class="spec light"><span class="st never"><i></i>never run</span></div>
+			<div class="spec dark"><span class="st never"><i></i>never run</span></div>
+			<div class="what"><span class="name"><b>never</b><code>--text-muted</code></span><span>Not happened yet. A dashed square, in muted ink.</span></div>
+		</div>
+		<div class="srow">
+			<div class="spec light"><span class="st off"><i></i>off</span></div>
+			<div class="spec dark"><span class="st off"><i></i>off</span></div>
+			<div class="what"><span class="name"><b>off</b><code>--text-muted</code></span><span>Switched off on purpose. A split disc, in muted ink.</span></div>
+		</div>
+	</div>
+	<p class="note">A state never wears the app colour, so a new app colour cannot break a state. Each pairing reads at AA or better on its surface (light on #ffffff, dark on #111111).</p>
+</section>
+
+<!-- ============================================================ 2 slot -->
+<section class="group" id="slot">
+	<div class="group-head">
+		<h2>2 · The app colour is a slot</h2>
+		<span class="tag app">App colour</span>
+	</div>
+	<p class="note">The same page three times. Only the slot changes: <b>primary button, current tab, where you are, link, focus ring, account circle, wordmark</b>. Fonts, surfaces, spacing, radii and states are the family's. Sample words.</p>
+
+	<div class="grid3">
+		<figure class="board songmaker"><figcaption><b>songmaker</b> light</figcaption>
+			<div class="frame light">
+				<div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av">F</span></div>
+				<div class="pg">
+					<div class="tabs" style="border-bottom:1px solid var(--border);margin:0;min-height:36px"><span class="tab now">Library</span><span class="tab">Playlists</span></div>
+					<div class="pg-head"><h3>Library</h3><span class="btn primary">New</span></div>
+					<div class="rows">
+						<div class="row here"><span class="st ok"><i></i>ready</span><span class="nm">Opening Move</span><span class="mt">3 h</span></div>
+						<div class="row"><span class="st busy"><i></i>building</span><span class="nm">Second Wind</span><span class="mt">now</span></div>
+						<div class="row"><span class="st fail"><i></i>failed</span><span class="nm">Cold Harbour</span><span class="mt">1 d</span></div>
+					</div>
+					<span class="lnk">Show all</span>
+				</div>
+			</div>
+		</figure>
+		<figure class="board presentator"><figcaption><b>presentator</b> light</figcaption>
+			<div class="frame light">
+				<div class="bar"><span class="wm" data-text="Presentator">Presentator</span><span class="spacer"></span><span class="av">F</span></div>
+				<div class="pg">
+					<div class="tabs" style="border-bottom:1px solid var(--border);margin:0;min-height:36px"><span class="tab now">Library</span><span class="tab">Playlists</span></div>
+					<div class="pg-head"><h3>Library</h3><span class="btn primary">New</span></div>
+					<div class="rows">
+						<div class="row here"><span class="st ok"><i></i>ready</span><span class="nm">Opening Move</span><span class="mt">3 h</span></div>
+						<div class="row"><span class="st busy"><i></i>building</span><span class="nm">Second Wind</span><span class="mt">now</span></div>
+						<div class="row"><span class="st fail"><i></i>failed</span><span class="nm">Cold Harbour</span><span class="mt">1 d</span></div>
+					</div>
+					<span class="lnk">Show all</span>
+				</div>
+			</div>
+		</figure>
+		<figure class="board hopin"><figcaption><b>hopin</b> light</figcaption>
+			<div class="frame light">
+				<div class="bar"><span class="wm" data-text="HopIn">HopIn</span><span class="spacer"></span><span class="av">F</span></div>
+				<div class="pg">
+					<div class="tabs" style="border-bottom:1px solid var(--border);margin:0;min-height:36px"><span class="tab now">Library</span><span class="tab">Playlists</span></div>
+					<div class="pg-head"><h3>Library</h3><span class="btn primary">New</span></div>
+					<div class="rows">
+						<div class="row here"><span class="st ok"><i></i>ready</span><span class="nm">Opening Move</span><span class="mt">3 h</span></div>
+						<div class="row"><span class="st busy"><i></i>building</span><span class="nm">Second Wind</span><span class="mt">now</span></div>
+						<div class="row"><span class="st fail"><i></i>failed</span><span class="nm">Cold Harbour</span><span class="mt">1 d</span></div>
+					</div>
+					<span class="lnk">Show all</span>
+				</div>
+			</div>
+		</figure>
+
+		<figure class="board songmaker"><figcaption><b>songmaker</b> dark</figcaption>
+			<div class="frame dark">
+				<div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av">F</span></div>
+				<div class="pg">
+					<div class="tabs" style="border-bottom:1px solid var(--border);margin:0;min-height:36px"><span class="tab now">Library</span><span class="tab">Playlists</span></div>
+					<div class="pg-head"><h3>Library</h3><span class="btn primary focus">New</span></div>
+					<div class="rows">
+						<div class="row here"><span class="st ok"><i></i>ready</span><span class="nm">Opening Move</span><span class="mt">3 h</span></div>
+						<div class="row"><span class="st busy"><i></i>building</span><span class="nm">Second Wind</span><span class="mt">now</span></div>
+						<div class="row"><span class="st fail"><i></i>failed</span><span class="nm">Cold Harbour</span><span class="mt">1 d</span></div>
+					</div>
+					<span class="lnk">Show all</span>
+				</div>
+			</div>
+		</figure>
+		<figure class="board presentator"><figcaption><b>presentator</b> dark</figcaption>
+			<div class="frame dark">
+				<div class="bar"><span class="wm" data-text="Presentator">Presentator</span><span class="spacer"></span><span class="av">F</span></div>
+				<div class="pg">
+					<div class="tabs" style="border-bottom:1px solid var(--border);margin:0;min-height:36px"><span class="tab now">Library</span><span class="tab">Playlists</span></div>
+					<div class="pg-head"><h3>Library</h3><span class="btn primary focus">New</span></div>
+					<div class="rows">
+						<div class="row here"><span class="st ok"><i></i>ready</span><span class="nm">Opening Move</span><span class="mt">3 h</span></div>
+						<div class="row"><span class="st busy"><i></i>building</span><span class="nm">Second Wind</span><span class="mt">now</span></div>
+						<div class="row"><span class="st fail"><i></i>failed</span><span class="nm">Cold Harbour</span><span class="mt">1 d</span></div>
+					</div>
+					<span class="lnk">Show all</span>
+				</div>
+			</div>
+		</figure>
+		<figure class="board hopin"><figcaption><b>hopin</b> dark</figcaption>
+			<div class="frame dark">
+				<div class="bar"><span class="wm" data-text="HopIn">HopIn</span><span class="spacer"></span><span class="av">F</span></div>
+				<div class="pg">
+					<div class="tabs" style="border-bottom:1px solid var(--border);margin:0;min-height:36px"><span class="tab now">Library</span><span class="tab">Playlists</span></div>
+					<div class="pg-head"><h3>Library</h3><span class="btn primary focus">New</span></div>
+					<div class="rows">
+						<div class="row here"><span class="st ok"><i></i>ready</span><span class="nm">Opening Move</span><span class="mt">3 h</span></div>
+						<div class="row"><span class="st busy"><i></i>building</span><span class="nm">Second Wind</span><span class="mt">now</span></div>
+						<div class="row"><span class="st fail"><i></i>failed</span><span class="nm">Cold Harbour</span><span class="mt">1 d</span></div>
+					</div>
+					<span class="lnk">Show all</span>
+				</div>
+			</div>
+		</figure>
+	</div>
+
+	<div class="scroll">
+		<table class="slot">
+			<thead><tr><th>App</th><th>Light</th><th>Dark</th></tr></thead>
+			<tbody>
+				<tr><td>songmaker</td><td><span class="sw hex" style="--c:#7a18c0">#7a18c0</span><small>7.7:1 · ink #ffffff</small></td><td><span class="sw hex" style="--c:#b45cf5">#b45cf5</span><small>5.2:1 · ink #111111</small></td></tr>
+				<tr><td>presentator</td><td><span class="sw hex" style="--c:#0c6c77">#0c6c77</span><small>6.1:1 · ink #ffffff</small></td><td><span class="sw hex" style="--c:#56c3cd">#56c3cd</span><small>9.1:1 · ink #06181b</small></td></tr>
+				<tr><td>hopin</td><td><span class="sw hex" style="--c:#1d5bbf">#1d5bbf</span><small>6.4:1 · ink #ffffff · named by hopin</small></td><td><span class="sw hex" style="--c:#7aa7f0">#7aa7f0</span><small>7.7:1 · ink #111111 · named by hopin</small></td></tr>
+			</tbody>
+		</table>
+	</div>
+	<p class="note">Ratios: the colour as text on the surface (#ffffff, #111111). songmaker also fills a second slot, its brand red, for the wordmark's upper half; an app with one colour puts it in both.</p>
+</section>
+
+<!-- ============================================================ 3 sign-in -->
+<section class="group" id="signin">
+	<div class="group-head">
+		<h2>3 · Sign-in page</h2>
+		<span class="tag fam">Family</span>
+	</div>
+	<p class="note">The three states, the same structure and the same words in every app; only the colours are the app's. These follow the page theme above. The faint grid is <code style="white-space:nowrap">--glow-primary</code>, drawn here in the app's colour; at 3 to 4&nbsp;% it is barely visible either way.</p>
+	<div class="grid3">
+		<figure class="board songmaker glow-app"><figcaption><b>Signed out</b> songmaker</figcaption>
+			<div class="frame auto"><div class="signin"><div class="grid-bg"></div><div class="gl gl1"></div><div class="gl gl2"></div>
+				<div class="card"><span class="wm" data-text="Hallucinai">Hallucinai</span><h3>You are logged out.</h3><span class="btn primary wide">Log in</span></div>
+				<div class="legal"><span>Impressum</span><span>Datenschutz</span><span>Nutzungsbedingungen</span></div>
+			</div></div>
+		</figure>
+		<figure class="board songmaker glow-app"><figcaption><b>No access</b> songmaker</figcaption>
+			<div class="frame auto"><div class="signin"><div class="grid-bg"></div><div class="gl gl1"></div><div class="gl gl2"></div>
+				<div class="card"><span class="wm" data-text="Hallucinai">Hallucinai</span><h3>No access</h3><p>You are signed in, but this account has no access to Hallucinai.</p><span class="btn secondary wide">Log out</span></div>
+				<div class="legal"><span>Impressum</span><span>Datenschutz</span><span>Nutzungsbedingungen</span></div>
+			</div></div>
+		</figure>
+		<figure class="board songmaker glow-app"><figcaption><b>Login failed</b> songmaker</figcaption>
+			<div class="frame auto"><div class="signin"><div class="grid-bg"></div><div class="gl gl1"></div><div class="gl gl2"></div>
+				<div class="card"><span class="wm" data-text="Hallucinai">Hallucinai</span><h3>Login failed</h3><div class="banner"><span class="st fail"><i></i></span><span>Sign-in did not work. Please try again.</span></div><span class="btn primary wide">Try again</span></div>
+				<div class="legal"><span>Impressum</span><span>Datenschutz</span><span>Nutzungsbedingungen</span></div>
+			</div></div>
+		</figure>
+		<figure class="board presentator glow-app"><figcaption><b>Signed out</b> presentator</figcaption>
+			<div class="frame auto"><div class="signin"><div class="grid-bg"></div><div class="gl gl1"></div><div class="gl gl2"></div>
+				<div class="card"><span class="wm" data-text="Presentator">Presentator</span><h3>You are logged out.</h3><span class="btn primary wide">Log in</span></div>
+				<div class="legal"><span>Impressum</span><span>Datenschutz</span><span>Nutzungsbedingungen</span></div>
+			</div></div>
+		</figure>
+		<figure class="board hopin glow-app"><figcaption><b>Signed out</b> hopin</figcaption>
+			<div class="frame auto"><div class="signin"><div class="grid-bg"></div><div class="gl gl1"></div><div class="gl gl2"></div>
+				<div class="card"><span class="wm" data-text="HopIn">HopIn</span><h3>You are logged out.</h3><span class="btn primary wide">Log in</span></div>
+				<div class="legal"><span>Impressum</span><span>Datenschutz</span><span>Nutzungsbedingungen</span></div>
+			</div></div>
+		</figure>
+	</div>
+	<p class="note">Each state has one way out: “Log in”, “Log out”, “Try again”. The page never redirects by itself. Words: the ruled sign-in list (en and de) in the kit's stylesheet reference.</p>
+</section>
+
+<!-- ============================================================ 4 account menu -->
+<section class="group" id="account">
+	<div class="group-head">
+		<h2>4 · Account menu</h2>
+		<span class="tag fam">Family</span>
+	</div>
+	<p class="note">The circle opens one menu, the same in every app: your name (opens the central account, ↗), the theme, “Log out”, and the quiet legal row. These follow the page theme above.</p>
+	<div class="grid3">
+		<figure class="board songmaker"><figcaption><b>songmaker</b></figcaption>
+			<div class="frame auto"><div class="acct">
+				<div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av ring">F</span></div>
+				<div class="ghost-rows"><span style="width:60%"></span><span style="width:85%"></span><span style="width:40%"></span><span style="width:70%"></span></div>
+				<div class="menu">
+					<div class="mrow name"><span class="grow">Felix</span><svg><use href="#i-out"/></svg></div>
+					<div class="mrow"><svg><use href="#i-theme"/></svg>Theme</div>
+					<div class="mrow sub"><span class="radio on"></span>Follow system</div>
+					<div class="mrow sub"><span class="radio"></span>Light</div>
+					<div class="mrow sub"><span class="radio"></span>Dark</div>
+					<div class="mrow out"><svg><use href="#i-logout"/></svg>Log out</div>
+					<div class="mlegal"><span>Impressum</span><span>Datenschutz</span><span>Nutzungsbedingungen</span></div>
+				</div>
+			</div></div>
+		</figure>
+		<figure class="board presentator"><figcaption><b>presentator</b></figcaption>
+			<div class="frame auto"><div class="acct">
+				<div class="bar"><span class="wm" data-text="Presentator">Presentator</span><span class="spacer"></span><span class="av ring">F</span></div>
+				<div class="ghost-rows"><span style="width:60%"></span><span style="width:85%"></span><span style="width:40%"></span><span style="width:70%"></span></div>
+				<div class="menu">
+					<div class="mrow name"><span class="grow">Felix</span><svg><use href="#i-out"/></svg></div>
+					<div class="mrow"><svg><use href="#i-theme"/></svg>Theme</div>
+					<div class="mrow sub"><span class="radio on"></span>Follow system</div>
+					<div class="mrow sub"><span class="radio"></span>Light</div>
+					<div class="mrow sub"><span class="radio"></span>Dark</div>
+					<div class="mrow out"><svg><use href="#i-logout"/></svg>Log out</div>
+					<div class="mlegal"><span>Impressum</span><span>Datenschutz</span><span>Nutzungsbedingungen</span></div>
+				</div>
+			</div></div>
+		</figure>
+		<figure class="board hopin"><figcaption><b>hopin</b></figcaption>
+			<div class="frame auto"><div class="acct">
+				<div class="bar"><span class="wm" data-text="HopIn">HopIn</span><span class="spacer"></span><span class="av ring">F</span></div>
+				<div class="ghost-rows"><span style="width:60%"></span><span style="width:85%"></span><span style="width:40%"></span><span style="width:70%"></span></div>
+				<div class="menu">
+					<div class="mrow name"><span class="grow">Felix</span><svg><use href="#i-out"/></svg></div>
+					<div class="mrow"><svg><use href="#i-theme"/></svg>Theme</div>
+					<div class="mrow sub"><span class="radio on"></span>Follow system</div>
+					<div class="mrow sub"><span class="radio"></span>Light</div>
+					<div class="mrow sub"><span class="radio"></span>Dark</div>
+					<div class="mrow out"><svg><use href="#i-logout"/></svg>Log out</div>
+					<div class="mlegal"><span>Impressum</span><span>Datenschutz</span><span>Nutzungsbedingungen</span></div>
+				</div>
+			</div></div>
+		</figure>
+	</div>
+	<p class="note">Who the theme choice holds for (one app, all apps, one device) is not decided here. An app adds its own rows above Theme (songmaker: Settings).</p>
+</section>
+
+<!-- ============================================================ 5 themes -->
+<section class="group" id="themes">
+	<div class="group-head">
+		<h2>5 · Light, dark, and no choice</h2>
+	</div>
+	<p class="note">Light and dark live in one file. <b>With no choice, the page follows the device.</b> With a choice, the choice holds.</p>
+	<div class="themes songmaker">
+		<div class="tcase">
+			<span class="label">No choice</span>
+			<div class="pair">
+				<div><span class="dev"><svg><use href="#i-sun"/></svg>Device light</span>
+					<div class="mini light"><div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av">F</span></div><div class="body"><span class="st ok"><i></i>ready</span><span class="btn primary">New</span></div></div></div>
+				<div><span class="dev"><svg><use href="#i-moon"/></svg>Device dark</span>
+					<div class="mini dark"><div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av">F</span></div><div class="body"><span class="st ok"><i></i>ready</span><span class="btn primary">New</span></div></div></div>
+			</div>
+		</div>
+		<div class="tcase">
+			<span class="label">No choice · always dark</span>
+			<div class="pair">
+				<div><span class="dev"><svg><use href="#i-sun"/></svg>Device light</span>
+					<div class="mini dark"><div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av">F</span></div><div class="body"><span class="st ok"><i></i>ready</span><span class="btn primary">New</span></div></div></div>
+				<div><span class="dev"><svg><use href="#i-moon"/></svg>Device dark</span>
+					<div class="mini dark"><div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av">F</span></div><div class="body"><span class="st ok"><i></i>ready</span><span class="btn primary">New</span></div></div></div>
+			</div>
+		</div>
+		<div class="tcase">
+			<span class="label">Chose light · chose dark</span>
+			<div class="pair">
+				<div><span class="dev"><svg><use href="#i-device"/></svg>Any device</span>
+					<div class="mini light"><div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av">F</span></div><div class="body"><span class="st ok"><i></i>ready</span><span class="btn primary">New</span></div></div></div>
+				<div><span class="dev"><svg><use href="#i-device"/></svg>Any device</span>
+					<div class="mini dark"><div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av">F</span></div><div class="body"><span class="st ok"><i></i>ready</span><span class="btn primary">New</span></div></div></div>
+			</div>
+		</div>
+	</div>
+	<div class="scroll">
+		<table class="today">
+			<thead><tr><th>Today, with no choice</th><th>Shows</th></tr></thead>
+			<tbody>
+				<tr><td>songmaker, and the kit's tokens</td><td>dark, always</td></tr>
+				<tr><td>presentator</td><td>the instance default, else the device</td></tr>
+				<tr><td>hopin</td><td>the device</td></tr>
+				<tr><td>legal pages (central)</td><td>the device</td></tr>
+				<tr><td>central sign-in (Keycloak)</td><td>dark, always</td></tr>
+			</tbody>
+		</table>
+	</div>
+</section>
+
+<!-- ============================================================ decided -->
+<section class="group" id="open">
+	<div class="group-head">
+		<h2>Decided at this picture</h2>
+	</div>
+	<ol class="qs">
+		<li><b>presentator and hopin get the family look</b> and keep their own colours. <span class="rec">Decided (operator, 28.10.2026).</span> Sections 2 to 4.</li>
+		<li><b>With no choice every app follows the device.</b> <span class="rec">Decided (operator, 28.10.2026).</span> Section 5.</li>
+		<li><b>The faint sign-in grid takes the app's colour.</b> <span class="rec">Decided (operator, 28.10.2026).</span> Section 3.</li>
+		<li><b>songmaker's dark purple is #b45cf5 with #111111 ink.</b> <span class="rec">Decided (operator, 28.10.2026).</span> Section 2, the table.</li>
+	</ol>
+	<p class="src">Extended from: appkit's family tokens (v0.5.0) and its state grammar; songmaker's vocabulary (states, buttons, radii, colour meanings), its sign-in card and its account menu; presentator's lobby picture (sign-in states, person menu); hopin's colours. Every value is copied from these sources except the light busy colour and the state token names, which section 1 explains.</p>
+</section>
+
+</main>
+
+<script>
+	(function () {
+		var root = document.documentElement;
+		var buttons = document.querySelectorAll('[data-set-theme]');
+		function apply(value) {
+			if (value === 'device') root.removeAttribute('data-theme');
+			else root.setAttribute('data-theme', value);
+			for (var i = 0; i < buttons.length; i++) {
+				buttons[i].setAttribute('aria-pressed', String(buttons[i].getAttribute('data-set-theme') === value));
+			}
+		}
+		for (var i = 0; i < buttons.length; i++) {
+			buttons[i].addEventListener('click', function (event) {
+				apply(event.currentTarget.getAttribute('data-set-theme'));
+			});
+		}
+		var fromHash = location.hash.replace('#', '');
+		if (fromHash === 'light' || fromHash === 'dark') apply(fromHash);
+	})();
+</script>
+</body>
+</html>

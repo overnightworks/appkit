@@ -1,8 +1,9 @@
 # appkit stylesheet reference
 
 Contract of `ui-style.css` for an engineer writing markup against it. "The
-picture" is the blessed mockup the [README](../README.md) names; the README
-also says how to obtain the file.
+picture" here is agent-presentator's `docs/mockups/m0-lobby.html`, which owns
+`ui-style.css` and `grammar.html` while they stay frozen; `appkit.css` follows
+[`family.html`](family.html) instead; the [README](../README.md) says the same.
 
 ## Beside `appkit.css`
 
