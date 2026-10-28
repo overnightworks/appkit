@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.6.0 (Breaking)
+
+`appkit.css` follows the device when an app makes no theme choice, and carries
+the family state set (overnightworks/appkit#32, slice of #25; rulings of
+28.10.2026 in #31).
+
+- With no `data-theme`, light applies, and dark applies under
+  `prefers-color-scheme: dark`. `data-theme='light'` and `data-theme='dark'`
+  force a theme. Each theme sets `color-scheme`.
+- `--glow-primary` is gone.
+- New: `--ok`, `--busy`, `--fail` and their `-soft` partners, light and dark,
+  with the values of `docs/family.html`.
+
+Migration:
+
+- An app that wants always dark sets `data-theme='dark'` on `<html>`.
+- An app that reads `--glow-primary` defines its own value from its colour at 3
+  to 4 percent.
+- An app drops its own `color-scheme`; the kit sets it with each theme.
+- The state tokens are available; an app may move its own success, busy and
+  danger colours onto them.
+
 ## v0.5.0
 
 The `overnightworks-appkit` wheel (import `appkit`) carries `appkit.css`, the
