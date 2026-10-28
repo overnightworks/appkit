@@ -1,6 +1,9 @@
 /* appkit family tokens and fonts: what every overnightworks product shares.
-   Dark is the no-choice state; data-theme='light' switches to light. The app
-   colour (--primary, --accent, --on-accent) and everything domain-specific stay
+   With no theme choice the page follows the device (light, or dark under
+   prefers-color-scheme); data-theme='light' and data-theme='dark' force a
+   theme, and each theme sets color-scheme. The state set (--ok, --busy, --fail
+   and their -soft partners) is shared; the app colour (--primary, --accent,
+   --on-accent), the sign-in grid value and everything domain-specific stay
    with the app. Only the latin and latin-ext subsets, woff2 only. */
 
 @font-face {
@@ -96,21 +99,6 @@
 }
 
 :root {
-	--bg: #0d0d0d;
-	--bg-deep: #050508;
-	--surface: #111;
-	--surface-hover: #1a1a1a;
-	--border: #333;
-	--text: #e0e0e0;
-	--text-muted: #888;
-	--card-bg: rgba(13, 13, 13, 0.85);
-	--glow-primary: rgba(255, 50, 32, 0.03);
-	--header-bg: #0a0a0a;
-	--font-display: 'Oswald', Impact, sans-serif;
-	--font-body: 'Open Sans', Arial, sans-serif;
-}
-
-[data-theme='light'] {
 	--bg: #f4f4f6;
 	--bg-deep: #e8e8ec;
 	--surface: #ffffff;
@@ -119,6 +107,54 @@
 	--text: #1a1a1e;
 	--text-muted: #555;
 	--card-bg: rgba(255, 255, 255, 0.9);
-	--glow-primary: rgba(212, 26, 10, 0.04);
 	--header-bg: #f0f0f2;
+	--ok: #1e7a1e;
+	--ok-soft: #e0f5e0;
+	--busy: #9a6200;
+	--busy-soft: #fef3e0;
+	--fail: #c02020;
+	--fail-soft: #fde8e8;
+	color-scheme: light;
+	--font-display: 'Oswald', Impact, sans-serif;
+	--font-body: 'Open Sans', Arial, sans-serif;
+}
+
+:root[data-theme='dark'] {
+	--bg: #0d0d0d;
+	--bg-deep: #050508;
+	--surface: #111;
+	--surface-hover: #1a1a1a;
+	--border: #333;
+	--text: #e0e0e0;
+	--text-muted: #888;
+	--card-bg: rgba(13, 13, 13, 0.85);
+	--header-bg: #0a0a0a;
+	--ok: #44aa44;
+	--ok-soft: #1a3a1a;
+	--busy: #f0a030;
+	--busy-soft: #2a1f10;
+	--fail: #ff4444;
+	--fail-soft: #3a1a1a;
+	color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) {
+		--bg: #0d0d0d;
+		--bg-deep: #050508;
+		--surface: #111;
+		--surface-hover: #1a1a1a;
+		--border: #333;
+		--text: #e0e0e0;
+		--text-muted: #888;
+		--card-bg: rgba(13, 13, 13, 0.85);
+		--header-bg: #0a0a0a;
+		--ok: #44aa44;
+		--ok-soft: #1a3a1a;
+		--busy: #f0a030;
+		--busy-soft: #2a1f10;
+		--fail: #ff4444;
+		--fail-soft: #3a1a1a;
+		color-scheme: dark;
+	}
 }

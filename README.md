@@ -15,8 +15,8 @@ Distribution is a GitHub release. Tags are never moved; a broken release gets
 the next patch tag. A release carries:
 
 - the wheel `overnightworks_appkit-<version>-py3-none-any.whl` (import
-  `appkit`): `appkit/static/appkit.css`, the family tokens (dark under `:root`,
-  light under `[data-theme='light']`) and the `@font-face` rules; and
+  `appkit`): `appkit/static/appkit.css`, the family tokens (light under `:root`,
+  dark under the device media query and `[data-theme='dark']`) and the `@font-face` rules; and
   `appkit/static/fonts/`, Oswald 400 and 700 and Open Sans 400 and 600, latin
   and latin-ext, woff2, with each family's OFL licence;
 - `ui-style.css`, frozen, as before;
@@ -29,11 +29,11 @@ Every pull request passes the shared quality gate (`quality / verdict`, from
 Pin the wheel by URL with its hash (`scripts/release` prints the sha256):
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v0.5.0/overnightworks_appkit-0.5.0-py3-none-any.whl#sha256=<sha256>
+https://github.com/overnightworks/appkit/releases/download/v0.6.0/overnightworks_appkit-0.6.0-py3-none-any.whl#sha256=<sha256>
 ```
 
 `ui-style.css` is still published at
-`https://github.com/overnightworks/appkit/releases/download/v0.5.0/ui-style.css`.
+`https://github.com/overnightworks/appkit/releases/download/v0.6.0/ui-style.css`.
 
 Writing markup against it: [stylesheet reference](docs/stylesheet.md).
 

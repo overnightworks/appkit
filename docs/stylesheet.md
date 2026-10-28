@@ -9,10 +9,13 @@ picture" here is agent-presentator's `docs/mockups/m0-lobby.html`, which owns
 
 The wheel's `appkit.css` owns the family tokens (`--bg`, `--bg-deep`,
 `--surface`, `--surface-hover`, `--border`, `--text`, `--text-muted`,
-`--card-bg`, `--glow-primary`, `--header-bg`, `--font-display`, `--font-body`) and the
+`--card-bg`, `--header-bg`, `--ok`, `--ok-soft`, `--busy`, `--busy-soft`, `--fail`,
+`--fail-soft`, `--font-display`, `--font-body`) and the
 `@font-face` rules for Oswald and Open Sans, with songmaker's names and values.
-Dark is under `:root`; `[data-theme='light']` switches to light; with no
-choice it stays dark. The app colour (`--primary`, `--accent`, `--on-accent`)
+Light is under `:root`; dark sits under the device media query guarded by
+`:root:not([data-theme='light'])` and under `:root[data-theme='dark']`, so with
+no choice the page follows the device and either attribute forces its theme.
+Each theme sets `color-scheme`, so an app sets none. The app colour (`--primary`, `--accent`, `--on-accent`)
 and everything domain-specific stay with the app. `ui-style.css` is frozen and
 keeps its own token names.
 
