@@ -1,7 +1,0 @@
-claim_id = "943f307e4f134983b5debdea9636882d"
-agent = "Claude 41655a5c-dc18-4dfd-a77f-08ffc675b475"
-role = "builder"
-base = "4baf6966c11a4da857d669cb8a64e155a4bd8195"
-branch = "claude/issue-31-k3-family-picture"
-scope = ["README.md", "docs/family.html", "docs/stylesheet.md"]
-opened_commit = "c9ed84ce65a4e550c526c6c1c7b54ed7e45d7ef4"
