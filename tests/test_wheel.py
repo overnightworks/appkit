@@ -16,7 +16,8 @@ FONT_FILES = {
 LICENCES = {"oswald-LICENSE", "open-sans-LICENSE"}
 FAMILY_TOKENS = {
     "--bg", "--bg-deep", "--surface", "--surface-hover", "--border", "--text",
-    "--text-muted", "--card-bg", "--glow-primary", "--header-bg", "--font-display", "--font-body",
+    "--text-muted", "--card-bg", "--header-bg", "--font-display", "--font-body",
+    "--ok", "--ok-soft", "--busy", "--busy-soft", "--fail", "--fail-soft",
 }
 
 
@@ -96,9 +97,19 @@ def top_level_rules(stylesheet):
     return rules
 
 
-def test_dark_tokens_sit_under_root_and_light_tokens_under_the_light_theme(installed_package):
+def test_light_is_the_no_choice_case_and_dark_follows_the_device_or_the_attribute(installed_package):
     _, static = installed_package
     rules = top_level_rules((static / "appkit.css").read_text())
-    for selector in (":root", "[data-theme='light']"):
-        (body,) = rules[selector]
-        assert re.search(r"^\s+--bg:", body, re.MULTILINE), selector
+    (device_dark,) = rules["@media (prefers-color-scheme: dark)"]
+    assert ":root:not([data-theme='light'])" in device_dark
+    bodies = {
+        ("light", "no attribute"): rules[":root"][0],
+        ("dark", "attribute"): rules[":root[data-theme='dark']"][0],
+        ("dark", "device"): device_dark,
+    }
+    for (scheme, case), body in bodies.items():
+        assert re.search(r"^\s+--bg:", body, re.MULTILINE), case
+        assert re.search(rf"^\s+color-scheme: {scheme};", body, re.MULTILINE), case
+        for state in ("ok", "busy", "fail"):
+            assert f"--{state}:" in body and f"--{state}-soft:" in body, (case, state)
+    assert "[data-theme='light']" not in rules
