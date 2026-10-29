@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 # Print the sorted custom-property names a stylesheet defines, one per line.
 set -euo pipefail
-[[ $# -eq 1 ]] || { echo "usage: scripts/token-list STYLESHEET" >&2; exit 1; }
+[[ $# -eq 1 ]] || { echo "usage: scripts/list_tokens STYLESHEET" >&2; exit 1; }
 grep -oE '^[[:space:]]+--[a-z0-9-]+:' "$1" | tr -d '\t:' | sort -u

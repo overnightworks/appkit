@@ -2,9 +2,9 @@
 # Publish a release: tag, push the tag, attach the wheel, ui-style.css and the token list.
 set -euo pipefail
 
-fail() { echo "release: $*" >&2; exit 1; }
+fail() { echo "publish_release: $*" >&2; exit 1; }
 
-[[ $# -eq 1 && $1 =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "usage: scripts/release vMAJOR.MINOR.PATCH"
+[[ $# -eq 1 && $1 =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "usage: scripts/publish_release vMAJOR.MINOR.PATCH"
 tag=$1
 
 cd "$(git rev-parse --show-toplevel)"
@@ -28,7 +28,7 @@ trap '$keep_staging || rm -rf "$staging"' EXIT
 uv build --wheel --out-dir "$staging" >/dev/null
 wheel=$(ls "$staging"/*.whl)
 tokens="$staging/appkit-$version-tokens.txt"
-scripts/token-list src/appkit/static/appkit.css >"$tokens"
+scripts/list_tokens src/appkit/static/appkit.css >"$tokens"
 
 git tag "$tag"
 git push origin "$tag"
