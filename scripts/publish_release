@@ -40,4 +40,5 @@ git push origin "$tag"
 release=(gh release create "$tag" "$wheel" "$tarball" ui-style.css "$tokens" --title "$tag" --generate-notes)
 "${release[@]}" || { keep_staging=true; fail "tag $tag is pushed but has no release; tags are never moved, so run: ${release[*]}"; }
 echo "wheel sha256: $(sha256sum "$wheel" | cut -d' ' -f1)"
-echo "tarball integrity: sha512-$(openssl dgst -sha512 -binary "$tarball" | base64 -w0)"
+digest=$(openssl dgst -sha512 -binary "$tarball" | base64 -w0) || fail "tarball integrity could not be computed"
+echo "tarball integrity: sha512-$digest"

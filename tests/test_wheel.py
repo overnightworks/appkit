@@ -53,6 +53,12 @@ def test_wheel_holds_the_stylesheet_the_fonts_and_both_licences(installed_packag
     assert {path.name for path in (static / "fonts").iterdir()} == FONT_FILES | LICENCES
 
 
+def test_wheel_stylesheet_is_byte_equal_to_the_source_stylesheet(installed_package):
+    _, static = installed_package
+    source = REPOSITORY / "src" / "appkit" / "static" / "appkit.css"
+    assert (static / "appkit.css").read_bytes() == source.read_bytes()
+
+
 def test_wheel_holds_only_data_and_no_tests(installed_package):
     wheel, _ = installed_package
     names = zipfile.ZipFile(wheel).namelist()

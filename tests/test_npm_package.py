@@ -61,9 +61,15 @@ def test_every_url_in_the_packed_stylesheet_names_a_packed_font(tarball):
         assert (stylesheet.parent / url).is_file(), url
 
 
-def test_packed_stylesheet_is_byte_equal_to_the_one_the_wheel_ships(tarball):
+def test_packed_stylesheet_is_byte_equal_to_the_source_stylesheet(tarball):
     source = REPOSITORY / STATIC / "appkit.css"
     assert (tarball / STATIC / "appkit.css").read_bytes() == source.read_bytes()
+
+
+def test_manifest_is_private_and_exports_the_stylesheet_as_appkit_css(tarball):
+    manifest = json.loads((tarball / "package.json").read_text())
+    assert manifest["private"] is True
+    assert manifest["exports"] == {"./appkit.css": f"./{STATIC}/appkit.css"}
 
 
 def test_package_version_equals_the_python_package_version(tarball):
