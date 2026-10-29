@@ -1,8 +1,0 @@
-claim_id = "324ffc6d4c734081b6890ca968af6de7"
-agent = "Claude 41655a5c-dc18-4dfd-a77f-08ffc675b475"
-role = "builder"
-base = "e4bd5f087e205648cb4c00be5c32bfc1c6983d6c"
-branch = "claude/issue-40-k5a-npm-tarball"
-scope = [".github/workflows/ci.yml", "CHANGELOG.md", "README.md", "docs/stylesheet.md", "package.json", "pyproject.toml", "quality/config.toml", "scripts/publish_release", "tests/conftest.py", "tests/test_npm_package.py", "tests/test_publish_release.py", "tests/test_wheel.py", "uv.lock"]
-opened_commit = "099a7e2f2abc058222680b9a096a2f96166e7fe3"
-whole_reason = "One release form change: the package manifest, the publisher, their tests, CI setup, the version bump and the docs that name the pin move together."
