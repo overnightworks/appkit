@@ -1,8 +1,0 @@
-claim_id = "58b401a09980495fae12c2db8670445e"
-agent = "Claude 41655a5c-dc18-4dfd-a77f-08ffc675b475"
-role = "builder"
-base = "8e8f3318f4f097c079ab879e91e1d90463139078"
-branch = "claude/issue-35-quality-v0-9-0"
-scope = [".github/workflows/ci.yml", ".github/workflows/code-scanning.yml", "README.md", "pyproject.toml", "quality/config.toml", "scripts/list_tokens", "scripts/publish_release", "scripts/release", "scripts/token-list", "tests/test_wheel.py"]
-opened_commit = "714aacd37e102861506c74fde866c20e133cc303"
-whole_reason = "One gate bump across four quality releases; its declarations and fixes must land with the pin or the gate goes red."
