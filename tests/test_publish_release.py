@@ -136,7 +136,8 @@ def test_a_package_json_version_that_differs_from_the_tag_refuses_without_a_tag(
     result = release.publish()
     assert result.returncode != 0
     assert "package.json version" in result.stderr
-    assert release.local_tags() == [] and release.origin_tags() == []
+    assert release.local_tags() == []
+    assert release.origin_tags() == []
 
 
 def test_a_missing_pnpm_refuses_without_a_tag(release):
@@ -144,14 +145,16 @@ def test_a_missing_pnpm_refuses_without_a_tag(release):
     result = release.publish()
     assert result.returncode != 0
     assert "pnpm is missing" in result.stderr
-    assert release.local_tags() == [] and release.origin_tags() == []
+    assert release.local_tags() == []
+    assert release.origin_tags() == []
 
 
 def test_a_failing_pnpm_pack_refuses_without_a_tag(release):
     result = release.publish(FAIL_PACK="1")
     assert result.returncode != 0
     assert "pnpm pack failed" in result.stderr
-    assert release.local_tags() == [] and release.origin_tags() == []
+    assert release.local_tags() == []
+    assert release.origin_tags() == []
 
 
 def test_a_failing_upload_after_the_tag_names_the_rerun_and_keeps_both_staged_files(release):
