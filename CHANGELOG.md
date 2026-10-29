@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.7.0
+
+The release also attaches `overnightworks-appkit-0.7.0.tgz`, the npm form of
+`appkit.css` and the fonts (overnightworks/appkit#40, slice of #38). Not
+breaking: the wheel's content is unchanged.
+
+- `import 'overnightworks-appkit/appkit.css'` resolves to the stylesheet; the
+  fonts resolve through its relative `url()`.
+- Pin the tarball by URL; pnpm records its `sha512-` integrity.
+
 ## v0.6.0 (Breaking)
 
 `appkit.css` follows the device when an app makes no theme choice, and carries

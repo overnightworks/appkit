@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publish a release: tag, push the tag, attach the wheel, ui-style.css and the token list.
+# Publish a release: tag, push the tag, attach the wheel, the npm tarball, ui-style.css and the token list.
 set -euo pipefail
 
 fail() { echo "publish_release: $*" >&2; exit 1; }
@@ -10,7 +10,12 @@ tag=$1
 cd "$(git rev-parse --show-toplevel)"
 
 version=$(sed -nE 's/^version = "([^"]+)"$/\1/p' pyproject.toml)
+[[ -n $version ]] || fail "no version = \"...\" line found in pyproject.toml"
 [[ $tag == "v$version" ]] || fail "tag $tag is not the package version v$version"
+npm_version=$(sed -nE '/^ *"version" *: *"[^"]+" *,? *$/{s/^ *"version" *: *"([^"]+)".*$/\1/;p;q}' package.json)
+[[ -n $npm_version ]] || fail "no \"version\" field found in package.json"
+[[ $tag == "v$npm_version" ]] || fail "tag $tag is not the package.json version v$npm_version"
+command -v pnpm >/dev/null || fail "pnpm is missing"
 
 # Tags are never moved, so a tag on the wrong commit cannot be undone.
 [[ $(git branch --show-current) == main ]] || fail "not on main"
@@ -27,11 +32,15 @@ keep_staging=false
 trap '$keep_staging || rm -rf "$staging"' EXIT
 uv build --wheel --out-dir "$staging" >/dev/null
 wheel=$(ls "$staging"/*.whl)
+pnpm pack --pack-destination "$staging" >/dev/null || fail "pnpm pack failed"
+tarball=$(ls "$staging"/*.tgz)
 tokens="$staging/appkit-$version-tokens.txt"
 scripts/list_tokens src/appkit/static/appkit.css >"$tokens"
 
 git tag "$tag"
 git push origin "$tag"
-release=(gh release create "$tag" "$wheel" ui-style.css "$tokens" --title "$tag" --generate-notes)
+release=(gh release create "$tag" "$wheel" "$tarball" ui-style.css "$tokens" --title "$tag" --generate-notes)
 "${release[@]}" || { keep_staging=true; fail "tag $tag is pushed but has no release; tags are never moved, so run: ${release[*]}"; }
 echo "wheel sha256: $(sha256sum "$wheel" | cut -d' ' -f1)"
+digest=$(openssl dgst -sha512 -binary "$tarball" | base64 -w0) || fail "tarball integrity could not be computed"
+echo "tarball integrity: sha512-$digest"

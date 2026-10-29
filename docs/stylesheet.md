@@ -1,7 +1,8 @@
 # appkit stylesheet reference
 
 Contract of `ui-style.css` for an engineer writing markup against it. "The
-picture" here is agent-presentator's `docs/mockups/m0-lobby.html`, which owns
+picture" here is agent-presentator's `docs/mockups/m0-lobby.html`, at revision
+`cf31929d328b000be8db5da0d8765d48109c4376`, which owns
 `ui-style.css` and `grammar.html` while they stay frozen; `appkit.css` follows
 [`family.html`](family.html) instead; the [README](../README.md) says the same.
 
