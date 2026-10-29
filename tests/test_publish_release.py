@@ -28,6 +28,9 @@ echo "pnpm $*" >>"$RECORD"
 [[ -n ${FAIL_PACK:-} ]] && exit 1
 echo tarball >"$3/overnightworks-appkit-9.9.9.tgz"
 """
+FAKE_FAILING_OPENSSL = """#!/usr/bin/env bash
+exit 1
+"""
 
 
 def write_executable(path, text):
@@ -158,3 +161,11 @@ def test_a_failing_upload_after_the_tag_names_the_rerun_and_keeps_both_staged_fi
     rerun = re.search(r"run: gh release create \S+ (\S+\.whl) (\S+\.tgz) ", result.stderr)
     assert rerun, result.stderr
     assert all(Path(path).is_file() for path in rerun.groups())
+
+
+def test_a_failing_digest_exits_nonzero_without_printing_the_tarball_integrity(release):
+    write_executable(release.fakes / "openssl", FAKE_FAILING_OPENSSL)
+    result = release.publish()
+    assert result.returncode != 0
+    assert "tarball integrity could not be computed" in result.stderr
+    assert "tarball integrity: sha512-" not in result.stdout
