@@ -29,11 +29,11 @@ Every pull request passes the shared quality gate (`quality / verdict`, from
 Pin the wheel by URL with its hash (`scripts/publish_release` prints the sha256):
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v0.6.0/overnightworks_appkit-0.6.0-py3-none-any.whl#sha256=<sha256>
+https://github.com/overnightworks/appkit/releases/download/v0.7.0/overnightworks_appkit-0.7.0-py3-none-any.whl#sha256=<sha256>
 ```
 
 `ui-style.css` is still published at
-`https://github.com/overnightworks/appkit/releases/download/v0.6.0/ui-style.css`.
+`https://github.com/overnightworks/appkit/releases/download/v0.7.0/ui-style.css`.
 
 Writing markup against it: [stylesheet reference](docs/stylesheet.md).
 
