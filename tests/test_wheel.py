@@ -70,7 +70,7 @@ def test_every_url_in_the_stylesheet_names_a_font_in_the_wheel(installed_package
 def test_token_list_holds_exactly_the_properties_the_stylesheet_defines(installed_package):
     _, static = installed_package
     listing = subprocess.run(
-        [str(REPOSITORY / "scripts" / "token-list"), str(static / "appkit.css")],
+        [str(REPOSITORY / "scripts" / "list_tokens"), str(static / "appkit.css")],
         check=True,
         capture_output=True,
         text=True,

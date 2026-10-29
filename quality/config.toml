@@ -18,16 +18,6 @@ path = "pyproject.toml"
 reason = "the wheel is data-only and its consumers pin Python 3.12 (songmaker >=3.12,<3.13; edge >=3.12), so a 3.14 floor would make it uninstallable for both"
 
 [[layout.allow]]
-path = "scripts/release"
-rule = "script-name"
-reason = "README, scripts/release and tests/test_wheel.py call it under this name; the rename needs those callers changed"
-
-[[layout.allow]]
-path = "scripts/token-list"
-rule = "script-name"
-reason = "called by scripts/release and tests/test_wheel.py under this name"
-
-[[layout.allow]]
 path = "src/appkit/static/fonts/open-sans-LICENSE"
 rule = "file-suffix"
 reason = "licence text shipped verbatim beside the font it covers"

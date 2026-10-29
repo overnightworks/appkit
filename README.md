@@ -26,7 +26,7 @@ the next patch tag. A release carries:
 Every pull request passes the shared quality gate (`quality / verdict`, from
 `overnightworks/quality`): secret scan, workflow-security scan and SonarCloud analysis of the CSS, HTML and Python.
 
-Pin the wheel by URL with its hash (`scripts/release` prints the sha256):
+Pin the wheel by URL with its hash (`scripts/publish_release` prints the sha256):
 
 ```
 https://github.com/overnightworks/appkit/releases/download/v0.6.0/overnightworks_appkit-0.6.0-py3-none-any.whl#sha256=<sha256>
@@ -40,7 +40,7 @@ Writing markup against it: [stylesheet reference](docs/stylesheet.md).
 ## Release
 
 ```sh
-scripts/release v<version>
+scripts/publish_release v<version>
 ```
 
 It builds the wheel, tags `main`, pushes the tag, attaches the wheel,
