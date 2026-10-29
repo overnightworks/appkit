@@ -7,13 +7,6 @@ from pathlib import Path
 import pytest
 
 REPOSITORY = Path(__file__).resolve().parent.parent
-FONT_FILES = {
-    f"{family}-{subset}-{weight}-normal.woff2"
-    for family, weights in (("oswald", (400, 700)), ("open-sans", (400, 600)))
-    for weight in weights
-    for subset in ("latin", "latin-ext")
-}
-LICENCES = {"oswald-LICENSE", "open-sans-LICENSE"}
 FAMILY_TOKENS = {
     "--bg", "--bg-deep", "--surface", "--surface-hover", "--border", "--text",
     "--text-muted", "--card-bg", "--header-bg", "--font-display", "--font-body",
@@ -47,10 +40,10 @@ def installed_package(tmp_path_factory):
     return wheel, Path(static)
 
 
-def test_wheel_holds_the_stylesheet_the_fonts_and_both_licences(installed_package):
+def test_wheel_holds_the_stylesheet_the_fonts_and_both_licences(installed_package, font_files, licences):
     _, static = installed_package
     assert (static / "appkit.css").is_file()
-    assert {path.name for path in (static / "fonts").iterdir()} == FONT_FILES | LICENCES
+    assert {path.name for path in (static / "fonts").iterdir()} == font_files | licences
 
 
 def test_wheel_stylesheet_is_byte_equal_to_the_source_stylesheet(installed_package):
@@ -65,10 +58,10 @@ def test_wheel_holds_only_data_and_no_tests(installed_package):
     assert not [name for name in names if name.startswith("tests")]
 
 
-def test_every_url_in_the_stylesheet_names_a_font_in_the_wheel(installed_package):
+def test_every_url_in_the_stylesheet_names_a_font_in_the_wheel(installed_package, font_files, stylesheet_urls):
     _, static = installed_package
-    urls = re.findall(r"url\('([^']+)'\)", (static / "appkit.css").read_text())
-    assert len(urls) == len(FONT_FILES)
+    urls = stylesheet_urls(static / "appkit.css")
+    assert len(urls) == len(font_files)
     for url in urls:
         assert (static / url).is_file(), url
 

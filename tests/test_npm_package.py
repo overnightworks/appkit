@@ -1,5 +1,4 @@
 import json
-import re
 import subprocess
 import tarfile
 import tomllib
@@ -9,13 +8,6 @@ import pytest
 
 REPOSITORY = Path(__file__).resolve().parent.parent
 STATIC = "src/appkit/static"
-FONT_FILES = {
-    f"{family}-{subset}-{weight}-normal.woff2"
-    for family, weights in (("oswald", (400, 700)), ("open-sans", (400, 600)))
-    for weight in weights
-    for subset in ("latin", "latin-ext")
-}
-LICENCES = {"oswald-LICENSE", "open-sans-LICENSE"}
 INSTALL_SCRIPTS = {"preinstall", "install", "postinstall", "prepare"}
 
 
@@ -40,9 +32,9 @@ def packed_files(package):
     return {path.relative_to(package).as_posix() for path in package.rglob("*") if path.is_file()}
 
 
-def test_tarball_holds_exactly_the_manifest_readme_licence_stylesheet_fonts_and_font_licences(tarball):
+def test_tarball_holds_exactly_the_manifest_readme_licence_stylesheet_fonts_and_font_licences(tarball, font_files, licences):
     expected = {"package.json", "README.md", "LICENSE", f"{STATIC}/appkit.css"}
-    expected |= {f"{STATIC}/fonts/{name}" for name in FONT_FILES | LICENCES}
+    expected |= {f"{STATIC}/fonts/{name}" for name in font_files | licences}
     assert packed_files(tarball) == expected
 
 
@@ -53,10 +45,10 @@ def test_every_export_target_is_a_packed_file(tarball):
         assert (tarball / target).is_file(), target
 
 
-def test_every_url_in_the_packed_stylesheet_names_a_packed_font(tarball):
+def test_every_url_in_the_packed_stylesheet_names_a_packed_font(tarball, font_files, stylesheet_urls):
     stylesheet = tarball / STATIC / "appkit.css"
-    urls = re.findall(r"url\('([^']+)'\)", stylesheet.read_text())
-    assert len(urls) == len(FONT_FILES)
+    urls = stylesheet_urls(stylesheet)
+    assert len(urls) == len(font_files)
     for url in urls:
         assert (stylesheet.parent / url).is_file(), url
 
