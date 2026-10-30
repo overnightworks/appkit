@@ -53,6 +53,10 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm run check
           pnpm run test
+      - name: Prove production consumers of the tarball paint the sign-in page
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm run test:consumer
       - name: Run the package tests and build the wheel
         run: |
           uv run --frozen pytest -q tests

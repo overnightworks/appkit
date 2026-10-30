@@ -6,3 +6,7 @@ __pycache__/
 svelte-dist/
 node_modules/
 .svelte-kit/
+tests/consumer/.pack/
+tests/consumer/node_modules/
+tests/consumer/*/dist/
+test-results/
