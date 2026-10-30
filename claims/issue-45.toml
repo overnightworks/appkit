@@ -3,6 +3,6 @@ agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
 role = "builder"
 base = "58ab778ca1e42d28ab9b0e5ebcf996ac2b757394"
 branch = "claude/issue-45-k7c-ci-proves-a-production-consumer-of-t"
-scope = [".github/workflows/ci.yml", ".gitignore", "README.md", "package.json", "pnpm-lock.yaml", "quality/config.toml", "tests/consumer"]
+scope = [".github/workflows/ci.yml", ".gitignore", "README.md", "package.json", "pnpm-lock.yaml", "quality/config.toml", "tests/consumer", "tests/e2e"]
 opened_commit = "15301594964ca6ba9417d8a37dc4e95be8c24a71"
 whole_reason = "One check: the consumers, the browser driver, its development dependency and lock entry, the CI step that runs it, its ignore lines, its layout entry and the README line that names it work only together."
