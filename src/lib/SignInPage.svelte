@@ -28,10 +28,16 @@
 		{:else}
 			<h1>No access</h1>
 			<p>You are signed in, but this account has no access to {appName}.</p>
-			{#if state.logOutFailure}
-				<p role="alert">{state.logOutFailure}</p>
+			{#if state.logOutAction !== undefined}
+				<form class="log-out" method="post" action={state.logOutAction}>
+					<button class="action secondary" type="submit">Log out</button>
+				</form>
+			{:else}
+				{#if state.logOutFailure}
+					<p role="alert">{state.logOutFailure}</p>
+				{/if}
+				<button class="action secondary" type="button" onclick={state.onLogOut}>Log out</button>
 			{/if}
-			<button class="action secondary" type="button" onclick={state.onLogOut}>Log out</button>
 		{/if}
 	</main>
 	<LegalLinks links={legalLinks} />
@@ -193,6 +199,9 @@
 		text-decoration: none;
 		white-space: nowrap;
 		cursor: pointer;
+	}
+	.log-out {
+		display: contents;
 	}
 	.action.primary {
 		background: var(--accent);
