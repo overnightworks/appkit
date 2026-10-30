@@ -1,8 +1,0 @@
-claim_id = "fe4afe2eb8c0440784b1de24286c30fe"
-agent = "Claude 41655a5c-dc18-4dfd-a77f-08ffc675b475"
-role = "builder"
-base = "0fd01d425c2b95f55c90766f81d649176949640c"
-branch = "claude/issue-42-k5b-signinpage"
-scope = [".github/workflows/ci.yml", ".gitignore", "CHANGELOG.md", "README.md", "docs/stylesheet.md", "package.json", "patches/@sveltejs__vite-plugin-svelte@7.3.1.patch", "pnpm-lock.yaml", "pyproject.toml", "quality/config.toml", "sonar-project.properties", "src/appkit/static/appkit.css", "src/lib/SignInPage.svelte", "src/lib/SignInPage.test.ts", "src/lib/index.ts", "src/lib/types.ts", "tests/test_npm_package.py", "tests/test_wheel.py", "tsconfig.json", "uv.lock", "vitest.config.ts"]
-opened_commit = "974548e4fc73c7f505c154cb20bc7d30d8f055ad"
-whole_reason = "One component and the Svelte package toolchain it needs: the sources, their config and lock, the packaging tests, CI, the version bump and the docs that name the contract move together."
