@@ -4,7 +4,7 @@ This package carries the design tokens and the console-page grammar that
 overnightworks products share: lists of things with states, facts and fields,
 and the family tokens and fonts every product wears. It refuses components,
 product-specific page layout and JavaScript, with one exception: the tarball
-carries the Svelte components `SignInPage` and `LegalLinks` (until K7 of #25 decides on more). A
+carries the Svelte components `SignInPage`, `AccountMenu` and `LegalLinks`. A
 product renders everything else through this grammar with its own markup.
 
 `appkit.css` and every shared part follow the family picture
@@ -21,11 +21,11 @@ the next patch tag. A release carries:
   `appkit/static/fonts/`, Oswald 400 and 700 and Open Sans 400 and 600, latin
   and latin-ext, woff2, with each family's OFL licence;
 - `overnightworks-appkit-<version>.tgz`, the npm form of the same stylesheet and
-  fonts, plus the components `SignInPage` and `LegalLinks` (`package.json` is `private`; the
+  fonts, plus the components `SignInPage`, `AccountMenu` and `LegalLinks` (`package.json` is `private`; the
   tarball is the only npm distribution): `import 'overnightworks-appkit/appkit.css'`,
   the fonts resolving through the CSS's relative `url()`, and
   `import { SignInPage } from 'overnightworks-appkit'` (`exports` `.` with
-  `types` and `svelte`). `svelte` ^5 is its only, peer, dependency; the wheel
+  `types` and `svelte`). `svelte` ^5.20 is its only, peer, dependency; the wheel
   holds no `.svelte`;
 - `ui-style.css`, frozen, as before;
 - `appkit-<version>-tokens.txt`, the sorted custom-property names `appkit.css`
@@ -61,8 +61,9 @@ again", with the failure banner as an alert). The sign-in link carries
 `data-sveltekit-reload`, the page title is `appName`, and the glow follows the
 theme. The app passes `appName`, the state (`signInHref` for the two link
 states; a `LogOut` for `no-access`, below) and `legalLinks` (an empty list shows no legal row). The row is the exported
-`LegalLinks` component (`<LegalLinks links={[{ label, href }]} />`): a `<nav>` of
+`LegalLinks` component (`<LegalLinks links={[{ label, href }]} />`): a `<nav>` named "Legal" of
 same-tab links in the given order, one per entry, even when two share an href.
+`place="menu"` is the look and the new-tab links of a row inside `AccountMenu`.
 
 `no-access` logs out in one of two forms (the exported type `LogOut`, shared with other kit
 components). With a callback, the button calls it and an optional `logOutFailure` text shows as
@@ -73,6 +74,33 @@ no script, no token, no alert, so it works on a page prerendered with `csr = fal
 <SignInPage appName="Hallucinai" state={{ page: 'no-access', onLogOut, logOutFailure }} legalLinks={[]} />
 <SignInPage appName="Hallucinai" state={{ page: 'no-access', logOutAction: '/logout' }} legalLinks={[]} />
 ```
+
+## AccountMenu
+
+```svelte
+<AccountMenu
+	name="Felix"
+	accountHref={accountConsoleUrl}
+	onAccountOpen={() => popover.close(false)}
+	appRows={[{ label: 'Settings', icon: 'settings', onSelect: openSettings }]}
+	theme={{ choice, onChange: setChoice }}
+	legalLinks={[{ label: 'Impressum', href: '/impressum' }]}
+	{onLogOut}
+	{logOutFailure}
+/>
+```
+
+The panel of the family picture ([`docs/family.html`](docs/family.html), section 4): the
+name as a link to the account in a new tab, the app's rows, an optional Theme row with three
+radios ("Follow system", "Light", "Dark"), "Log out" in either `LogOut` form (see
+`SignInPage`) and the legal row. The kit owns the panel and its rows. The app owns the trigger,
+the popover with its focus handling and closing, where the menu sits, storing the theme and
+setting `data-theme`, how logging out works, and the labels, actions and visibility of its rows.
+The kit stores, fetches and closes nothing.
+
+The theme radios are controlled: `onChange` reports only a different pick, and the checked radio
+always equals `theme.choice`, so an app that does not take the choice sees the radio snap back.
+Without `theme`, the menu shows no Theme row and the app follows the device.
 
 The app owns
 its routes, the sign-out mechanism, the wording of a sign-out failure, the legal

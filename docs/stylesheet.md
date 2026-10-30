@@ -57,10 +57,12 @@ selector may outrank a single class on the heading itself.
 
 Sign-in wording is identical in every app. Each catalog carries these strings verbatim (operator ruling 19.10.2026, ui-console#6); no button names Keycloak:
 
-- en: "Log in", "Log out", "You are logged out.", "No access", "Login failed", "Try again"
+- en: "Log in", "Log out", "You are logged out.", "No access", "Login failed", "Try again", "Legal"
 - de: "Anmelden", "Abmelden", "Du bist abgemeldet.", "Kein Zugang", "Anmeldung fehlgeschlagen", "Erneut versuchen"
 
 The tarball's `SignInPage` component renders these en strings and two kit-owned sentences from the family picture: "Sign-in did not work. Please try again." (login failed) and "You are signed in, but this account has no access to <app name>." (no access). The de strings are not ruled for it.
+
+The tarball's `AccountMenu` component renders the en words of the family picture's account menu: "Theme", "Follow system", "Light", "Dark" and "Log out", and `LegalLinks` names its `<nav>` "Legal" (an accessible name, not printed). The de strings are not ruled for it.
 
 Each state has one way out: Signed out shows "Log in" and never redirects by itself; No access shows "Log out" (no "Back": the page is reached through the Keycloak redirect chain, so going back returns to Keycloak, which sends a live session straight back here); Login failed shows "Try again". `.actions` stacks at a viewport of 520px or less.
 
@@ -79,7 +81,7 @@ variant.
 - **Page layout.** App bar, deck page, Pico forms, and the
   column tracks `.row--src` / `.row--user` stay in the product.
 - **Components and JavaScript.** `ui-style.css` has no Svelte, no Jinja macros, no htmx;
-  markup is the product's. The npm tarball carries two components, `SignInPage` and `LegalLinks`.
+  markup is the product's. The npm tarball carries three components, `SignInPage`, `AccountMenu` and `LegalLinks`.
 - **Fonts.** No `@font-face`, no Google Fonts, no IBM Plex. The type tokens
   default to system stacks. A product that wants Plex loads it and assigns
   `--sans` / `--cond` / `--mono`.

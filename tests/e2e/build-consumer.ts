@@ -1,14 +1,18 @@
 import { execFileSync } from 'node:child_process';
 import { cpSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, join, resolve } from 'node:path';
+import { existsSync, statSync } from 'node:fs';
+import { dirname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
+import type { BrowserContext, Page } from '@playwright/test';
 import { build } from 'vite';
 
 const consumersRoot = dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = resolve(consumersRoot, '../..');
 const packDirectory = join(consumersRoot, '.pack');
+
+export const origin = 'http://consumer.test';
 
 export type ConsumerName = 'imported' | 'linked';
 
@@ -58,4 +62,16 @@ export async function buildConsumer(name: ConsumerName): Promise<string> {
 		cpSync(join(dirname(stylesheet), 'fonts'), join(outDir, 'fonts'), { recursive: true });
 	}
 	return outDir;
+}
+
+/** Serves a built consumer through request routing, so no server process exists. */
+export async function routeTo(target: Page | BrowserContext, outDir: string): Promise<void> {
+	await target.route(`${origin}/**`, async (route) => {
+		const { pathname } = new URL(route.request().url());
+		const file = normalize(join(outDir, pathname === '/' ? 'index.html' : pathname));
+		if (!file.startsWith(outDir + sep) || !existsSync(file) || !statSync(file).isFile()) {
+			return route.fulfill({ status: 404 });
+		}
+		return route.fulfill({ path: file });
+	});
 }

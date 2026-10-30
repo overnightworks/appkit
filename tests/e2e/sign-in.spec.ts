@@ -1,22 +1,7 @@
-import { join, normalize, sep } from 'node:path';
-import { existsSync, statSync } from 'node:fs';
-import { expect, test, type Page } from '@playwright/test';
-import { buildConsumer, type ConsumerName } from './build-consumer.ts';
+import { expect, test } from '@playwright/test';
+import { buildConsumer, origin, routeTo, type ConsumerName } from './build-consumer.ts';
 
-const origin = 'http://consumer.test';
 const colorSchemes = ['light', 'dark'] as const;
-
-/** Serves a built consumer through request routing, so no server process exists. */
-async function routeTo(page: Page, outDir: string): Promise<void> {
-	await page.route(`${origin}/**`, async (route) => {
-		const { pathname } = new URL(route.request().url());
-		const file = normalize(join(outDir, pathname === '/' ? 'index.html' : pathname));
-		if (!file.startsWith(outDir + sep) || !existsSync(file) || !statSync(file).isFile()) {
-			return route.fulfill({ status: 404 });
-		}
-		return route.fulfill({ path: file });
-	});
-}
 
 for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[]) {
 	test.describe(`a production consumer that ${consumer === 'imported' ? 'imports' : 'statically links'} appkit.css`, () => {
