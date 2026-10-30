@@ -1,8 +1,0 @@
-claim_id = "35a904372df14255af91a327797ab52c"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "58ab778ca1e42d28ab9b0e5ebcf996ac2b757394"
-branch = "claude/issue-44-k7a-legallinks-as-its-own-export-in-the"
-scope = ["README.md", "docs/stylesheet.md", "src/lib/LegalLinks.svelte", "src/lib/LegalLinks.test.ts", "src/lib/SignInPage.svelte", "src/lib/index.ts", "src/lib/types.ts", "tests/test_npm_package.py"]
-opened_commit = "4ab610f62cc039c5a8ef6ec5c9b2e97569fe7716"
-whole_reason = "One extraction: the new component, its export and type, SignInPage's switch to it, the packed-file test that pins it and the two documents that name the kit's components move together, or the tarball ships a component its docs and tests do not know."
