@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.8.0
+
+Not breaking. The tarball gains the Svelte component `SignInPage`
+(overnightworks/appkit#42, slice of #38); the wheel changes by one comment in
+`appkit.css`.
+
+- `import { SignInPage } from 'overnightworks-appkit'` renders the three sign-in
+  states with their types; `svelte` ^5 is a peer dependency.
+- The wheel holds no `.svelte`.
+
 ## v0.7.0
 
 The release also attaches `overnightworks-appkit-0.7.0.tgz`, the npm form of

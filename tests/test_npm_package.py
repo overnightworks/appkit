@@ -9,6 +9,14 @@ import pytest
 REPOSITORY = Path(__file__).resolve().parent.parent
 STATIC = "src/appkit/static"
 INSTALL_SCRIPTS = {"preinstall", "install", "postinstall", "prepare"}
+COMPONENT_FILES = {
+    "svelte-dist/index.js",
+    "svelte-dist/index.d.ts",
+    "svelte-dist/types.js",
+    "svelte-dist/types.d.ts",
+    "svelte-dist/SignInPage.svelte",
+    "svelte-dist/SignInPage.svelte.d.ts",
+}
 
 
 @pytest.fixture(scope="module")
@@ -32,8 +40,15 @@ def packed_files(package):
     return {path.relative_to(package).as_posix() for path in package.rglob("*") if path.is_file()}
 
 
-def test_tarball_holds_exactly_the_manifest_readme_licence_stylesheet_fonts_and_font_licences(tarball, font_files, licences):
-    expected = {"package.json", "README.md", "LICENSE", f"{STATIC}/appkit.css"}
+def export_targets(exports):
+    """Every file an exports map names, through nested conditions."""
+    if isinstance(exports, str):
+        return {exports}
+    return set().union(*(export_targets(value) for value in exports.values()))
+
+
+def test_tarball_holds_exactly_the_manifest_readme_licence_stylesheet_fonts_font_licences_and_component(tarball, font_files, licences):
+    expected = {"package.json", "README.md", "LICENSE", f"{STATIC}/appkit.css"} | COMPONENT_FILES
     expected |= {f"{STATIC}/fonts/{name}" for name in font_files | licences}
     assert packed_files(tarball) == expected
 
@@ -41,7 +56,7 @@ def test_tarball_holds_exactly_the_manifest_readme_licence_stylesheet_fonts_and_
 def test_every_export_target_is_a_packed_file(tarball):
     exports = json.loads((tarball / "package.json").read_text())["exports"]
     assert exports
-    for target in exports.values():
+    for target in export_targets(exports):
         assert (tarball / target).is_file(), target
 
 
@@ -58,10 +73,13 @@ def test_packed_stylesheet_is_byte_equal_to_the_source_stylesheet(tarball):
     assert (tarball / STATIC / "appkit.css").read_bytes() == source.read_bytes()
 
 
-def test_manifest_is_private_and_exports_the_stylesheet_as_appkit_css(tarball):
+def test_manifest_is_private_and_exports_the_component_with_types_and_the_stylesheet_as_appkit_css(tarball):
     manifest = json.loads((tarball / "package.json").read_text())
     assert manifest["private"] is True
-    assert manifest["exports"] == {"./appkit.css": f"./{STATIC}/appkit.css"}
+    exports = manifest["exports"]
+    assert set(exports) == {".", "./appkit.css"}
+    assert set(exports["."]) == {"types", "svelte"}
+    assert exports["./appkit.css"] == f"./{STATIC}/appkit.css"
 
 
 def test_package_version_equals_the_python_package_version(tarball):
@@ -69,7 +87,12 @@ def test_package_version_equals_the_python_package_version(tarball):
     assert json.loads((tarball / "package.json").read_text())["version"] == python_version
 
 
-def test_package_has_no_dependencies_and_no_install_scripts(tarball):
+def test_package_has_only_svelte_as_a_peer_and_no_install_scripts(tarball):
     manifest = json.loads((tarball / "package.json").read_text())
-    assert not {"dependencies", "peerDependencies"} & manifest.keys()
+    assert not {"dependencies", "optionalDependencies"} & manifest.keys()
+    assert manifest["peerDependencies"].keys() == {"svelte"}
     assert not INSTALL_SCRIPTS & manifest.get("scripts", {}).keys()
+
+
+def test_shipped_component_styles_do_not_use_light_dark_which_a_minifier_rewrites_into_variables_a_linked_stylesheet_lacks(tarball):
+    assert "light-dark(" not in (tarball / "svelte-dist/SignInPage.svelte").read_text()

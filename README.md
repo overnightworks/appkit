@@ -3,8 +3,9 @@
 This package carries the design tokens and the console-page grammar that
 overnightworks products share: lists of things with states, facts and fields,
 and the family tokens and fonts every product wears. It refuses components,
-product-specific page layout and JavaScript (until K7 of #25); a product renders
-through this grammar with its own markup.
+product-specific page layout and JavaScript, with one exception: the tarball
+carries the Svelte component `SignInPage` (until K7 of #25 decides on more). A
+product renders everything else through this grammar with its own markup.
 
 `appkit.css` and every shared part follow the family picture
 [`docs/family.html`](docs/family.html). `ui-style.css` and `grammar.html` stay
@@ -20,20 +21,23 @@ the next patch tag. A release carries:
   `appkit/static/fonts/`, Oswald 400 and 700 and Open Sans 400 and 600, latin
   and latin-ext, woff2, with each family's OFL licence;
 - `overnightworks-appkit-<version>.tgz`, the npm form of the same stylesheet and
-  fonts (`package.json` is `private`; the tarball is the only npm distribution):
-  `import 'overnightworks-appkit/appkit.css'`, the fonts resolving through the
-  CSS's relative `url()`;
+  fonts, plus the component `SignInPage` (`package.json` is `private`; the
+  tarball is the only npm distribution): `import 'overnightworks-appkit/appkit.css'`,
+  the fonts resolving through the CSS's relative `url()`, and
+  `import { SignInPage } from 'overnightworks-appkit'` (`exports` `.` with
+  `types` and `svelte`). `svelte` ^5 is its only, peer, dependency; the wheel
+  holds no `.svelte`;
 - `ui-style.css`, frozen, as before;
 - `appkit-<version>-tokens.txt`, the sorted custom-property names `appkit.css`
   defines.
 
 Every pull request passes the shared quality gate (`quality / verdict`, from
-`overnightworks/quality`): secret scan, workflow-security scan and SonarCloud analysis of the CSS, HTML and Python.
+`overnightworks/quality`): secret scan, workflow-security scan and SonarCloud analysis of the CSS, HTML, Python and TypeScript. SonarCloud does not analyse `.svelte` files; `svelte-check`, `vitest` and the size ratchet check the component.
 
 Pin the wheel by URL with its hash (`scripts/publish_release` prints the sha256):
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v0.7.0/overnightworks_appkit-0.7.0-py3-none-any.whl#sha256=<sha256>
+https://github.com/overnightworks/appkit/releases/download/v0.8.0/overnightworks_appkit-0.8.0-py3-none-any.whl#sha256=<sha256>
 ```
 
 A SvelteKit app takes the tarball, pinned by URL; pnpm writes its `sha512-`
@@ -41,14 +45,32 @@ integrity into the lockfile, and `scripts/publish_release` prints the same value
 to compare:
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v0.7.0/overnightworks-appkit-0.7.0.tgz
+https://github.com/overnightworks/appkit/releases/download/v0.8.0/overnightworks-appkit-0.8.0.tgz
 ```
+
+## SignInPage
+
+```svelte
+<SignInPage appName="Hallucinai" state={{ page: 'signed-out', signInHref }} legalLinks={[{ label: 'Impressum', href: '/impressum' }]} />
+```
+
+One component renders the three sign-in states of the family picture
+([`docs/family.html`](docs/family.html), section 3) with the ruled words:
+`signed-out` ("Log in"), `no-access` ("Log out") and `login-failed` ("Try
+again", with the failure banner as an alert). The sign-in link carries
+`data-sveltekit-reload`, the page title is `appName`, and the glow follows the
+theme. The app passes `appName`, the state (`signInHref` for the two link
+states; `onLogOut` and an optional `logOutFailure` text, shown as an alert, for
+`no-access`) and `legalLinks` (an empty list shows no legal row). The app owns
+its routes, the sign-out mechanism, the wording of a sign-out failure, the legal
+targets, the colour slot (`--primary`, `--accent`, `--on-accent`) and loading
+`appkit.css`. The component writes no `data-theme`.
 
 A Python app (edge, songmaker's backend) takes the wheel; an app with a
 frontend takes the tarball.
 
 `ui-style.css` is still published at
-`https://github.com/overnightworks/appkit/releases/download/v0.7.0/ui-style.css`.
+`https://github.com/overnightworks/appkit/releases/download/v0.8.0/ui-style.css`.
 
 Writing markup against it: [stylesheet reference](docs/stylesheet.md).
 
@@ -61,7 +83,8 @@ scripts/publish_release v<version>
 It builds the wheel and packs the tarball, tags `main`, pushes the tag,
 attaches both, `ui-style.css` and the token list, and prints the wheel's sha256
 and the tarball's sha512 integrity for pins. It refuses unless the tag equals
-the version in `pyproject.toml` and `package.json`, `pnpm` is installed, you are on a clean `main`
+the version in `pyproject.toml` and `package.json`, `pnpm` is installed and `pnpm install --frozen-lockfile` has run, you are on a clean `main`
 equal to `origin/main`, the tag is new and `gh` is logged in.
 
-Tests: `uv run --frozen pytest -q tests`.
+Tests: `pnpm install --frozen-lockfile`, `pnpm run check`,
+`pnpm exec vitest run <file>` and `uv run --frozen pytest -q tests`.

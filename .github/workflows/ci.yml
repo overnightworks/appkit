@@ -39,7 +39,7 @@ jobs:
           else
             base="${PUSH_BEFORE}"
           fi
-          git diff --check "${base}" HEAD
+          git diff --check "${base}" HEAD -- . ':(exclude)patches/'
 
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e  # v10.3.2
       # pnpm takes its version from package.json's packageManager.
@@ -47,6 +47,12 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         with:
           node-version: "22"
+      # The tarball test's pnpm pack runs prepack, which needs node_modules.
+      - name: Install, type-check and test the Svelte component
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run check
+          pnpm run test
       - name: Run the package tests and build the wheel
         run: |
           uv run --frozen pytest -q tests
