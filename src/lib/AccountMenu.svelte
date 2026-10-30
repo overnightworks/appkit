@@ -181,6 +181,9 @@
 		border-radius: 50%;
 		background: transparent;
 	}
+	input[type='radio']:focus-visible {
+		outline-offset: 2px;
+	}
 	input[type='radio']:checked {
 		border-color: var(--accent);
 		background: radial-gradient(circle, var(--accent) 0 3.5px, transparent 4.5px);

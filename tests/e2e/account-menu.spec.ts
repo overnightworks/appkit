@@ -195,6 +195,16 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			await expectNothingStoredOrFetched(page, requests);
 		});
 
+		test('draws the focused radio ring outside its own border', async ({ page }) => {
+			await open(page);
+			const radio = page.getByRole('radio', { name: 'Follow system' });
+			await radio.focus();
+			const offset = await radio.evaluate((element) =>
+				Number.parseFloat(getComputedStyle(element).outlineOffset)
+			);
+			expect(offset).toBeGreaterThanOrEqual(0);
+		});
+
 		test('shows no theme rows and touches nothing without them', async ({ page }) => {
 			const requests = watchRequests(page);
 			await open(page, 'no-theme');
