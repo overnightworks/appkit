@@ -68,7 +68,7 @@ variant.
 - **Page layout.** App bar, deck page, Pico forms, and the
   column tracks `.row--src` / `.row--user` stay in the product.
 - **Components and JavaScript.** `ui-style.css` has no Svelte, no Jinja macros, no htmx;
-  markup is the product's. The one component is `SignInPage`, in the npm tarball.
+  markup is the product's. The npm tarball carries two components, `SignInPage` and `LegalLinks`.
 - **Fonts.** No `@font-face`, no Google Fonts, no IBM Plex. The type tokens
   default to system stacks. A product that wants Plex loads it and assigns
   `--sans` / `--cond` / `--mono`.

@@ -4,7 +4,7 @@ This package carries the design tokens and the console-page grammar that
 overnightworks products share: lists of things with states, facts and fields,
 and the family tokens and fonts every product wears. It refuses components,
 product-specific page layout and JavaScript, with one exception: the tarball
-carries the Svelte component `SignInPage` (until K7 of #25 decides on more). A
+carries the Svelte components `SignInPage` and `LegalLinks` (until K7 of #25 decides on more). A
 product renders everything else through this grammar with its own markup.
 
 `appkit.css` and every shared part follow the family picture
@@ -21,7 +21,7 @@ the next patch tag. A release carries:
   `appkit/static/fonts/`, Oswald 400 and 700 and Open Sans 400 and 600, latin
   and latin-ext, woff2, with each family's OFL licence;
 - `overnightworks-appkit-<version>.tgz`, the npm form of the same stylesheet and
-  fonts, plus the component `SignInPage` (`package.json` is `private`; the
+  fonts, plus the components `SignInPage` and `LegalLinks` (`package.json` is `private`; the
   tarball is the only npm distribution): `import 'overnightworks-appkit/appkit.css'`,
   the fonts resolving through the CSS's relative `url()`, and
   `import { SignInPage } from 'overnightworks-appkit'` (`exports` `.` with
@@ -61,7 +61,9 @@ again", with the failure banner as an alert). The sign-in link carries
 `data-sveltekit-reload`, the page title is `appName`, and the glow follows the
 theme. The app passes `appName`, the state (`signInHref` for the two link
 states; `onLogOut` and an optional `logOutFailure` text, shown as an alert, for
-`no-access`) and `legalLinks` (an empty list shows no legal row). The app owns
+`no-access`) and `legalLinks` (an empty list shows no legal row). The row is the exported
+`LegalLinks` component (`<LegalLinks links={[{ label, href }]} />`): a `<nav>` of
+same-tab links in the given order, one per entry, even when two share an href. The app owns
 its routes, the sign-out mechanism, the wording of a sign-out failure, the legal
 targets, the colour slot (`--primary`, `--accent`, `--on-accent`) and loading
 `appkit.css`. The component writes no `data-theme`.
