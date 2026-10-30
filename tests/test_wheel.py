@@ -58,6 +58,12 @@ def test_wheel_holds_only_data_and_no_tests(installed_package):
     assert not [name for name in names if name.startswith("tests")]
 
 
+def test_wheel_holds_no_svelte_component_and_no_component_build(installed_package):
+    wheel, _ = installed_package
+    names = zipfile.ZipFile(wheel).namelist()
+    assert not [name for name in names if name.endswith(".svelte") or "svelte-dist" in name]
+
+
 def test_every_url_in_the_stylesheet_names_a_font_in_the_wheel(installed_package, font_files, stylesheet_urls):
     _, static = installed_package
     urls = stylesheet_urls(static / "appkit.css")

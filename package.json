@@ -1,18 +1,51 @@
 {
   "name": "overnightworks-appkit",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "license": "MIT",
   "files": [
     "src/appkit/static/appkit.css",
-    "src/appkit/static/fonts"
+    "src/appkit/static/fonts",
+    "svelte-dist",
+    "!svelte-dist/**/*.test.*"
   ],
   "exports": {
+    ".": {
+      "types": "./svelte-dist/index.d.ts",
+      "svelte": "./svelte-dist/index.js"
+    },
     "./appkit.css": "./src/appkit/static/appkit.css"
   },
   "sideEffects": [
-    "*.css"
+    "**/*.css"
   ],
-  "packageManager": "pnpm@10.32.1"
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  },
+  "scripts": {
+    "package": "svelte-package --input src/lib --output svelte-dist",
+    "prepack": "pnpm run package",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest run"
+  },
+  "packageManager": "pnpm@10.32.1",
+  "devDependencies": {
+    "@sveltejs/package": "^3.0.2",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "jsdom": "30.0.1",
+    "svelte": "^5.57.2",
+    "svelte-check": "^4.7.7",
+    "typescript": "^6.0.0",
+    "vite": "^8.3.5",
+    "vitest": "^4.1.12"
+  },
+  "pnpm": {
+    "overrides": {
+      "deepmerge": "-"
+    },
+    "patchedDependencies": {
+      "@sveltejs/vite-plugin-svelte@7.3.1": "patches/@sveltejs__vite-plugin-svelte@7.3.1.patch"
+    }
+  }
 }

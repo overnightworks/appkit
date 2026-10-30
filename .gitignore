@@ -3,3 +3,6 @@
 dist/
 __pycache__/
 .pytest_cache/
+svelte-dist/
+node_modules/
+.svelte-kit/
