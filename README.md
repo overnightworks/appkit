@@ -89,4 +89,7 @@ the version in `pyproject.toml` and `package.json`, `pnpm` is installed and `pnp
 equal to `origin/main`, the tag is new and `gh` is logged in.
 
 Tests: `pnpm install --frozen-lockfile`, `pnpm run check`,
-`pnpm exec vitest run <file>` and `uv run --frozen pytest -q tests`.
+`pnpm exec vitest run <file>`, `uv run --frozen pytest -q tests` and, after
+`pnpm exec playwright install chromium`, `pnpm run test:consumer`, which
+builds two production consumers from the packed tarball and paints the sign-in
+page in a browser (`APPKIT_TARBALL` points it at another tarball).

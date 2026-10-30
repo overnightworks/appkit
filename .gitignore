@@ -6,3 +6,7 @@ __pycache__/
 svelte-dist/
 node_modules/
 .svelte-kit/
+tests/e2e/.pack/
+tests/e2e/node_modules/
+tests/e2e/*/dist/
+test-results/
