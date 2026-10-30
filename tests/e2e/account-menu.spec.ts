@@ -73,6 +73,9 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 						'border-top-style',
 						'solid'
 					);
+					expect(
+						(await page.getByRole('button', { name: 'Log out' }).locator('..').boundingBox())!.height
+					).toBe(40);
 					const viewport = page.viewportSize()!;
 					for (const name of legalNames) {
 						const box = (await page.getByRole('link', { name }).boundingBox())!;
@@ -135,6 +138,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 		test('snaps back when the app ignores the choice, and reports nothing for the checked radio', async ({
 			page
 		}) => {
+			const requests = watchRequests(page);
 			await open(page, 'ignore');
 			await page.getByRole('radio', { name: 'Dark' }).click();
 			expect(await reportsOf(page)).toEqual(['theme:dark']);
@@ -142,6 +146,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			await expect(page.getByRole('radio', { name: 'Dark' })).not.toBeChecked();
 			await page.getByRole('radio', { name: 'Follow system' }).click();
 			expect(await reportsOf(page)).toEqual(['theme:dark']);
+			await expectNothingStoredOrFetched(page, requests);
 		});
 
 		test('is reachable and operable by keyboard in reading order', async ({ page }) => {

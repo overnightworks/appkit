@@ -190,6 +190,9 @@
 		padding-top: 4px;
 		border-top: 1px solid var(--border);
 	}
+	.out .row {
+		min-height: 35px;
+	}
 	form {
 		margin: 0;
 	}
