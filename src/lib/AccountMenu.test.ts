@@ -115,6 +115,25 @@ describe('theme rows', () => {
 		expect(checkedLabel(target)).toBe('Follow system');
 	});
 
+	it('survives an app update that unmounts the menu while reporting a pick', async () => {
+		const target = document.createElement('div');
+		document.body.append(target);
+		const component = mount(AccountMenu, {
+			target,
+			props: baseProps({
+				theme: {
+					choice: 'light',
+					onChange: () => {
+						void unmount(component);
+					}
+				}
+			})
+		});
+		await tick();
+		expect(() => radios(target)[2].click()).not.toThrow();
+		target.remove();
+	});
+
 	it('renders no Theme row and no radios without theme rows', async () => {
 		const menu = await render();
 		expect(radios(menu)).toHaveLength(0);

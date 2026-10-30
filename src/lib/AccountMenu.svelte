@@ -28,7 +28,8 @@
 		theme?.onChange(choice);
 		flushSync();
 		radios.forEach((radio, index) => {
-			radio.checked = choices[index].value === theme?.choice;
+			// The app's update may have removed the rows or unmounted the menu.
+			if (radio) radio.checked = choices[index].value === theme?.choice;
 		});
 	}
 </script>
