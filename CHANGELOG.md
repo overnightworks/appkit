@@ -5,8 +5,9 @@
 Breaking only in the Svelte peer floor, `^5.20.0`, which `AccountMenu` needs for
 `$props.id()`; no current consumer is below it. `appkit.css` gains the class
 `as-typed` (overnightworks/appkit#48, slice of #25), `SignInPage`'s no-access
-state logs out without a script (overnightworks/appkit#51), and the tarball
-gains `AccountMenu` (overnightworks/appkit#50, slice of #39).
+state logs out without a script (overnightworks/appkit#51), the wordmark of
+`SignInPage` is named once for screen readers (overnightworks/appkit#55), and
+the tarball gains `AccountMenu` (overnightworks/appkit#50, slice of #39).
 
 - `as-typed` turns the case transform and the letter-spacing off, so text a
   person typed (a name, slug or address) keeps its case inside an uppercase
@@ -22,6 +23,9 @@ gains `AccountMenu` (overnightworks/appkit#50, slice of #39).
   menu's look, links open a new tab). Its `<nav>` is named "Legal" in both
   places, so `SignInPage`'s legal row gains that name too.
 - The `svelte` peer is `^5.20.0` (was `^5.0.0`).
+- The two-colour wordmark of `SignInPage` gives its generated text empty
+  alternative text, so a screen reader reads the app name once, not three times.
+  The look does not change.
 
 ## v0.8.0
 
