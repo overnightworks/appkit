@@ -13,9 +13,41 @@ export interface LegalLink {
 	href: string;
 }
 
+export type LegalLinksPlace = 'page' | 'menu';
+
 export interface LegalLinksProps {
 	links: readonly LegalLink[];
+	place?: LegalLinksPlace;
 }
+
+/** The effective choice, never the resolved colour. */
+export type ThemeChoice = 'follow-system' | 'light' | 'dark';
+
+export interface ThemeRows {
+	choice: ThemeChoice;
+	/** Called only when a different radio is selected. */
+	onChange: (choice: ThemeChoice) => void;
+}
+
+export type AppRowIcon = 'settings';
+
+export interface AppRow {
+	label: string;
+	icon: AppRowIcon;
+	onSelect: () => void;
+}
+
+export type AccountMenuProps = {
+	name: string;
+	accountHref: string;
+	/** The name link was activated. */
+	onAccountOpen: () => void;
+	/** Rendered above Theme; an empty list renders none. */
+	appRows: readonly AppRow[];
+	/** Absent renders no theme rows. */
+	theme?: ThemeRows;
+	legalLinks: readonly LegalLink[];
+} & LogOut;
 
 export interface SignInPageProps {
 	appName: string;
