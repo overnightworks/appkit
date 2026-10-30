@@ -1,7 +1,6 @@
 import { execFileSync } from 'node:child_process';
-import { cpSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { existsSync, statSync } from 'node:fs';
 import { dirname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
