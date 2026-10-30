@@ -1,8 +1,0 @@
-claim_id = "46d62cbb3d664b2bb5ca52767ca00969"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "5f522ef3777cb7704d62c2930763bf6eaf5a6de6"
-branch = "claude/issue-51-k5c-no-access-logs-out-without-script"
-scope = ["CHANGELOG.md", "README.md", "src/lib/SignInPage.ssr.test.ts", "src/lib/SignInPage.svelte", "src/lib/SignInPage.test.ts", "src/lib/index.ts", "src/lib/types.ts", "tests/test_npm_package.py", "vitest.config.ts"]
-opened_commit = "7d899b1bedff33eff9bee78e49f0d5223d42989a"
-whole_reason = "One public type and the component state that renders it: the type, its export, the markup, its tests with the server project that runs them, and the docs naming it ship nothing usable apart."
