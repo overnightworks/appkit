@@ -133,3 +133,36 @@ def test_a_consumer_imports_legal_links_and_its_props_type_from_the_package_root
         text=True,
     )
     assert result.returncode == 0, result.stdout
+
+
+def test_a_consumer_gives_the_no_access_state_one_log_out_form_and_a_released_state_still_type_checks(tarball, tmp_path):
+    name = json.loads((tarball / "package.json").read_text())["name"]
+    modules = tmp_path / "node_modules"
+    modules.mkdir()
+    shutil.copytree(tarball, modules / name)
+    (modules / "svelte").symlink_to(REPOSITORY / "node_modules/svelte")
+    (tmp_path / "consumer.ts").write_text(
+        f"import type {{ LogOut, SignInState }} from '{name}';\n"
+        "export const callback: SignInState = { page: 'no-access', onLogOut: () => {}, logOutFailure: 'x' };\n"
+        "export const action: SignInState = { page: 'no-access', logOutAction: '/logout' };\n"
+        "export const shared: LogOut = { logOutAction: '/logout' };\n"
+        "// @ts-expect-error neither form\n"
+        "export const neither: SignInState = { page: 'no-access' };\n"
+        "// @ts-expect-error both forms\n"
+        "export const both: SignInState = { page: 'no-access', onLogOut: () => {}, logOutAction: '/logout' };\n"
+        "// @ts-expect-error a failure text belongs to the callback form\n"
+        "export const mixed: SignInState = { page: 'no-access', logOutAction: '/logout', logOutFailure: 'x' };\n"
+    )
+    result = subprocess.run(
+        [
+            str(REPOSITORY / "node_modules/.bin/tsc"),
+            "--noEmit", "--strict", "--skipLibCheck",
+            "--module", "esnext", "--moduleResolution", "bundler",
+            "--target", "es2022", "--allowImportingTsExtensions",
+            "--verbatimModuleSyntax", "consumer.ts",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stdout

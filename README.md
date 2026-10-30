@@ -60,10 +60,21 @@ One component renders the three sign-in states of the family picture
 again", with the failure banner as an alert). The sign-in link carries
 `data-sveltekit-reload`, the page title is `appName`, and the glow follows the
 theme. The app passes `appName`, the state (`signInHref` for the two link
-states; `onLogOut` and an optional `logOutFailure` text, shown as an alert, for
-`no-access`) and `legalLinks` (an empty list shows no legal row). The row is the exported
+states; a `LogOut` for `no-access`, below) and `legalLinks` (an empty list shows no legal row). The row is the exported
 `LegalLinks` component (`<LegalLinks links={[{ label, href }]} />`): a `<nav>` of
-same-tab links in the given order, one per entry, even when two share an href. The app owns
+same-tab links in the given order, one per entry, even when two share an href.
+
+`no-access` logs out in one of two forms (the exported type `LogOut`, shared with other kit
+components). With a callback, the button calls it and an optional `logOutFailure` text shows as
+an alert. With `logOutAction`, a URL, the button submits a plain same-origin POST form to it:
+no script, no token, no alert, so it works on a page prerendered with `csr = false`.
+
+```svelte
+<SignInPage appName="Hallucinai" state={{ page: 'no-access', onLogOut, logOutFailure }} legalLinks={[]} />
+<SignInPage appName="Hallucinai" state={{ page: 'no-access', logOutAction: '/logout' }} legalLinks={[]} />
+```
+
+The app owns
 its routes, the sign-out mechanism, the wording of a sign-out failure, the legal
 targets, the colour slot (`--primary`, `--accent`, `--on-accent`) and loading
 `appkit.css`. The component writes no `data-theme`.
