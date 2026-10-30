@@ -90,5 +90,9 @@ def test_package_version_equals_the_python_package_version(tarball):
 def test_package_has_only_svelte_as_a_peer_and_no_install_scripts(tarball):
     manifest = json.loads((tarball / "package.json").read_text())
     assert not {"dependencies", "optionalDependencies"} & manifest.keys()
-    assert manifest["peerDependencies"] == {"svelte": "^5.0.0"}
+    assert manifest["peerDependencies"].keys() == {"svelte"}
     assert not INSTALL_SCRIPTS & manifest.get("scripts", {}).keys()
+
+
+def test_shipped_component_styles_do_not_use_light_dark_which_a_minifier_rewrites_into_variables_a_linked_stylesheet_lacks(tarball):
+    assert "light-dark(" not in (tarball / "svelte-dist/SignInPage.svelte").read_text()

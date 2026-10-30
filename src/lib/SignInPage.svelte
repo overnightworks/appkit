@@ -44,10 +44,8 @@
 
 <style>
 	.signin {
-		--glow: light-dark(
-			color-mix(in srgb, var(--primary) 4%, transparent),
-			color-mix(in srgb, var(--primary) 3%, transparent)
-		);
+		--glow-mix: 4%;
+		--glow: color-mix(in srgb, var(--primary) var(--glow-mix), transparent);
 		position: relative;
 		overflow: hidden;
 		min-height: 100dvh;
@@ -61,6 +59,14 @@
 		background: var(--bg-deep);
 		color: var(--text);
 		font-family: 'Open Sans', system-ui, sans-serif;
+	}
+	:global(:root[data-theme='dark']) .signin {
+		--glow-mix: 3%;
+	}
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .signin {
+			--glow-mix: 3%;
+		}
 	}
 	.grid-bg {
 		position: absolute;

@@ -83,7 +83,7 @@ scripts/publish_release v<version>
 It builds the wheel and packs the tarball, tags `main`, pushes the tag,
 attaches both, `ui-style.css` and the token list, and prints the wheel's sha256
 and the tarball's sha512 integrity for pins. It refuses unless the tag equals
-the version in `pyproject.toml` and `package.json`, `pnpm` is installed, you are on a clean `main`
+the version in `pyproject.toml` and `package.json`, `pnpm` is installed and `pnpm install --frozen-lockfile` has run, you are on a clean `main`
 equal to `origin/main`, the tag is new and `gh` is logged in.
 
 Tests: `pnpm install --frozen-lockfile`, `pnpm run check`,
