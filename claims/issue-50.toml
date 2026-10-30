@@ -1,8 +1,0 @@
-claim_id = "11470731208846409c3a9a7f7d66c46e"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "f31f27ef222b08bca537768a8325d8f1db80b231"
-branch = "claude/issue-50-k7b-accountmenu-from-the-kit"
-scope = ["CHANGELOG.md", "README.md", "docs/stylesheet.md", "package.json", "pnpm-lock.yaml", "src/lib", "tests/e2e", "tests/test_npm_package.py"]
-opened_commit = "46477876aac937e457e016e559d6ae04f3ec5044"
-whole_reason = "One component contract: the menu, its types and export, LegalLinks' place it renders, the tests and paint check that prove them, and the docs of the release that carries them ship nothing usable apart."
