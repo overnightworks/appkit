@@ -1,4 +1,5 @@
 import json
+import shutil
 import subprocess
 import tarfile
 import tomllib
@@ -105,10 +106,14 @@ def test_shipped_components_use_neither_light_dark_nor_inline_style_which_a_link
         assert "style=" not in source, component.name
 
 
-def test_a_consumer_imports_legal_links_and_its_props_type_from_the_package_root(tarball):
-    (tarball / "node_modules").symlink_to(REPOSITORY / "node_modules")
-    (tarball / "consumer.ts").write_text(
-        "import { LegalLinks, type LegalLinksProps } from './svelte-dist/index.js';\n"
+def test_a_consumer_imports_legal_links_and_its_props_type_from_the_package_root(tarball, tmp_path):
+    name = json.loads((tarball / "package.json").read_text())["name"]
+    modules = tmp_path / "node_modules"
+    modules.mkdir()
+    shutil.copytree(tarball, modules / name)
+    (modules / "svelte").symlink_to(REPOSITORY / "node_modules/svelte")
+    (tmp_path / "consumer.ts").write_text(
+        f"import {{ LegalLinks, type LegalLinksProps }} from '{name}';\n"
         "const props: LegalLinksProps = { links: [{ label: 'Imprint', href: '/imprint' }] };\n"
         "export const component: typeof LegalLinks = LegalLinks;\n"
         "// @ts-expect-error links is required\n"
@@ -123,7 +128,7 @@ def test_a_consumer_imports_legal_links_and_its_props_type_from_the_package_root
             "--target", "es2022", "--allowImportingTsExtensions",
             "--verbatimModuleSyntax", "consumer.ts",
         ],
-        cwd=tarball,
+        cwd=tmp_path,
         capture_output=True,
         text=True,
     )
