@@ -100,7 +100,8 @@ The kit stores, fetches and closes nothing.
 
 The theme radios are controlled: `onChange` reports only a different pick, and the checked radio
 always equals `theme.choice`, so an app that does not take the choice sees the radio snap back.
-Without `theme`, the menu shows no Theme row and the app follows the device.
+Without `theme`, the menu shows no Theme row and writes nothing about the theme; the effective
+theme stays with the app.
 
 The app owns
 its routes, the sign-out mechanism, the wording of a sign-out failure, the legal
