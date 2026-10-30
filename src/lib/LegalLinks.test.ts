@@ -1,14 +1,17 @@
 import { mount, tick, unmount } from 'svelte';
 import { afterEach, describe, expect, it } from 'vitest';
 import LegalLinks from './LegalLinks.svelte';
-import type { LegalLink } from './types.ts';
+import type { LegalLink, LegalLinksPlace } from './types.ts';
 
 const mounted: { target: HTMLElement; component: ReturnType<typeof mount> }[] = [];
 
-async function render(links: readonly LegalLink[]): Promise<HTMLElement> {
+async function render(
+	links: readonly LegalLink[],
+	place?: LegalLinksPlace
+): Promise<HTMLElement> {
 	const target = document.createElement('div');
 	document.body.append(target);
-	mounted.push({ target, component: mount(LegalLinks, { target, props: { links } }) });
+	mounted.push({ target, component: mount(LegalLinks, { target, props: { links, place } }) });
 	await tick();
 	return target;
 }
@@ -44,5 +47,21 @@ describe('LegalLinks', () => {
 			{ label: 'Privacy', href: '/legal' }
 		]);
 		expect([...page.querySelectorAll('a')].map((anchor) => anchor.textContent)).toEqual(['Imprint', 'Privacy']);
+	});
+
+	it('is named Legal and opens links in the same tab on a page', async () => {
+		const page = await render([{ label: 'Imprint', href: '/imprint' }]);
+		expect(page.querySelector('nav')?.getAttribute('aria-label')).toBe('Legal');
+		const anchor = page.querySelector('a')!;
+		expect(anchor.hasAttribute('target')).toBe(false);
+		expect(anchor.hasAttribute('rel')).toBe(false);
+	});
+
+	it('is named Legal and opens links in a new tab in a menu', async () => {
+		const page = await render([{ label: 'Imprint', href: '/imprint' }], 'menu');
+		expect(page.querySelector('nav')?.getAttribute('aria-label')).toBe('Legal');
+		const anchor = page.querySelector('a')!;
+		expect(anchor.getAttribute('target')).toBe('_blank');
+		expect(anchor.getAttribute('rel')).toBe('noopener');
 	});
 });
