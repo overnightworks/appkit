@@ -252,6 +252,7 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 .pg { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .pg-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .pg-head h3 { margin: 0; font-family: 'Oswald', Impact, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: .06em; text-transform: uppercase; }
+.as-typed { text-transform: none; letter-spacing: normal; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; padding: 0 14px; border-radius: 4px; border: 1px solid transparent; font-size: 14px; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .btn.secondary { background: transparent; border-color: var(--border); color: var(--text); }
@@ -284,6 +285,7 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 
 /* ------------------------------------------------------------------ account menu */
 .acct { position: relative; min-height: 360px; background: var(--bg); }
+.acct.tall { min-height: 400px; }
 .menu { position: absolute; top: 54px; right: 10px; width: min(256px, calc(100% - 20px)); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 6px 24px rgba(0, 0, 0, .14); padding: 4px 0; font-size: 14px; }
 .mrow { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 14px; }
 .mrow svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; color: var(--text-muted); }
@@ -335,6 +337,7 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
 	<symbol id="i-out" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+	<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
 	<symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M12 3a9 9 0 0 1 0 18" fill="currentColor"/></symbol>
 	<symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
 	<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
@@ -564,11 +567,12 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 	<p class="note">The circle opens one menu, the same in every app: your name (opens the central account, ↗), the theme, “Log out”, and the quiet legal row. These follow the page theme above.</p>
 	<div class="grid3">
 		<figure class="board songmaker"><figcaption><b>songmaker</b></figcaption>
-			<div class="frame auto"><div class="acct">
+			<div class="frame auto"><div class="acct tall">
 				<div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av ring">F</span></div>
 				<div class="ghost-rows"><span style="width:60%"></span><span style="width:85%"></span><span style="width:40%"></span><span style="width:70%"></span></div>
 				<div class="menu">
-					<div class="mrow name"><span class="grow">Felix</span><svg><use href="#i-out"/></svg></div>
+					<div class="mrow name"><span class="grow as-typed">Felix</span><svg><use href="#i-out"/></svg></div>
+					<div class="mrow"><svg><use href="#i-gear"/></svg>Settings</div>
 					<div class="mrow"><svg><use href="#i-theme"/></svg>Theme</div>
 					<div class="mrow sub"><span class="radio on"></span>Follow system</div>
 					<div class="mrow sub"><span class="radio"></span>Light</div>
@@ -583,7 +587,7 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 				<div class="bar"><span class="wm" data-text="Presentator">Presentator</span><span class="spacer"></span><span class="av ring">F</span></div>
 				<div class="ghost-rows"><span style="width:60%"></span><span style="width:85%"></span><span style="width:40%"></span><span style="width:70%"></span></div>
 				<div class="menu">
-					<div class="mrow name"><span class="grow">Felix</span><svg><use href="#i-out"/></svg></div>
+					<div class="mrow name"><span class="grow as-typed">Felix</span><svg><use href="#i-out"/></svg></div>
 					<div class="mrow"><svg><use href="#i-theme"/></svg>Theme</div>
 					<div class="mrow sub"><span class="radio on"></span>Follow system</div>
 					<div class="mrow sub"><span class="radio"></span>Light</div>
@@ -598,7 +602,7 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 				<div class="bar"><span class="wm" data-text="HopIn">HopIn</span><span class="spacer"></span><span class="av ring">F</span></div>
 				<div class="ghost-rows"><span style="width:60%"></span><span style="width:85%"></span><span style="width:40%"></span><span style="width:70%"></span></div>
 				<div class="menu">
-					<div class="mrow name"><span class="grow">Felix</span><svg><use href="#i-out"/></svg></div>
+					<div class="mrow name"><span class="grow as-typed">Felix</span><svg><use href="#i-out"/></svg></div>
 					<div class="mrow"><svg><use href="#i-theme"/></svg>Theme</div>
 					<div class="mrow sub"><span class="radio on"></span>Follow system</div>
 					<div class="mrow sub"><span class="radio"></span>Light</div>
@@ -607,9 +611,21 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 					<div class="mlegal"><span>Impressum</span><span>Datenschutz</span><span>Nutzungsbedingungen</span></div>
 				</div>
 			</div></div>
+			<p class="note">hopin shows no theme rows and follows the device, until it stores a per-person choice.</p>
 		</figure>
 	</div>
-	<p class="note">Who the theme choice holds for (one app, all apps, one device) is not decided here. An app adds its own rows above Theme (songmaker: Settings).</p>
+	<p class="note">The theme choice belongs to one person in one app. An app that cannot store it per person shows no theme rows and follows the device. An app adds its own rows above Theme (songmaker: Settings). Decisions 5 and 6 below record who holds the choice and the no-store case.</p>
+	<p class="note">A name a person typed keeps its case, also in the uppercase headings; the words the app wrote stay uppercase. presentator's source “talks” and the menu's name show it.</p>
+	<div class="grid3">
+		<figure class="board presentator"><figcaption><b>presentator</b> page head</figcaption>
+			<div class="frame auto">
+				<div class="bar"><span class="wm" data-text="Presentator">Presentator</span><span class="spacer"></span><span class="av">F</span></div>
+				<div class="pg">
+					<div class="pg-head"><h3>Source <span class="as-typed">talks</span></h3><span class="btn primary">New</span></div>
+				</div>
+			</div>
+		</figure>
+	</div>
 </section>
 
 <!-- ============================================================ 5 themes -->
@@ -671,6 +687,9 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 		<li><b>With no choice every app follows the device.</b> <span class="rec">Decided (operator, 28.10.2026).</span> Section 5.</li>
 		<li><b>The faint sign-in grid takes the app's colour.</b> <span class="rec">Decided (operator, 28.10.2026).</span> Section 3.</li>
 		<li><b>songmaker's dark purple is #b45cf5 with #111111 ink.</b> <span class="rec">Decided (operator, 28.10.2026).</span> Section 2, the table.</li>
+		<li><b>The theme choice belongs to one person in one app.</b> <span class="rec">Decided (operator, 29.10.2026).</span> Section 4.</li>
+		<li><b>An app that cannot store the choice per person shows no theme rows</b> and follows the device. <span class="rec">Decided (operator, 30.10.2026).</span> Section 4, hopin.</li>
+		<li><b>A name a person typed keeps its case</b> in the uppercase headings. <span class="rec">Decided (operator, 30.10.2026).</span> Section 4.</li>
 	</ol>
 	<p class="src">Extended from: appkit's family tokens (v0.5.0) and its state grammar; songmaker's vocabulary (states, buttons, radii, colour meanings), its sign-in card and its account menu; presentator's lobby picture (sign-in states, person menu); hopin's colours. Every value is copied from these sources except the light busy colour and the state token names, which section 1 explains.</p>
 </section>
