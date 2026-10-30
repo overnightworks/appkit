@@ -20,6 +20,17 @@ Each theme sets `color-scheme`, so an app sets none. The app colour (`--primary`
 and everything domain-specific stay with the app. `ui-style.css` is frozen and
 keeps its own token names.
 
+It also owns one class, `as-typed`, which turns the case transform and the
+letter-spacing off. Text the app writes keeps the family's uppercase. Text a
+person typed (a name, slug or address) keeps its case, also in `h1`, `h2` and
+the page head's `h3`. An app marks such text with `as-typed` on the element that
+holds only the typed text: a `span` inside the heading, because a heading's own
+selector may outrank a single class on the heading itself.
+
+```html
+<h3>Source <span class="as-typed">talks</span></h3>
+```
+
 ## What `ui-style.css` owns
 
 - The token names and the picture's default values: surfaces (`--canvas`,
