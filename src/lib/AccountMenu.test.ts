@@ -53,7 +53,7 @@ describe('name row', () => {
 });
 
 describe('app rows', () => {
-	it('renders each row as a button in order above Theme, and ', async () => {
+	it('renders each row as a button in order above Theme', async () => {
 		const menu = await render({
 			appRows: [
 				{ label: 'Settings', icon: 'settings', onSelect: () => {} },
@@ -130,7 +130,12 @@ describe('theme rows', () => {
 			})
 		});
 		await tick();
-		expect(() => radios(target)[2].click()).not.toThrow();
+		const errors: unknown[] = [];
+		const record = (event: ErrorEvent) => errors.push(event.error);
+		window.addEventListener('error', record);
+		radios(target)[2].click();
+		window.removeEventListener('error', record);
+		expect(errors).toEqual([]);
 		target.remove();
 	});
 

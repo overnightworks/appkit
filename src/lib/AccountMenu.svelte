@@ -191,6 +191,7 @@
 		border-top: 1px solid var(--border);
 	}
 	.out .row {
+		/* 40px row height minus the wrapper's 4px padding and 1px border. */
 		min-height: 35px;
 	}
 	form {

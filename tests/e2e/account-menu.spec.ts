@@ -73,9 +73,14 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 						'border-top-style',
 						'solid'
 					);
-					expect(
-						(await page.getByRole('button', { name: 'Log out' }).locator('..').boundingBox())!.height
-					).toBe(40);
+					const logOutHeight = (await page
+						.getByRole('button', { name: 'Log out' })
+						.locator('..')
+						.boundingBox())!.height;
+					const settingsHeight = (await page
+						.getByRole('button', { name: 'Settings' })
+						.boundingBox())!.height;
+					expect(logOutHeight).toBe(settingsHeight);
 					const viewport = page.viewportSize()!;
 					for (const name of legalNames) {
 						const box = (await page.getByRole('link', { name }).boundingBox())!;
