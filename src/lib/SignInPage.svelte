@@ -1,4 +1,5 @@
 <script lang="ts">
+	import LegalLinks from './LegalLinks.svelte';
 	import type { SignInPageProps } from './types.ts';
 
 	let { appName, state, legalLinks }: SignInPageProps = $props();
@@ -33,13 +34,7 @@
 			<button class="action secondary" type="button" onclick={state.onLogOut}>Log out</button>
 		{/if}
 	</main>
-	{#if legalLinks.length > 0}
-		<nav class="legal">
-			{#each legalLinks as link (link.href)}
-				<a href={link.href}>{link.label}</a>
-			{/each}
-		</nav>
-	{/if}
+	<LegalLinks links={legalLinks} />
 </div>
 
 <style>
@@ -97,12 +92,9 @@
 		bottom: -60px;
 		left: -60px;
 	}
-	.card,
-	.legal {
+	.card {
 		position: relative;
 		z-index: 1;
-	}
-	.card {
 		width: 340px;
 		max-width: 100%;
 		box-sizing: border-box;
@@ -215,17 +207,5 @@
 	.action:focus-visible {
 		outline: 2px solid var(--accent);
 		outline-offset: 2px;
-	}
-	.legal {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: center;
-		gap: 4px 16px;
-		font-size: 12px;
-	}
-	.legal a {
-		color: var(--text-muted);
-		text-decoration: none;
-		border-bottom: 1px solid var(--border);
 	}
 </style>

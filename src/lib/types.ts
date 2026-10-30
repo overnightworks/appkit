@@ -8,6 +8,10 @@ export interface LegalLink {
 	href: string;
 }
 
+export interface LegalLinksProps {
+	links: readonly LegalLink[];
+}
+
 export interface SignInPageProps {
 	appName: string;
 	state: SignInState;
