@@ -103,3 +103,28 @@ def test_shipped_components_use_neither_light_dark_nor_inline_style_which_a_link
         source = component.read_text()
         assert "light-dark(" not in source, component.name
         assert "style=" not in source, component.name
+
+
+def test_a_consumer_imports_legal_links_and_its_props_type_from_the_package_root(tarball):
+    (tarball / "node_modules").symlink_to(REPOSITORY / "node_modules")
+    (tarball / "consumer.ts").write_text(
+        "import { LegalLinks, type LegalLinksProps } from './svelte-dist/index.js';\n"
+        "const props: LegalLinksProps = { links: [{ label: 'Imprint', href: '/imprint' }] };\n"
+        "export const component: typeof LegalLinks = LegalLinks;\n"
+        "// @ts-expect-error links is required\n"
+        "export const missing: LegalLinksProps = {};\n"
+        "export { props };\n"
+    )
+    result = subprocess.run(
+        [
+            str(REPOSITORY / "node_modules/.bin/tsc"),
+            "--noEmit", "--strict", "--skipLibCheck",
+            "--module", "esnext", "--moduleResolution", "bundler",
+            "--target", "es2022", "--allowImportingTsExtensions",
+            "--verbatimModuleSyntax", "consumer.ts",
+        ],
+        cwd=tarball,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stdout
