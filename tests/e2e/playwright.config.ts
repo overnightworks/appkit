@@ -5,5 +5,6 @@ export default defineConfig({
 	testMatch: '*.spec.ts',
 	workers: 1,
 	reporter: 'list',
-	timeout: 120_000
+	timeout: 120_000,
+	use: { screenshot: 'only-on-failure', trace: 'retain-on-failure' }
 });

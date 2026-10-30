@@ -28,7 +28,7 @@
     "prepack": "pnpm run package",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
-    "test:consumer": "playwright test --config tests/consumer/playwright.config.ts"
+    "test:consumer": "playwright test --config tests/e2e/playwright.config.ts"
   },
   "packageManager": "pnpm@10.32.1",
   "devDependencies": {

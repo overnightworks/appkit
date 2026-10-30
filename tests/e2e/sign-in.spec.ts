@@ -34,7 +34,8 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 				const card = page.getByRole('main');
 				await expect(card.getByRole('heading')).toBeVisible();
 
-				// The page's layers are the card's earlier siblings: grid, then two glows.
+				// No class names are read: the layers are the card's three earlier siblings (grid, then two
+				// glows), so a decorative layer added to or removed from SignInPage must update this count.
 				const layers = card.locator('xpath=preceding-sibling::*');
 				await expect(layers).toHaveCount(3);
 				const [grid, ...glows] = await layers.all();
