@@ -1,7 +1,0 @@
-claim_id = "c58e3ea53cb64e65a936bd5d8946f4b8"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "0de77214d4f725251f0cdf311c74d9cf106e4aaa"
-branch = "claude/issue-49-k7p-the-picture-draws-the-menu-s-setting"
-scope = ["docs/family.html"]
-opened_commit = "bffbeed864792ad8592a774801c77e394e2aed28"
