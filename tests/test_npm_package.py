@@ -14,6 +14,8 @@ COMPONENT_FILES = {
     "svelte-dist/index.d.ts",
     "svelte-dist/types.js",
     "svelte-dist/types.d.ts",
+    "svelte-dist/LegalLinks.svelte",
+    "svelte-dist/LegalLinks.svelte.d.ts",
     "svelte-dist/SignInPage.svelte",
     "svelte-dist/SignInPage.svelte.d.ts",
 }
@@ -94,5 +96,10 @@ def test_package_has_only_svelte_as_a_peer_and_no_install_scripts(tarball):
     assert not INSTALL_SCRIPTS & manifest.get("scripts", {}).keys()
 
 
-def test_shipped_component_styles_do_not_use_light_dark_which_a_minifier_rewrites_into_variables_a_linked_stylesheet_lacks(tarball):
-    assert "light-dark(" not in (tarball / "svelte-dist/SignInPage.svelte").read_text()
+def test_shipped_components_use_neither_light_dark_nor_inline_style_which_a_linked_stylesheet_cannot_serve(tarball):
+    components = sorted((tarball / "svelte-dist").glob("*.svelte"))
+    assert components
+    for component in components:
+        source = component.read_text()
+        assert "light-dark(" not in source, component.name
+        assert "style=" not in source, component.name
