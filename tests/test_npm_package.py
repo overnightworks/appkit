@@ -1,6 +1,11 @@
+import functools
+import http.server
 import json
+import re
+import shutil
 import subprocess
 import tarfile
+import threading
 import tomllib
 from pathlib import Path
 
@@ -94,5 +99,80 @@ def test_package_has_only_svelte_as_a_peer_and_no_install_scripts(tarball):
     assert not INSTALL_SCRIPTS & manifest.get("scripts", {}).keys()
 
 
-def test_shipped_component_styles_do_not_use_light_dark_which_a_minifier_rewrites_into_variables_a_linked_stylesheet_lacks(tarball):
-    assert "light-dark(" not in (tarball / "svelte-dist/SignInPage.svelte").read_text()
+GLOW_ALPHA_BY_THEME = {"light": 0.04, "dark": 0.03}
+CONSUMER_ENTRY = """\
+import {{ mount }} from 'svelte';
+import {{ SignInPage }} from 'overnightworks-appkit';
+{stylesheet_import}
+document.documentElement.dataset.theme = location.hash.slice(1);
+mount(SignInPage, {{
+  target: document.body,
+  props: {{ appName: 'App', state: {{ page: 'signed-out', signInHref: '/in' }}, legalLinks: [] }}
+}});
+setTimeout(() => {{
+  document.title = getComputedStyle(document.querySelector('.grid-bg')).backgroundImage;
+}}, 300);
+"""
+CONSUMER_PAGE = "<!doctype html><html><head>{stylesheet_link}<link rel=stylesheet href=/app.css></head><body><script type=module src=/main.js></script></body></html>"
+CONSUMER_COLOURS = ":root { --primary: #7c3aed; --accent: #f59e0b; }"
+CONSUMER_VITE_CONFIG = (
+    "import { svelte } from '@sveltejs/vite-plugin-svelte';\n"
+    "export default { plugins: [svelte()], build: { modulePreload: false } };\n"
+)
+
+
+def build_consumer(package, root, stylesheet_linked):
+    """A production-built app that uses the packed component, with appkit.css linked as a file or bundled by the build."""
+    modules = root / "node_modules"
+    (modules / "@sveltejs").mkdir(parents=True)
+    for name in ("svelte", "vite", "@sveltejs/vite-plugin-svelte"):
+        (modules / name).symlink_to((REPOSITORY / "node_modules" / name).resolve())
+    shutil.copytree(package, modules / "overnightworks-appkit")
+    (root / "public").mkdir()
+    (root / "public/app.css").write_text(CONSUMER_COLOURS)
+    stylesheet = package / STATIC / "appkit.css"
+    shutil.copytree(stylesheet.parent, root / "public/static")
+    (root / "index.html").write_text(
+        CONSUMER_PAGE.format(stylesheet_link="<link rel=stylesheet href=/static/appkit.css>" if stylesheet_linked else "")
+    )
+    (root / "main.js").write_text(
+        CONSUMER_ENTRY.format(stylesheet_import="" if stylesheet_linked else "import 'overnightworks-appkit/appkit.css';")
+    )
+    (root / "vite.config.mjs").write_text(CONSUMER_VITE_CONFIG)
+    subprocess.run(
+        ["node", str(modules / "vite/bin/vite.js"), "build"], cwd=root, check=True, capture_output=True
+    )
+    return root / "dist"
+
+
+class QuietHandler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, *_):
+        pass
+
+
+def rendered_grid_alpha(site, theme):
+    """The alpha of the grid lines the page paints in Chrome under a forced theme."""
+    handler = functools.partial(QuietHandler, directory=str(site))
+    with http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler) as server:
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        browser = shutil.which("google-chrome") or shutil.which("chromium")
+        assert browser, "headless Chrome is required"
+        dom = subprocess.run(
+            [browser, "--headless=new", "--no-sandbox", "--disable-gpu", "--virtual-time-budget=3000", "--dump-dom",
+             f"http://127.0.0.1:{server.server_port}/index.html#{theme}"],
+            check=True, capture_output=True, text=True, timeout=60,
+        ).stdout
+        server.shutdown()
+    painted = re.search(r"<title>([^<]*)</title>", dom).group(1)
+    alpha = re.search(r"linear-gradient\(.*? / ([\d.]+)\)", painted)
+    assert alpha, f"the grid is not painted: {painted!r}"
+    return float(alpha.group(1))
+
+
+@pytest.mark.parametrize("stylesheet_linked", [True, False], ids=["stylesheet-linked-as-file", "stylesheet-bundled-by-the-build"])
+@pytest.mark.parametrize("theme", GLOW_ALPHA_BY_THEME)
+def test_grid_of_the_production_built_page_is_painted_with_the_theme_mix_whether_the_stylesheet_is_linked_or_bundled(
+    tarball, tmp_path, stylesheet_linked, theme
+):
+    site = build_consumer(tarball, tmp_path, stylesheet_linked)
+    assert rendered_grid_alpha(site, theme) == pytest.approx(GLOW_ALPHA_BY_THEME[theme], abs=0.005)
