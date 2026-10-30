@@ -4,7 +4,8 @@
 
 Not breaking. `appkit.css` gains the class `as-typed`
 (overnightworks/appkit#48, slice of #25), and `SignInPage`'s no-access state
-logs out without a script (overnightworks/appkit#51).
+logs out without a script (overnightworks/appkit#51). The wordmark of
+`SignInPage` is named once for screen readers (overnightworks/appkit#55).
 
 - `as-typed` turns the case transform and the letter-spacing off, so text a
   person typed (a name, slug or address) keeps its case inside an uppercase
@@ -12,6 +13,9 @@ logs out without a script (overnightworks/appkit#51).
 - `SignInPage`'s no-access state takes the new type `LogOut`: it logs out through
   the app's callback (as before) or through a plain same-origin POST form to
   `logOutAction` that needs no script. v0.8.0 callers stay valid.
+- The two-colour wordmark of `SignInPage` gives its generated text empty
+  alternative text, so a screen reader reads the app name once, not three times.
+  The look does not change.
 
 ## v0.8.0
 
