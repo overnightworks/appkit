@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.9.0
+
+Not breaking. `appkit.css` gains the class `as-typed`
+(overnightworks/appkit#48, slice of #25).
+
+- `as-typed` turns the case transform and the letter-spacing off, so text a
+  person typed (a name, slug or address) keeps its case inside an uppercase
+  heading. Put it on a `span` that holds only the typed text.
+
 ## v0.8.0
 
 Not breaking. The tarball gains the Svelte component `SignInPage`

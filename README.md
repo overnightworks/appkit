@@ -17,7 +17,7 @@ the next patch tag. A release carries:
 
 - the wheel `overnightworks_appkit-<version>-py3-none-any.whl` (import
   `appkit`): `appkit/static/appkit.css`, the family tokens (light under `:root`,
-  dark under the device media query and `[data-theme='dark']`) and the `@font-face` rules; and
+  dark under the device media query and `[data-theme='dark']`), the `@font-face` rules and the class `as-typed`, which keeps the case of text a person typed; and
   `appkit/static/fonts/`, Oswald 400 and 700 and Open Sans 400 and 600, latin
   and latin-ext, woff2, with each family's OFL licence;
 - `overnightworks-appkit-<version>.tgz`, the npm form of the same stylesheet and
@@ -37,7 +37,7 @@ Every pull request passes the shared quality gate (`quality / verdict`, from
 Pin the wheel by URL with its hash (`scripts/publish_release` prints the sha256):
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v0.8.0/overnightworks_appkit-0.8.0-py3-none-any.whl#sha256=<sha256>
+https://github.com/overnightworks/appkit/releases/download/v0.9.0/overnightworks_appkit-0.9.0-py3-none-any.whl#sha256=<sha256>
 ```
 
 A SvelteKit app takes the tarball, pinned by URL; pnpm writes its `sha512-`
@@ -45,7 +45,7 @@ integrity into the lockfile, and `scripts/publish_release` prints the same value
 to compare:
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v0.8.0/overnightworks-appkit-0.8.0.tgz
+https://github.com/overnightworks/appkit/releases/download/v0.9.0/overnightworks-appkit-0.9.0.tgz
 ```
 
 ## SignInPage
@@ -72,7 +72,7 @@ A Python app (edge, songmaker's backend) takes the wheel; an app with a
 frontend takes the tarball.
 
 `ui-style.css` is still published at
-`https://github.com/overnightworks/appkit/releases/download/v0.8.0/ui-style.css`.
+`https://github.com/overnightworks/appkit/releases/download/v0.9.0/ui-style.css`.
 
 Writing markup against it: [stylesheet reference](docs/stylesheet.md).
 

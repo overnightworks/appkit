@@ -57,5 +57,16 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 				}
 			});
 		}
+
+		test('keeps the case of typed text in an uppercase heading', async ({ page }) => {
+			await routeTo(page, outDir);
+			await page.goto(`${origin}/?typed`);
+
+			const heading = page.getByRole('heading', { level: 1 });
+			const typed = heading.locator('.as-typed');
+			await expect(typed).toHaveCSS('text-transform', 'none');
+			expect(await typed.innerText()).toBe('talks');
+			expect(await heading.innerText()).toBe('SOURCE talks');
+		});
 	});
 }
