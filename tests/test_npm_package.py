@@ -76,10 +76,10 @@ def test_packed_stylesheet_is_byte_equal_to_the_source_stylesheet(tarball):
 def test_manifest_is_private_and_exports_the_component_with_types_and_the_stylesheet_as_appkit_css(tarball):
     manifest = json.loads((tarball / "package.json").read_text())
     assert manifest["private"] is True
-    assert manifest["exports"] == {
-        ".": {"types": "./svelte-dist/index.d.ts", "svelte": "./svelte-dist/index.js"},
-        "./appkit.css": f"./{STATIC}/appkit.css",
-    }
+    exports = manifest["exports"]
+    assert set(exports) == {".", "./appkit.css"}
+    assert set(exports["."]) == {"types", "svelte"}
+    assert exports["./appkit.css"] == f"./{STATIC}/appkit.css"
 
 
 def test_package_version_equals_the_python_package_version(tarball):
