@@ -4,3 +4,9 @@
 	--accent: #f08c00;
 	--on-accent: #1a1a1a;
 }
+
+/* The app uppercases its headings, as the family picture does. */
+h1 {
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}

@@ -159,3 +159,8 @@
 		color-scheme: dark;
 	}
 }
+
+.as-typed {
+	text-transform: none;
+	letter-spacing: normal;
+}
