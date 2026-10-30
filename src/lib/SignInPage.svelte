@@ -128,6 +128,7 @@
 	.wordmark::before,
 	.wordmark::after {
 		content: attr(data-text);
+		content: attr(data-text) / '';
 		position: absolute;
 		inset: 0;
 		pointer-events: none;

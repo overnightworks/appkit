@@ -58,6 +58,14 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			});
 		}
 
+		test('names the app once in the card for screen readers', async ({ page }) => {
+			await routeTo(page, outDir);
+			await page.goto(`${origin}/`);
+
+			const snapshot = await page.getByRole('main').ariaSnapshot();
+			expect(snapshot.match(/Probe/gi)).toHaveLength(1);
+		});
+
 		test('keeps the case of typed text in an uppercase heading', async ({ page }) => {
 			await routeTo(page, outDir);
 			await page.goto(`${origin}/?typed`);
