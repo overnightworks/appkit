@@ -285,6 +285,7 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 
 /* ------------------------------------------------------------------ account menu */
 .acct { position: relative; min-height: 360px; background: var(--bg); }
+.acct.tall { min-height: 400px; }
 .menu { position: absolute; top: 54px; right: 10px; width: min(256px, calc(100% - 20px)); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 6px 24px rgba(0, 0, 0, .14); padding: 4px 0; font-size: 14px; }
 .mrow { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 14px; }
 .mrow svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; color: var(--text-muted); }
@@ -425,7 +426,7 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 			</div>
 		</figure>
 		<figure class="board presentator"><figcaption><b>presentator</b> light</figcaption>
-			<div class="frame light">
+			<div class="frame auto">
 				<div class="bar"><span class="wm" data-text="Presentator">Presentator</span><span class="spacer"></span><span class="av">F</span></div>
 				<div class="pg">
 					<div class="tabs" style="border-bottom:1px solid var(--border);margin:0;min-height:36px"><span class="tab now">Library</span><span class="tab">Playlists</span></div>
@@ -566,7 +567,7 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 	<p class="note">The circle opens one menu, the same in every app: your name (opens the central account, ↗), the theme, “Log out”, and the quiet legal row. These follow the page theme above.</p>
 	<div class="grid3">
 		<figure class="board songmaker"><figcaption><b>songmaker</b></figcaption>
-			<div class="frame auto"><div class="acct" style="min-height:400px">
+			<div class="frame auto"><div class="acct tall">
 				<div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av ring">F</span></div>
 				<div class="ghost-rows"><span style="width:60%"></span><span style="width:85%"></span><span style="width:40%"></span><span style="width:70%"></span></div>
 				<div class="menu">
@@ -610,10 +611,10 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 					<div class="mlegal"><span>Impressum</span><span>Datenschutz</span><span>Nutzungsbedingungen</span></div>
 				</div>
 			</div></div>
-			<p class="note">hopin shows no theme rows until it stores a per-person choice.</p>
+			<p class="note">hopin shows no theme rows and follows the device, until it stores a per-person choice.</p>
 		</figure>
 	</div>
-	<p class="note">The theme choice belongs to one person in one app. An app that cannot store it per person shows no theme rows and follows the device. An app adds its own rows above Theme (songmaker: Settings).</p>
+	<p class="note">The theme choice belongs to one person in one app. An app that cannot store it per person shows no theme rows and follows the device. An app adds its own rows above Theme (songmaker: Settings). Decisions 5 and 6 below record who holds the choice and the no-store case.</p>
 	<p class="note">A name a person typed keeps its case, also in the uppercase headings; the words the app wrote stay uppercase. presentator's source “talks” and the menu's name show it.</p>
 	<div class="grid3">
 		<figure class="board presentator"><figcaption><b>presentator</b> page head</figcaption>
