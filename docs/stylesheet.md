@@ -49,6 +49,8 @@ Sign-in wording is identical in every app. Each catalog carries these strings ve
 - en: "Log in", "Log out", "You are logged out.", "No access", "Login failed", "Try again"
 - de: "Anmelden", "Abmelden", "Du bist abgemeldet.", "Kein Zugang", "Anmeldung fehlgeschlagen", "Erneut versuchen"
 
+The tarball's `SignInPage` component renders these en strings and two kit-owned sentences from the family picture: "Sign-in did not work. Please try again." (login failed) and "You are signed in, but this account has no access to <app name>." (no access). The de strings are not ruled for it.
+
 Each state has one way out: Signed out shows "Log in" and never redirects by itself; No access shows "Log out" (no "Back": the page is reached through the Keycloak redirect chain, so going back returns to Keycloak, which sends a live session straight back here); Login failed shows "Try again". `.actions` stacks at a viewport of 520px or less.
 
 Which refusal shows which page, and the redirect rule, are in webauth's [Signed out and refused](https://github.com/overnightworks/webauth/blob/main/docs/host-contract.md#signed-out-and-refused).
@@ -65,8 +67,8 @@ variant.
 - **Wording.** Catalogs carry every string; the stylesheet has none, and grammar.html's text is sample text. Only the sign-in wording list above is ruled here.
 - **Page layout.** App bar, deck page, Pico forms, and the
   column tracks `.row--src` / `.row--user` stay in the product.
-- **Components and JavaScript.** No Svelte, no Jinja macros, no htmx. Markup
-  is the product's.
+- **Components and JavaScript.** `ui-style.css` has no Svelte, no Jinja macros, no htmx;
+  markup is the product's. The one component is `SignInPage`, in the npm tarball.
 - **Fonts.** No `@font-face`, no Google Fonts, no IBM Plex. The type tokens
   default to system stacks. A product that wants Plex loads it and assigns
   `--sans` / `--cond` / `--mono`.
