@@ -17,10 +17,6 @@ reason = "vitest finds its configuration at the root"
 entry = "patches/"
 reason = "pnpm reads patchedDependencies from its default patches/ folder at the root"
 
-[[python.allow]]
-path = "pyproject.toml"
-reason = "the wheel is data-only and its consumers pin Python 3.12 (songmaker >=3.12,<3.13; edge >=3.12), so a 3.14 floor would make it uninstallable for both"
-
 [[layout.allow]]
 path = "src/appkit/static/fonts/open-sans-LICENSE"
 rule = "file-suffix"

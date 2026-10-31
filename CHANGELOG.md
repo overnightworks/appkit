@@ -2,10 +2,11 @@
 
 ## v0.11.0
 
-Breaking only in what a release attaches: releases no longer carry
-`ui-style.css`; no consumer loads it; v0.10.0 and earlier keep it.
-`grammar.html`, its fixture, leaves the repository too
-(overnightworks/appkit#30, slice of #25).
+Breaking only in what a release attaches and in the wheel's Python floor
+(`>=3.14`, from `>=3.11`): releases no longer carry `ui-style.css`; no consumer
+loads it; v0.10.0 and earlier keep it. `grammar.html`, its fixture, leaves the
+repository too (overnightworks/appkit#30, slice of #25). The wheel's one
+consumer, hal, is on Python 3.14 (overnightworks/appkit#61).
 
 ## v0.10.0
 
