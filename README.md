@@ -37,7 +37,7 @@ Every pull request passes the shared quality gate (`quality / verdict`, from
 Pin the wheel by URL with its hash (`scripts/publish_release` prints the sha256):
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v0.9.0/overnightworks_appkit-0.9.0-py3-none-any.whl#sha256=<sha256>
+https://github.com/overnightworks/appkit/releases/download/v0.10.0/overnightworks_appkit-0.10.0-py3-none-any.whl#sha256=<sha256>
 ```
 
 A SvelteKit app takes the tarball, pinned by URL; pnpm writes its `sha512-`
@@ -45,7 +45,7 @@ integrity into the lockfile, and `scripts/publish_release` prints the same value
 to compare:
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v0.9.0/overnightworks-appkit-0.9.0.tgz
+https://github.com/overnightworks/appkit/releases/download/v0.10.0/overnightworks-appkit-0.10.0.tgz
 ```
 
 ## SignInPage
@@ -62,7 +62,8 @@ again", with the failure banner as an alert). The sign-in link carries
 theme. The app passes `appName`, the state (`signInHref` for the two link
 states; a `LogOut` for `no-access`, below) and `legalLinks` (an empty list shows no legal row). The row is the exported
 `LegalLinks` component (`<LegalLinks links={[{ label, href }]} />`): a `<nav>` named "Legal" of
-same-tab links in the given order, one per entry, even when two share an href.
+same-tab links in the given order, one per entry, even when two share an href;
+`newTab` opens them in a new tab with the same look.
 `place="menu"` is the look and the new-tab links of a row inside `AccountMenu`.
 
 `no-access` logs out in one of two forms (the exported type `LogOut`, shared with other kit
@@ -112,7 +113,7 @@ A Python app (edge, songmaker's backend) takes the wheel; an app with a
 frontend takes the tarball.
 
 `ui-style.css` is still published at
-`https://github.com/overnightworks/appkit/releases/download/v0.9.0/ui-style.css`.
+`https://github.com/overnightworks/appkit/releases/download/v0.10.0/ui-style.css`.
 
 Writing markup against it: [stylesheet reference](docs/stylesheet.md).
 

@@ -142,6 +142,11 @@ def test_a_consumer_imports_legal_links_and_its_props_type_from_the_package_root
         "// @ts-expect-error links is required\n"
         "export const missing: LegalLinksProps = {};\n"
         "export { props };\n"
+        "export const menuPlace: LegalLinksProps = { links: [], place: 'menu' };\n"
+        "export const pageNewTab: LegalLinksProps = { links: [], place: 'page', newTab: true };\n"
+        "export const defaultPlaceNewTab: LegalLinksProps = { links: [], newTab: true };\n"
+        "// @ts-expect-error the menu place always opens a new tab\n"
+        "export const menuNewTab: LegalLinksProps = { links: [], place: 'menu', newTab: true };\n"
     )
     result = subprocess.run(
         [
