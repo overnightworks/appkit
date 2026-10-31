@@ -36,7 +36,7 @@ The tarball's `SignInPage` component renders these en strings and two kit-owned 
 
 The tarball's `AccountMenu` component renders the en words of the family picture's account menu: "Theme", "Follow system", "Light", "Dark" and "Log out", and `LegalLinks` names its `<nav>` "Legal" (an accessible name, not printed). The de strings are not ruled for it.
 
-Each state has one way out: Signed out shows "Log in" and never redirects by itself; No access shows "Log out" (no "Back": the page is reached through the Keycloak redirect chain, so going back returns to Keycloak, which sends a live session straight back here); Login failed shows "Try again". `.actions` stacks at a viewport of 520px or less.
+Each state has one way out: Signed out shows "Log in" and never redirects by itself; No access shows "Log out" (no "Back": the page is reached through the Keycloak redirect chain, so going back returns to Keycloak, which sends a live session straight back here); Login failed shows "Try again".
 
 Which refusal shows which page, and the redirect rule, are in webauth's [Signed out and refused](https://github.com/overnightworks/webauth/blob/main/docs/host-contract.md#signed-out-and-refused).
 
@@ -44,5 +44,5 @@ Which refusal shows which page, and the redirect rule, are in webauth's [Signed 
 
 - **Wording.** Catalogs carry every string; the stylesheet has none. Only the sign-in wording list above is ruled here.
 - **Page layout and markup.** App bar, page structure, forms and any markup outside the three components stay in the product.
-- **The app colour.** `--primary`, `--accent` and `--on-accent` stay with the app, which also loads `appkit.css`.
+- **The app colour.** `--primary`, `--accent` and `--on-accent`; `appkit.css` defines none of them.
 - **Meaning that differs.** State words (reachable vs ready vs active) and which state a domain shows.
