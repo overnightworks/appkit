@@ -1,8 +1,0 @@
-claim_id = "7699569b9bc24a8584c347e543b40af6"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "625d5b3c9daa3a2272ae25a9064c1f982a69fbdb"
-branch = "claude/issue-61-python-floor-3-14"
-scope = [".python-version", "CHANGELOG.md", "pyproject.toml", "quality/config.toml", "uv.lock"]
-opened_commit = "eaf1227723857601ca33217bf1f0ac5ec9a1899a"
-whole_reason = "One floor: the declared version, its lock, the exception it ends and the changelog line ship together."
