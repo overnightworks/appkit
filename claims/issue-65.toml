@@ -1,0 +1,7 @@
+claim_id = "c0d5eabd15ff47bb9a7bf103d8f684b3"
+agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
+role = "builder"
+base = "36c4ff0cafc1b86cbf8492d558c5b144706ad13a"
+branch = "claude/issue-65-builds-on-node-26"
+scope = [".github/workflows/ci.yml", "package.json"]
+opened_commit = "a6d5513772d78652380a1bb8ca3e25f87f91ec98"
