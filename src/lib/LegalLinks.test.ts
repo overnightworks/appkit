@@ -1,17 +1,17 @@
 import { mount, tick, unmount } from 'svelte';
 import { afterEach, describe, expect, it } from 'vitest';
 import LegalLinks from './LegalLinks.svelte';
-import type { LegalLink, LegalLinksPlace } from './types.ts';
+import type { LegalLink } from './types.ts';
 
 const mounted: { target: HTMLElement; component: ReturnType<typeof mount> }[] = [];
 
 async function render(
 	links: readonly LegalLink[],
-	place?: LegalLinksPlace
+	options: { place?: 'page'; newTab?: boolean } | { place: 'menu' } = {}
 ): Promise<HTMLElement> {
 	const target = document.createElement('div');
 	document.body.append(target);
-	mounted.push({ target, component: mount(LegalLinks, { target, props: { links, place } }) });
+	mounted.push({ target, component: mount(LegalLinks, { target, props: { links, ...options } }) });
 	await tick();
 	return target;
 }
@@ -58,10 +58,35 @@ describe('LegalLinks', () => {
 	});
 
 	it('is named Legal and opens links in a new tab in a menu', async () => {
-		const page = await render([{ label: 'Imprint', href: '/imprint' }], 'menu');
+		const page = await render([{ label: 'Imprint', href: '/imprint' }], { place: 'menu' });
 		expect(page.querySelector('nav')?.getAttribute('aria-label')).toBe('Legal');
 		const anchor = page.querySelector('a')!;
 		expect(anchor.getAttribute('target')).toBe('_blank');
 		expect(anchor.getAttribute('rel')).toBe('noopener');
+	});
+
+	it('opens every link of a page in a new tab with newTab and keeps the page look', async () => {
+		const page = await render(
+			[
+				{ label: 'Imprint', href: '/imprint' },
+				{ label: 'Privacy', href: '/privacy' }
+			],
+			{ newTab: true }
+		);
+		const anchors = [...page.querySelectorAll('a')];
+		expect(anchors).toHaveLength(2);
+		for (const anchor of anchors) {
+			expect(anchor.getAttribute('target')).toBe('_blank');
+			expect(anchor.getAttribute('rel')).toBe('noopener');
+		}
+		const menu = await render([{ label: 'Imprint', href: '/imprint' }], { place: 'menu' });
+		expect(page.querySelector('nav')?.className).not.toBe(menu.querySelector('nav')?.className);
+	});
+
+	it('opens links of a page in the same tab with newTab false', async () => {
+		const page = await render([{ label: 'Imprint', href: '/imprint' }], { newTab: false });
+		const anchor = page.querySelector('a')!;
+		expect(anchor.hasAttribute('target')).toBe(false);
+		expect(anchor.hasAttribute('rel')).toBe(false);
 	});
 });

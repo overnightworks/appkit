@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.10.0
+
+Not breaking. `LegalLinks` gains the option `newTab` (overnightworks/appkit#58,
+slice of #25): on the page place it opens every link in a new tab with
+`rel="noopener"`, with the look of the page. Without it, or with `false`, links
+open in the same tab as before; the menu place always opens a new tab, and
+`newTab` there is a type error. `LegalLinksProps` becomes a union of the two
+places; no current consumer extends it.
+
 ## v0.9.0
 
 Breaking only in the Svelte peer floor, `^5.20.0`, which `AccountMenu` needs for

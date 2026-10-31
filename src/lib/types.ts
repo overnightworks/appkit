@@ -15,10 +15,9 @@ export interface LegalLink {
 
 export type LegalLinksPlace = 'page' | 'menu';
 
-export interface LegalLinksProps {
-	links: readonly LegalLink[];
-	place?: LegalLinksPlace;
-}
+export type LegalLinksProps =
+	| { links: readonly LegalLink[]; place?: 'page'; newTab?: boolean }
+	| { links: readonly LegalLink[]; place: 'menu'; newTab?: never };
 
 /** The effective choice, never the resolved colour. */
 export type ThemeChoice = 'follow-system' | 'light' | 'dark';

@@ -1,6 +1,6 @@
 [project]
 name = "overnightworks-appkit"
-version = "0.9.0"
+version = "0.10.0"
 description = "Family design tokens and fonts shared by overnightworks products"
 readme = "README.md"
 license = "MIT"
