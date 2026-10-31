@@ -47,7 +47,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         with:
           node-version-file: package.json
-          # Without check-latest a range resolves from the runner's tool cache, which holds 24 and no 26.
+          # Without check-latest a range resolves from the runner's tool cache, which can lag the newest major.
           check-latest: true
       # The tarball test's pnpm pack runs prepack, which needs node_modules.
       - name: Install, type-check and test the Svelte component
