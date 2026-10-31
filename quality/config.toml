@@ -6,14 +6,6 @@ entry = "CHANGELOG.md"
 reason = "release history that consumers read at the repository root; no owner directory exists for it"
 
 [[root.allow]]
-entry = "grammar.html"
-reason = "frozen artefact that leaves with overnightworks/appkit#30"
-
-[[root.allow]]
-entry = "ui-style.css"
-reason = "frozen artefact that leaves with overnightworks/appkit#30"
-
-[[root.allow]]
 entry = "tsconfig.json"
 reason = "svelte-check and the editor find the TypeScript configuration at the root"
 

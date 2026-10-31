@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.11.0
+
+Breaking only in what a release attaches: releases no longer carry
+`ui-style.css`; no consumer loads it; v0.10.0 and earlier keep it.
+`grammar.html`, its fixture, leaves the repository too
+(overnightworks/appkit#30, slice of #25).
+
 ## v0.10.0
 
 Not breaking. `LegalLinks` gains the option `newTab` (overnightworks/appkit#58,
