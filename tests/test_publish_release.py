@@ -74,7 +74,6 @@ class Release:
         shutil.copy(REPOSITORY / "scripts/publish_release", self.clone / "scripts")
         shutil.copy(REPOSITORY / "scripts/list_tokens", self.clone / "scripts")
         shutil.copy(REPOSITORY / "src/appkit/static/appkit.css", self.clone / "src/appkit/static")
-        (self.clone / "ui-style.css").write_text("/* frozen */\n")
         self.write_versions(RELEASED_VERSION, RELEASED_VERSION)
         git(self.clone, "init", "-q", "-b", "main")
         git(self.clone, "remote", "add", "origin", str(self.origin))
@@ -117,16 +116,17 @@ def release(tmp_path):
     return Release(tmp_path)
 
 
-def test_a_good_release_pushes_the_tag_attaches_four_assets_and_prints_both_hashes(release):
+def test_a_good_release_pushes_the_tag_attaches_the_wheel_the_tarball_and_the_token_list_without_ui_style_and_prints_both_hashes(release):
     result = release.publish()
     assert result.returncode == 0, result.stderr
     assert release.origin_tags() == [TAG]
     (create,) = release.calls("gh release create")
     assert re.search(
         rf"overnightworks_appkit-9\.9\.9-py3-none-any\.whl .*overnightworks-appkit-9\.9\.9\.tgz "
-        rf"ui-style\.css .*appkit-9\.9\.9-tokens\.txt",
+        rf".*appkit-9\.9\.9-tokens\.txt",
         create,
     )
+    assert "ui-style.css" not in create
     assert re.search(r"^wheel sha256: [0-9a-f]{64}$", result.stdout, re.MULTILINE)
     assert re.search(r"^tarball integrity: sha512-[A-Za-z0-9+/]{86}==$", result.stdout, re.MULTILINE)
 
