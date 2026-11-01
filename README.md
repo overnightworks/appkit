@@ -105,8 +105,7 @@ its routes, the sign-out mechanism, the wording of a sign-out failure, the legal
 targets, the colour slot (`--primary`, `--accent`, `--on-accent`) and loading
 `appkit.css`. The component writes no `data-theme`.
 
-A Python app (edge, songmaker's backend) takes the wheel; an app with a
-frontend takes the tarball.
+A Python app takes the wheel; an app with a frontend takes the tarball.
 
 Writing markup against the kit: [stylesheet reference](docs/stylesheet.md).
 
