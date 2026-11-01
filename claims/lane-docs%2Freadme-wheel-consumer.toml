@@ -1,7 +1,0 @@
-claim_id = "60d4aa5f3b6547fca287fb7d07c7328f"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "156176dc4ecaaedefe9b62fe661e42ca11b1412d"
-branch = "docs/readme-wheel-consumer"
-scope = ["README.md"]
-opened_commit = "9a59ec49d48e7522ce3304b99618eed607572b00"
