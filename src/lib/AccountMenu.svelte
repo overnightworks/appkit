@@ -207,4 +207,9 @@
 		font-size: 13px;
 		overflow-wrap: anywhere;
 	}
+	@media (any-pointer: coarse) {
+		.row:not(.name) {
+			min-height: 44px;
+		}
+	}
 </style>
