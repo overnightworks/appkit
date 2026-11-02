@@ -116,7 +116,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 		test.describe('with a finger at 390 px', () => {
 			test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 800 } });
 
-			test('every row reaches its touch floor and every legal link its floor', async ({ page }) => {
+			test('every row reaches its touch floor and the name is taller than Settings', async ({ page }) => {
 				await open(page);
 				expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true);
 				const rows = await panelOf(page).locator('.row').all();
@@ -128,6 +128,11 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 				const settingsHeight = (await page.getByRole('button', { name: 'Settings' }).boundingBox())!
 					.height;
 				expect(nameHeight).toBeGreaterThan(settingsHeight);
+			});
+
+			test('every legal link reaches its floor', async ({ page }) => {
+				await open(page);
+				expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true);
 				await expectLegalLinksReachTheFloor(page);
 			});
 		});
