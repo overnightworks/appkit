@@ -15,6 +15,13 @@ const legalLinks = [
 	{ label: 'Privacy', href: '/privacy' }
 ];
 
+/** Long enough that the row wraps in the 256 px panel, as an app's real labels do. */
+const menuLegalLinks = [
+	{ label: 'Impressum', href: '/imprint' },
+	{ label: 'Datenschutz', href: '/privacy' },
+	{ label: 'Nutzungsbedingungen', href: '/terms' }
+];
+
 /** The app's side of the theme: it keeps the choice in memory and sets data-theme, as an app would. */
 function themeHolder(takesChoice: boolean) {
 	const held = new SvelteMap<string, ThemeChoice>([['choice', 'follow-system']]);
@@ -43,7 +50,7 @@ function mountMenu(variant: string): void {
 		accountHref: '/account',
 		onAccountOpen: report('account'),
 		appRows: [{ label: 'Settings', icon: 'settings', onSelect: report('settings') }] as const,
-		legalLinks: [...legalLinks, { label: 'Terms', href: '/terms' }]
+		legalLinks: menuLegalLinks
 	};
 	const logOut =
 		variant === 'action' ? { logOutAction: '/logout' } : { onLogOut: report('logout') };

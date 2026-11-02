@@ -3,12 +3,31 @@ import { buildConsumer, origin, routeTo, type ConsumerName } from './build-consu
 
 const colorSchemes = ['light', 'dark'] as const;
 const widths = [390, 1280] as const;
-const legalNames = ['Imprint', 'Privacy', 'Terms'];
+const legalNames = ['Impressum', 'Datenschutz', 'Nutzungsbedingungen'];
 const typedName = 'Felix mcDonald';
 const touchRowFloor = 44;
-const touchLegalLinkFloor = 24;
+const legalLinkFloor = 24;
 
 const panelOf = (page: Page) => page.getByRole('link', { name: typedName }).locator('..');
+
+/** The labels must wrap, or the floor below proves nothing about a wrapped row. */
+async function expectLegalRowOnTwoLines(page: Page): Promise<void> {
+	const tops = new Set<number>();
+	for (const name of legalNames) {
+		tops.add(Math.round((await page.getByRole('link', { name }).boundingBox())!.y));
+	}
+	expect(tops.size).toBe(2);
+}
+
+async function expectLegalLinksReachTheFloor(page: Page): Promise<void> {
+	await expectLegalRowOnTwoLines(page);
+	for (const name of legalNames) {
+		expect((await page.getByRole('link', { name }).boundingBox())!.height).toBeGreaterThanOrEqual(
+			legalLinkFloor
+		);
+	}
+}
+
 const reportsOf = (page: Page) => page.evaluate(() => window.reports);
 
 /** The requests the page itself makes, to compare with the assets it was routed. */
@@ -97,7 +116,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 		test.describe('with a finger at 390 px', () => {
 			test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 800 } });
 
-			test('every row and legal link reaches its touch floor', async ({ page }) => {
+			test('every row reaches its touch floor and every legal link its floor', async ({ page }) => {
 				await open(page);
 				expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true);
 				const rows = await panelOf(page).locator('.row').all();
@@ -109,27 +128,24 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 				const settingsHeight = (await page.getByRole('button', { name: 'Settings' }).boundingBox())!
 					.height;
 				expect(nameHeight).toBeGreaterThan(settingsHeight);
-				for (const name of legalNames) {
-					expect(
-						(await page.getByRole('link', { name }).boundingBox())!.height
-					).toBeGreaterThanOrEqual(touchLegalLinkFloor);
-				}
+				await expectLegalLinksReachTheFloor(page);
 			});
 		});
 
 		test.describe('with a mouse at 390 px', () => {
 			test.use({ hasTouch: false, viewport: { width: 390, height: 800 } });
 
-			test('a row and every legal link stay below the touch floors', async ({ page }) => {
+			test('a row stays below the touch floor', async ({ page }) => {
 				await open(page);
 				expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(false);
 				const radioRow = page.getByRole('radio', { name: 'Follow system' }).locator('..');
 				expect((await radioRow.boundingBox())!.height).toBeLessThan(touchRowFloor);
-				for (const name of legalNames) {
-					expect((await page.getByRole('link', { name }).boundingBox())!.height).toBeLessThan(
-						touchLegalLinkFloor
-					);
-				}
+			});
+
+			test('every legal link reaches its floor', async ({ page }) => {
+				await open(page);
+				expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(false);
+				await expectLegalLinksReachTheFloor(page);
 			});
 		});
 

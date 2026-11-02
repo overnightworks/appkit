@@ -41,13 +41,9 @@
 		font-size: 11.5px;
 	}
 	.legal.menu a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 24px;
 		border-bottom: none;
-	}
-	@media (any-pointer: coarse) {
-		.legal.menu a {
-			display: inline-flex;
-			align-items: center;
-			min-height: 24px;
-		}
 	}
 </style>
