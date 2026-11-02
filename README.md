@@ -88,13 +88,13 @@ no script, no token, no alert, so it works on a page prerendered with `csr = fal
 />
 ```
 
-The panel of the family picture ([`docs/family.html`](docs/family.html), section 4): the
-name as a link to the account in a new tab, the app's rows, an optional Theme row with three
-radios ("Follow system", "Light", "Dark"), "Log out" in either `LogOut` form (see
-`SignInPage`) and the legal row. The kit owns the panel and its rows, which are taller on a touch screen. The app owns the trigger,
-the popover with its focus handling and closing, where the menu sits, storing the theme and
-setting `data-theme`, how logging out works, and the labels, actions and visibility of its rows.
-The kit stores, fetches and closes nothing.
+The panel of the family picture ([`docs/family.html`](docs/family.html), section 4): the name as
+a link to the account in a new tab, the app's rows, an optional Theme row with three radios
+("Follow system", "Light", "Dark"), "Log out" in either `LogOut` form (see `SignInPage`) and the
+legal row. The kit owns the panel and its rows, which are taller on a touch screen. The app owns
+the trigger, the popover with its focus handling and closing, where the menu sits, storing the
+theme and setting `data-theme`, how logging out works, and the labels, actions and visibility of
+its rows. The kit stores, fetches and closes nothing.
 
 The theme radios are controlled: `onChange` reports only a different pick, and the checked radio
 always equals `theme.choice`, so an app that does not take the choice sees the radio snap back.

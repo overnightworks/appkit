@@ -300,6 +300,8 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 	.mrow:not(.name) { min-height: 44px; }
 	.mrow.out { min-height: 49px; }
 	.mlegal span { display: inline-flex; align-items: center; min-height: 24px; }
+	.acct { min-height: 425px; }
+	.acct.tall { min-height: 465px; }
 }
 .ghost-rows { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 .ghost-rows span { display: block; height: 12px; border-radius: 3px; background: var(--surface-hover); }
@@ -569,7 +571,7 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 		<h2>4 · Account menu</h2>
 		<span class="tag fam">Family</span>
 	</div>
-	<p class="note">The circle opens one menu, the same in every app: your name (opens the central account, ↗), the theme, “Log out”, and the quiet legal row. These follow the page theme above. On a touch screen every row except the name grows to 44px and each legal link to 24px; the heights drawn here are the mouse's.</p>
+	<p class="note">The circle opens one menu, the same in every app: your name (opens the central account, ↗), the theme, “Log out”, and the quiet legal row. These follow the page theme above. On a touch screen every row except the name grows to 44px and each legal link to 24px; the page draws the heights of the pointer it is viewed with, and with a mouse the rows stay 40 and 34px.</p>
 	<div class="grid3">
 		<figure class="board songmaker"><figcaption><b>songmaker</b></figcaption>
 			<div class="frame auto"><div class="acct tall">
