@@ -284,8 +284,8 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 .legal span { color: var(--text-muted); border-bottom: 1px solid var(--border); }
 
 /* ------------------------------------------------------------------ account menu */
-.acct { position: relative; min-height: 360px; background: var(--bg); }
-.acct.tall { min-height: 400px; }
+.acct { position: relative; min-height: 380px; background: var(--bg); }
+.acct.tall { min-height: 420px; }
 .menu { position: absolute; top: 54px; right: 10px; width: min(256px, calc(100% - 20px)); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 6px 24px rgba(0, 0, 0, .14); padding: 4px 0; font-size: 14px; }
 .mrow { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 14px; }
 .mrow svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; color: var(--text-muted); }
@@ -296,10 +296,10 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 .radio.on { border-color: var(--accent); background: radial-gradient(circle, var(--accent) 0 3.5px, transparent 4.5px); }
 .mrow.out { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 4px; }
 .mlegal { display: flex; flex-wrap: wrap; gap: 2px 12px; padding: 8px 14px 6px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-muted); }
+.mlegal span { display: inline-flex; align-items: center; min-height: 24px; }
 @media (any-pointer: coarse) {
 	.mrow:not(.name) { min-height: 44px; }
 	.mrow.out { min-height: 49px; }
-	.mlegal span { display: inline-flex; align-items: center; min-height: 24px; }
 	.acct { min-height: 425px; }
 	.acct.tall { min-height: 465px; }
 }
@@ -571,7 +571,7 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 		<h2>4 · Account menu</h2>
 		<span class="tag fam">Family</span>
 	</div>
-	<p class="note">The circle opens one menu, the same in every app: your name (opens the central account, ↗), the theme, “Log out”, and the quiet legal row. These follow the page theme above. On a touch screen every row except the name grows to 44px and each legal link to 24px; the page draws the heights of the pointer it is viewed with, and with a mouse the rows stay 40 and 34px.</p>
+	<p class="note">The circle opens one menu, the same in every app: your name (opens the central account, ↗), the theme, “Log out”, and the quiet legal row. These follow the page theme above. Each legal link is 24px tall on every pointer; on a touch screen every row except the name also grows to 44px. The page draws the heights of the pointer it is viewed with, and with a mouse the rows stay 40 and 34px.</p>
 	<div class="grid3">
 		<figure class="board songmaker"><figcaption><b>songmaker</b></figcaption>
 			<div class="frame auto"><div class="acct tall">

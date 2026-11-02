@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.12.1
+
+Not breaking, no prop changes (overnightworks/appkit#72). The account menu's
+legal links are at least 24px tall on every pointer, not only on a coarse one:
+with a mouse, real labels wrap in the 256px panel and the 15px lines sat 2px
+apart, which misses WCAG 2.2 2.5.8. The row grows by about 18px with a mouse.
+`LegalLinks` on the page does not change.
+
 ## v0.12.0
 
 Not breaking, no prop changes (overnightworks/appkit#70). On a device with a
