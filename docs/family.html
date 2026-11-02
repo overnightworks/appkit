@@ -320,9 +320,6 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 .mini .body .btn { min-height: 22px; font-size: 10px; padding: 0 8px; align-self: flex-start; }
 .dev { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
 .dev svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.today { width: 100%; border-collapse: collapse; font-size: 14px; }
-.today th, .today td { text-align: left; padding: 8px 10px; border-top: 1px solid var(--border); vertical-align: top; }
-.today th { font-family: 'Oswald', Impact, sans-serif; font-weight: 400; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); border-top: 0; }
 .scroll { overflow-x: auto; }
 
 /* ------------------------------------------------------------------ slot table */
@@ -640,22 +637,13 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 	<div class="group-head">
 		<h2>5 · Light, dark, and no choice</h2>
 	</div>
-	<p class="note">Light and dark live in one file. <b>With no choice, the page follows the device.</b> With a choice, the choice holds.</p>
+	<p class="note">Light and dark live in one file. <b>With no choice, the page follows the device.</b> Where presentator has an instance default, that comes first. With a choice, the choice holds.</p>
 	<div class="themes songmaker">
 		<div class="tcase">
 			<span class="label">No choice</span>
 			<div class="pair">
 				<div><span class="dev"><svg><use href="#i-sun"/></svg>Device light</span>
 					<div class="mini light"><div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av">F</span></div><div class="body"><span class="st ok"><i></i>ready</span><span class="btn primary">New</span></div></div></div>
-				<div><span class="dev"><svg><use href="#i-moon"/></svg>Device dark</span>
-					<div class="mini dark"><div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av">F</span></div><div class="body"><span class="st ok"><i></i>ready</span><span class="btn primary">New</span></div></div></div>
-			</div>
-		</div>
-		<div class="tcase">
-			<span class="label">No choice · always dark</span>
-			<div class="pair">
-				<div><span class="dev"><svg><use href="#i-sun"/></svg>Device light</span>
-					<div class="mini dark"><div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av">F</span></div><div class="body"><span class="st ok"><i></i>ready</span><span class="btn primary">New</span></div></div></div>
 				<div><span class="dev"><svg><use href="#i-moon"/></svg>Device dark</span>
 					<div class="mini dark"><div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av">F</span></div><div class="body"><span class="st ok"><i></i>ready</span><span class="btn primary">New</span></div></div></div>
 			</div>
@@ -669,18 +657,6 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 					<div class="mini dark"><div class="bar"><span class="wm" data-text="Hallucinai">Hallucinai</span><span class="spacer"></span><span class="av">F</span></div><div class="body"><span class="st ok"><i></i>ready</span><span class="btn primary">New</span></div></div></div>
 			</div>
 		</div>
-	</div>
-	<div class="scroll">
-		<table class="today">
-			<thead><tr><th>Today, with no choice</th><th>Shows</th></tr></thead>
-			<tbody>
-				<tr><td>songmaker, and the kit's tokens</td><td>dark, always</td></tr>
-				<tr><td>presentator</td><td>the instance default, else the device</td></tr>
-				<tr><td>hopin</td><td>the device</td></tr>
-				<tr><td>legal pages (central)</td><td>the device</td></tr>
-				<tr><td>central sign-in (Keycloak)</td><td>dark, always</td></tr>
-			</tbody>
-		</table>
 	</div>
 </section>
 
