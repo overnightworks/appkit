@@ -1,0 +1,8 @@
+claim_id = "27e62ad5910e445f96489401a72e27f9"
+agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
+role = "builder"
+base = "0a1cc535cdea7dccaf5006587ec71b1bded0ad53"
+branch = "claude/issue-72-menu-legal-links"
+scope = ["CHANGELOG.md", "README.md", "docs/family.html", "package.json", "pyproject.toml", "src/lib/LegalLinks.svelte", "tests/e2e/account-menu.spec.ts", "tests/e2e/main.ts", "uv.lock"]
+opened_commit = "57c2c257a096d16d1bcec75dbae65ea5ebb9607a"
+whole_reason = "One CSS rule, its picture, its proof and the version it ships in; apart they would release a menu the picture does not draw."
