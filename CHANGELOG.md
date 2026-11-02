@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.12.0
+
+Not breaking, no prop changes (overnightworks/appkit#70). On a device with a
+coarse pointer (`any-pointer: coarse`) the account menu's rows are at least
+44px tall, Log out measured on its button, and the menu's legal links at least
+24px; the name row keeps its 48px. A fine pointer keeps the sizes of
+`docs/family.html`.
+
 ## v0.11.0
 
 Breaking only in what a release attaches and in the wheel's Python floor

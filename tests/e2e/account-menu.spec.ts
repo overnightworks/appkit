@@ -5,6 +5,9 @@ const colorSchemes = ['light', 'dark'] as const;
 const widths = [390, 1280] as const;
 const legalNames = ['Imprint', 'Privacy', 'Terms'];
 const typedName = 'Felix mcDonald';
+const touchRowFloor = 44;
+const nameRowFloor = 48;
+const touchLegalLinkFloor = 24;
 
 const panelOf = (page: Page) => page.getByRole('link', { name: typedName }).locator('..');
 const reportsOf = (page: Page) => page.evaluate(() => window.reports);
@@ -91,6 +94,39 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 				});
 			}
 		}
+
+		test.describe('with a finger at 390 px', () => {
+			test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 800 } });
+
+			test('every row and legal link reaches its touch floor', async ({ page }) => {
+				await open(page);
+				expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true);
+				const rows = await panelOf(page).locator('.row').all();
+				expect(rows.length).toBeGreaterThan(0);
+				for (const row of rows) {
+					expect((await row.boundingBox())!.height).toBeGreaterThanOrEqual(touchRowFloor);
+				}
+				expect(
+					(await page.getByRole('link', { name: typedName }).boundingBox())!.height
+				).toBeGreaterThanOrEqual(nameRowFloor);
+				for (const name of legalNames) {
+					expect(
+						(await page.getByRole('link', { name }).boundingBox())!.height
+					).toBeGreaterThanOrEqual(touchLegalLinkFloor);
+				}
+			});
+		});
+
+		test.describe('with a mouse at 1280 px', () => {
+			test.use({ hasTouch: false, viewport: { width: 1280, height: 800 } });
+
+			test('a row stays below the touch floor', async ({ page }) => {
+				await open(page);
+				expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(false);
+				const radioRow = page.getByRole('radio', { name: 'Follow system' }).locator('..');
+				expect((await radioRow.boundingBox())!.height).toBeLessThan(touchRowFloor);
+			});
+		});
 
 		test('keeps the case of a mixed-case name', async ({ page }) => {
 			await open(page);

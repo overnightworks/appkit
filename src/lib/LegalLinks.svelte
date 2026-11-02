@@ -43,4 +43,11 @@
 	.legal.menu a {
 		border-bottom: none;
 	}
+	@media (any-pointer: coarse) {
+		.legal.menu a {
+			display: inline-flex;
+			align-items: center;
+			min-height: 24px;
+		}
+	}
 </style>
