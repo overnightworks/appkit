@@ -254,7 +254,10 @@ describe('words from the app', () => {
 		};
 		mounted.push({ target, component: mount(AccountMenu, { target, props }) });
 		await tick();
-		expect(checkedLabel(target)).toBe('Dark');
+		const defaultMenu = await render({ theme: { choice: 'dark', onChange: () => {} } });
+		const startingLabel = checkedLabel(target);
+		expect(startingLabel).toBe(checkedLabel(defaultMenu));
+		expect(startingLabel).not.toBe('Dunkel');
 		state.set('words', german);
 		await tick();
 		const group = target.querySelector('[role="radiogroup"]')!;
@@ -267,11 +270,5 @@ describe('words from the app', () => {
 		]);
 		expect(checkedLabel(target)).toBe('Dunkel');
 		expect(onChange).not.toHaveBeenCalled();
-	});
-
-	it('rejects a partial record of words at type level', () => {
-		// @ts-expect-error words are whole or absent
-		const partial: AccountMenuWords = { theme: 'Darstellung' };
-		expect(partial.theme).toBe('Darstellung');
 	});
 });

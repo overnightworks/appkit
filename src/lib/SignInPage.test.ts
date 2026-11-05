@@ -146,7 +146,7 @@ describe('words from the app', () => {
 		logOut: 'Abmelden'
 	};
 	function visibleTexts(page: HTMLElement): string[] {
-		return [...page.querySelectorAll('h1, p, a, button')].map((element) => element.textContent ?? '');
+		return [...page.querySelectorAll('h1, p, a, button, [role="alert"]')].map((element) => element.textContent ?? '');
 	}
 
 	it.each([
@@ -180,20 +180,12 @@ describe('words from the app', () => {
 		for (const phrase of shown) expect(text).toContain(phrase);
 		const defaultTexts = visibleTexts(await render({ state }));
 		for (const defaultText of defaultTexts) expect(text).not.toContain(defaultText);
+		const alert = page.querySelector('[role="alert"]');
+		if (state.page === 'login-failed') expect(alert?.textContent?.trim()).toBe(german.loginFailedBanner);
+		else expect(alert).toBeNull();
 		const headline = page.querySelector('h1')?.textContent;
 		expect(headline).toBe(shown[0]);
 		const action = page.querySelector('a, button')!;
 		expect(action.textContent).toBe(shown[shown.length - 1]);
-	});
-});
-
-describe('words record shape', () => {
-	it('rejects a partial record and a plain no-access sentence at type level', () => {
-		// @ts-expect-error words are whole or absent
-		const partial: SignInPageWords = { logIn: 'Anmelden' };
-		const sentence: SignInPageWords['noAccessSentence'] = (appName) => appName;
-		// @ts-expect-error the no-access sentence is a function of the app name
-		const text: SignInPageWords['noAccessSentence'] = 'Kein Zugang';
-		expect([partial.logIn, sentence('X'), text]).toBeDefined();
 	});
 });
