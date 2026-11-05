@@ -36,6 +36,27 @@ export interface AppRow {
 	onSelect: () => void;
 }
 
+/** The menu's own words, in the app's language. Whole or absent: an app cannot pass half a language. */
+export interface AccountMenuWords {
+	theme: string;
+	followSystem: string;
+	light: string;
+	dark: string;
+	logOut: string;
+}
+
+/** The sign-in page's own words, in the app's language. Whole or absent. */
+export interface SignInPageWords {
+	loggedOut: string;
+	logIn: string;
+	loginFailed: string;
+	loginFailedBanner: string;
+	tryAgain: string;
+	noAccess: string;
+	noAccessSentence: (appName: string) => string;
+	logOut: string;
+}
+
 export type AccountMenuProps = {
 	name: string;
 	accountHref: string;
@@ -46,10 +67,14 @@ export type AccountMenuProps = {
 	/** Absent renders no theme rows. */
 	theme?: ThemeRows;
 	legalLinks: readonly LegalLink[];
+	/** Absent renders today's English words. */
+	words?: AccountMenuWords;
 } & LogOut;
 
 export interface SignInPageProps {
 	appName: string;
 	state: SignInState;
 	legalLinks: readonly LegalLink[];
+	/** Absent renders today's English words. */
+	words?: SignInPageWords;
 }

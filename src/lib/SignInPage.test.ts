@@ -1,7 +1,7 @@
 import { mount, tick, unmount } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import SignInPage from './SignInPage.svelte';
-import type { SignInPageProps } from './types.ts';
+import type { SignInPageProps, SignInPageWords } from './types.ts';
 
 const mounted: { target: HTMLElement; component: ReturnType<typeof mount> }[] = [];
 
@@ -131,5 +131,64 @@ describe('state shape', () => {
 			state: { page: 'no-access', onLogOut: () => {}, signInHref: '/x' }
 		};
 		expect(props.state.page).toBe('no-access');
+	});
+});
+
+describe('words from the app', () => {
+	const german: SignInPageWords = {
+		loggedOut: 'Du bist abgemeldet.',
+		logIn: 'Anmelden',
+		loginFailed: 'Anmeldung fehlgeschlagen',
+		loginFailedBanner: 'Die Anmeldung hat nicht geklappt. Bitte versuche es erneut.',
+		tryAgain: 'Erneut versuchen',
+		noAccess: 'Kein Zugang',
+		noAccessSentence: (appName) => `Du bist angemeldet, aber dieses Konto hat keinen Zugang zu ${appName}.`,
+		logOut: 'Abmelden'
+	};
+	const englishPhrases = [
+		'logged out',
+		'Log in',
+		'Login failed',
+		'Sign-in did not work',
+		'Try again',
+		'No access',
+		'signed in',
+		'Log out'
+	];
+
+	it.each([
+		[
+			'signed-out',
+			{ page: 'signed-out', signInHref: '/auth/login' },
+			['Du bist abgemeldet.', 'Anmelden']
+		],
+		[
+			'login-failed',
+			{ page: 'login-failed', signInHref: '/auth/login' },
+			[
+				'Anmeldung fehlgeschlagen',
+				'Die Anmeldung hat nicht geklappt. Bitte versuche es erneut.',
+				'Erneut versuchen'
+			]
+		],
+		[
+			'no-access with a callback',
+			{ page: 'no-access', onLogOut: () => {} },
+			['Kein Zugang', 'Du bist angemeldet, aber dieses Konto hat keinen Zugang zu Hallucinai.', 'Abmelden']
+		],
+		[
+			'no-access with a form action',
+			{ page: 'no-access', logOutAction: '/logout' },
+			['Kein Zugang', 'Du bist angemeldet, aber dieses Konto hat keinen Zugang zu Hallucinai.', 'Abmelden']
+		]
+	] as const)('shows the given words and no default word in %s', async (_name, state, shown) => {
+		const page = await render({ words: german, state });
+		const text = page.textContent ?? '';
+		for (const phrase of shown) expect(text).toContain(phrase);
+		for (const phrase of englishPhrases) expect(text).not.toContain(phrase);
+		const headline = page.querySelector('h1')?.textContent;
+		expect(headline).toBe(shown[0]);
+		const action = page.querySelector('a, button')!;
+		expect(action.textContent).toBe(shown[shown.length - 1]);
 	});
 });

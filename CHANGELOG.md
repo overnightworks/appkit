@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.13.0
+
+Not breaking (overnightworks/appkit#80, slice of #25). `AccountMenu` and
+`SignInPage` gain an optional `words` prop, `AccountMenuWords` and
+`SignInPageWords` (both exported), so an app shows their words in its own
+language; the no-access sentence is a function of `appName`. Without `words`
+the en words are unchanged. `LegalLinks` keeps its accessible name "Legal".
+
 ## v0.12.1
 
 Not breaking, no prop changes (overnightworks/appkit#72). The account menu's
