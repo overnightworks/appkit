@@ -48,9 +48,9 @@ The legal links stand in the same three places in every app (operator ruling 05.
 - On the `SignInPage` states, in the row under the card.
 - On a page without the account menu (a public or session-less page), in `LegalLinks` with `place='page'`.
 
-Two kinds of page show no legal links: full-screen presentation views, and pages that send themselves on, such as webauth's end-session page.
+Two kinds of page show no legal links: full-screen presentation views (presenter and projector), and pages that send themselves on, such as webauth's end-session page.
 
-One app deviates by name: a running call in hopin shows no account menu, so its links stand in `LegalLinks` with `place='menu'` in the call's More menu.
+One app deviates by name (operator ruling 05.11.2026, hopin#494): a running call in hopin shows no account menu, so its links stand in `LegalLinks` with `place='menu'` in the call's More menu.
 
 ## What it leaves to each product
 
