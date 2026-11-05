@@ -78,8 +78,24 @@ an alert. With `logOutAction`, a URL, the button submits a plain same-origin POS
 no script, no token, no alert, so it works on a page prerendered with `csr = false`.
 
 ```svelte
-<SignInPage appName="Hallucinai" state={{ page: 'no-access', onLogOut, logOutFailure }} legalLinks={[]} />
-<SignInPage appName="Hallucinai" state={{ page: 'no-access', logOutAction: '/logout' }} legalLinks={[]} />
+<SignInPage
+	appName="Hallucinai"
+	state={{ page: 'no-access', onLogOut, logOutFailure }}
+	legalLinks={[
+		{ label: 'Impressum', href: 'https://hallucinai.de/impressum#songmaker' },
+		{ label: 'Datenschutz', href: 'https://hallucinai.de/datenschutz#songmaker' },
+		{ label: 'Nutzungsbedingungen', href: 'https://hallucinai.de/nutzungsbedingungen#songmaker' }
+	]}
+/>
+<SignInPage
+	appName="Hallucinai"
+	state={{ page: 'no-access', logOutAction: '/logout' }}
+	legalLinks={[
+		{ label: 'Impressum', href: 'https://hallucinai.de/impressum#songmaker' },
+		{ label: 'Datenschutz', href: 'https://hallucinai.de/datenschutz#songmaker' },
+		{ label: 'Nutzungsbedingungen', href: 'https://hallucinai.de/nutzungsbedingungen#songmaker' }
+	]}
+/>
 ```
 
 ## AccountMenu
