@@ -1,7 +1,15 @@
 <script lang="ts">
 	import { flushSync } from 'svelte';
 	import LegalLinks from './LegalLinks.svelte';
-	import type { AccountMenuProps, ThemeChoice } from './types.ts';
+	import type { AccountMenuProps, AccountMenuWords, ThemeChoice } from './types.ts';
+
+	const english: AccountMenuWords = {
+		theme: 'Theme',
+		followSystem: 'Follow system',
+		light: 'Light',
+		dark: 'Dark',
+		logOut: 'Log out'
+	};
 
 	let {
 		name,
@@ -12,15 +20,16 @@
 		legalLinks,
 		onLogOut,
 		logOutFailure,
-		logOutAction
+		logOutAction,
+		words = english
 	}: AccountMenuProps = $props();
 
 	const group = $props.id();
-	const choices: readonly { value: ThemeChoice; label: string }[] = [
-		{ value: 'follow-system', label: 'Follow system' },
-		{ value: 'light', label: 'Light' },
-		{ value: 'dark', label: 'Dark' }
-	];
+	const choices: readonly { value: ThemeChoice; label: string }[] = $derived([
+		{ value: 'follow-system', label: words.followSystem },
+		{ value: 'light', label: words.light },
+		{ value: 'dark', label: words.dark }
+	]);
 	let radios: HTMLInputElement[] = [];
 
 	// The radios are controlled: once the app's update settles, the checked one equals theme.choice.
@@ -40,7 +49,7 @@
 			><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5" /><path
 				d="M21 12H9"
 			/></svg
-		>Log out
+		>{words.logOut}
 	</button>
 {/snippet}
 
@@ -70,7 +79,7 @@
 					d="M12 3a9 9 0 0 1 0 18"
 					fill="currentColor"
 				/></svg
-			>Theme
+			>{words.theme}
 		</div>
 		<div role="radiogroup" aria-labelledby="{group}-theme">
 			{#each choices as choice, index (choice.value)}

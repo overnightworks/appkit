@@ -231,3 +231,42 @@ def test_a_consumer_gives_the_account_menu_one_log_out_form_and_a_typed_theme_ch
         text=True,
     )
     assert result.returncode == 0, result.stdout
+
+
+def test_a_consumer_imports_both_words_types_from_the_package_root_and_gives_each_whole(tarball, tmp_path):
+    name = json.loads((tarball / "package.json").read_text())["name"]
+    modules = tmp_path / "node_modules"
+    modules.mkdir()
+    shutil.copytree(tarball, modules / name)
+    (modules / "svelte").symlink_to(REPOSITORY / "node_modules/svelte")
+    (tmp_path / "consumer.ts").write_text(
+        f"import type {{ AccountMenuProps, AccountMenuWords, SignInPageProps, SignInPageWords }} from '{name}';\n"
+        "const menuWords: AccountMenuWords = { theme: 'T', followSystem: 'F', light: 'L', dark: 'D', logOut: 'O' };\n"
+        "const pageWords: SignInPageWords = {\n"
+        "  loggedOut: 'a', logIn: 'b', loginFailed: 'c', loginFailedBanner: 'd',\n"
+        "  tryAgain: 'e', noAccess: 'f', noAccessSentence: (appName: string) => appName, logOut: 'g',\n"
+        "};\n"
+        "export const menu: AccountMenuProps = {\n"
+        "  name: 'F', accountHref: '/a', onAccountOpen: () => {}, appRows: [], legalLinks: [],\n"
+        "  logOutAction: '/l', words: menuWords,\n"
+        "};\n"
+        "export const page: SignInPageProps = {\n"
+        "  appName: 'A', state: { page: 'signed-out', signInHref: '/in' }, legalLinks: [], words: pageWords,\n"
+        "};\n"
+        "type OptionalKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? K : never }[keyof T];\n"
+        "export const menuHasNoOptionalWord: [OptionalKeys<AccountMenuWords>] extends [never] ? true : false = true;\n"
+        "export const pageHasNoOptionalWord: [OptionalKeys<SignInPageWords>] extends [never] ? true : false = true;\n"
+        "// @ts-expect-error a record of menu words is whole\n"
+        "export const partialMenu: AccountMenuWords = { theme: 'T' };\n"
+        "// @ts-expect-error a record of page words is whole\n"
+        "export const partialPage: SignInPageWords = { logIn: 'b' };\n"
+        "// @ts-expect-error the no-access sentence is a function of the app name\n"
+        "export const textSentence: SignInPageWords = { ...pageWords, noAccessSentence: 'f' };\n"
+    )
+    result = subprocess.run(
+        [str(REPOSITORY / "node_modules/.bin/tsc"), *TSC_ARGUMENTS],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stdout

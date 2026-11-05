@@ -34,7 +34,7 @@ An app that serves the stylesheet from Python, without a JavaScript bundler,
 pins the wheel by URL with its hash (`scripts/publish_release` prints the sha256):
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v0.12.1/overnightworks_appkit-0.12.1-py3-none-any.whl#sha256=<sha256>
+https://github.com/overnightworks/appkit/releases/download/v0.13.0/overnightworks_appkit-0.13.0-py3-none-any.whl#sha256=<sha256>
 ```
 
 A SvelteKit app takes the tarball, pinned by URL. pnpm writes its `sha512-`
@@ -43,7 +43,7 @@ hit, and a frozen install enforces it; `scripts/publish_release` prints the
 value to compare or enter:
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v0.12.1/overnightworks-appkit-0.12.1.tgz
+https://github.com/overnightworks/appkit/releases/download/v0.13.0/overnightworks-appkit-0.13.0.tgz
 ```
 
 ## SignInPage
@@ -58,7 +58,7 @@ One component renders the three sign-in states of the family picture
 again", with the failure banner as an alert). The sign-in link carries
 `data-sveltekit-reload`, the page title is `appName`, and the glow follows the
 theme. The app passes `appName`, the state (`signInHref` for the two link
-states; a `LogOut` for `no-access`, below) and `legalLinks` (an empty list shows no legal row). The row is the exported
+states; a `LogOut` for `no-access`, below), `legalLinks` (an empty list shows no legal row) and optionally `words` (a `SignInPageWords`: every sign-in word, the no-access sentence as a function of `appName`; absent renders the en words). The row is the exported
 `LegalLinks` component (`<LegalLinks links={[{ label, href }]} />`): a `<nav>` named "Legal" of
 same-tab links in the given order, one per entry, even when two share an href;
 `newTab` opens them in a new tab with the same look.
@@ -95,7 +95,7 @@ a link to the account in a new tab, the app's rows, an optional Theme row with t
 legal row. The kit owns the panel and its rows, which are taller on a touch screen. The app owns
 the trigger, the popover with its focus handling and closing, where the menu sits, storing the
 theme and setting `data-theme`, how logging out works, and the labels, actions and visibility of
-its rows. The kit stores, fetches and closes nothing.
+its rows. The optional `words` prop (an `AccountMenuWords`: Theme, Follow system, Light, Dark, Log out) carries the menu's own words in the app's language; absent renders the en words. The kit stores, fetches and closes nothing.
 
 The theme radios are controlled: `onChange` reports only a different pick, and the checked radio
 always equals `theme.choice`, so an app that does not take the choice sees the radio snap back.

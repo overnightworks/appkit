@@ -2,7 +2,7 @@ import { mount, tick, unmount } from 'svelte';
 import { SvelteMap } from 'svelte/reactivity';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import AccountMenu from './AccountMenu.svelte';
-import type { AccountMenuProps, ThemeChoice } from './types.ts';
+import type { AccountMenuProps, AccountMenuWords, ThemeChoice } from './types.ts';
 
 const mounted: { target: HTMLElement; component: ReturnType<typeof mount> }[] = [];
 
@@ -199,5 +199,76 @@ describe('legal row', () => {
 	it('renders no legal row for an empty list', async () => {
 		const menu = await render({ legalLinks: [] });
 		expect(menu.querySelector('nav')).toBeNull();
+	});
+});
+
+describe('words from the app', () => {
+	const german: AccountMenuWords = {
+		theme: 'Darstellung',
+		followSystem: 'Wie das System',
+		light: 'Hell',
+		dark: 'Dunkel',
+		logOut: 'Abmelden'
+	};
+
+	function visibleWords(menu: HTMLElement): string[] {
+		const group = menu.querySelector('[role="radiogroup"]')!;
+		const groupLabel = document.getElementById(group.getAttribute('aria-labelledby')!);
+		return [
+			groupLabel?.textContent?.trim() ?? '',
+			...[...group.querySelectorAll('label')].map((row) => row.textContent?.trim() ?? ''),
+			menu.querySelector('.out button')?.textContent?.trim() ?? ''
+		];
+	}
+
+	it.each([
+		['a callback', { onLogOut: () => {} }],
+		['a form action', { logOutAction: '/logout' }]
+	] as const)('shows the given words and no default word with %s to log out', async (_form, logOut) => {
+		const menu = await render({ words: german, theme: { choice: 'dark', onChange: () => {} }, ...logOut });
+		const group = menu.querySelector('[role="radiogroup"]')!;
+		const label = document.getElementById(group.getAttribute('aria-labelledby')!);
+		expect(label?.textContent?.trim()).toBe('Darstellung');
+		expect([...group.querySelectorAll('label')].map((row) => row.textContent?.trim())).toEqual([
+			'Wie das System',
+			'Hell',
+			'Dunkel'
+		]);
+		expect(checkedLabel(menu)).toBe('Dunkel');
+		const logOutButton = menu.querySelector<HTMLButtonElement>('.out button')!;
+		expect(logOutButton.textContent?.trim()).toBe('Abmelden');
+		const defaultMenu = await render({ theme: { choice: 'dark', onChange: () => {} }, ...logOut });
+		for (const word of visibleWords(defaultMenu)) expect(menu.textContent).not.toContain(word);
+	});
+
+	it('shows words given after the mount instead of the ones it first showed', async () => {
+		const state = new SvelteMap<string, AccountMenuWords | undefined>([['words', undefined]]);
+		const onChange = vi.fn();
+		const target = document.createElement('div');
+		document.body.append(target);
+		const props = {
+			...baseProps({ theme: { choice: 'dark', onChange } }),
+			get words() {
+				return state.get('words');
+			}
+		};
+		mounted.push({ target, component: mount(AccountMenu, { target, props }) });
+		await tick();
+		const defaultMenu = await render({ theme: { choice: 'dark', onChange: () => {} } });
+		const startingLabel = checkedLabel(target);
+		expect(startingLabel).toBe(checkedLabel(defaultMenu));
+		expect(startingLabel).not.toBe('Dunkel');
+		state.set('words', german);
+		await tick();
+		const group = target.querySelector('[role="radiogroup"]')!;
+		const label = document.getElementById(group.getAttribute('aria-labelledby')!);
+		expect(label?.textContent?.trim()).toBe('Darstellung');
+		expect([...group.querySelectorAll('label')].map((row) => row.textContent?.trim())).toEqual([
+			'Wie das System',
+			'Hell',
+			'Dunkel'
+		]);
+		expect(checkedLabel(target)).toBe('Dunkel');
+		expect(onChange).not.toHaveBeenCalled();
 	});
 });

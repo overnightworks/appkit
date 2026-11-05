@@ -1,8 +1,19 @@
 <script lang="ts">
 	import LegalLinks from './LegalLinks.svelte';
-	import type { SignInPageProps } from './types.ts';
+	import type { SignInPageProps, SignInPageWords } from './types.ts';
 
-	let { appName, state, legalLinks }: SignInPageProps = $props();
+	const english: SignInPageWords = {
+		loggedOut: 'You are logged out.',
+		logIn: 'Log in',
+		loginFailed: 'Login failed',
+		loginFailedBanner: 'Sign-in did not work. Please try again.',
+		tryAgain: 'Try again',
+		noAccess: 'No access',
+		noAccessSentence: (appName) => `You are signed in, but this account has no access to ${appName}.`,
+		logOut: 'Log out'
+	};
+
+	let { appName, state, legalLinks, words = english }: SignInPageProps = $props();
 </script>
 
 <svelte:head>
@@ -16,27 +27,27 @@
 	<main class="card">
 		<span class="wordmark" data-text={appName}>{appName}</span>
 		{#if state.page === 'signed-out'}
-			<h1>You are logged out.</h1>
-			<a class="action primary" href={state.signInHref} data-sveltekit-reload>Log in</a>
+			<h1>{words.loggedOut}</h1>
+			<a class="action primary" href={state.signInHref} data-sveltekit-reload>{words.logIn}</a>
 		{:else if state.page === 'login-failed'}
-			<h1>Login failed</h1>
+			<h1>{words.loginFailed}</h1>
 			<div class="banner" role="alert">
 				<span class="fail-shape"><i></i></span>
-				<span>Sign-in did not work. Please try again.</span>
+				<span>{words.loginFailedBanner}</span>
 			</div>
-			<a class="action primary" href={state.signInHref} data-sveltekit-reload>Try again</a>
+			<a class="action primary" href={state.signInHref} data-sveltekit-reload>{words.tryAgain}</a>
 		{:else}
-			<h1>No access</h1>
-			<p>You are signed in, but this account has no access to {appName}.</p>
+			<h1>{words.noAccess}</h1>
+			<p>{words.noAccessSentence(appName)}</p>
 			{#if state.logOutAction !== undefined}
 				<form class="log-out" method="post" action={state.logOutAction}>
-					<button class="action secondary" type="submit">Log out</button>
+					<button class="action secondary" type="submit">{words.logOut}</button>
 				</form>
 			{:else}
 				{#if state.logOutFailure}
 					<p role="alert">{state.logOutFailure}</p>
 				{/if}
-				<button class="action secondary" type="button" onclick={state.onLogOut}>Log out</button>
+				<button class="action secondary" type="button" onclick={state.onLogOut}>{words.logOut}</button>
 			{/if}
 		{/if}
 	</main>

@@ -32,9 +32,9 @@ Sign-in wording is identical in every app. Each catalog carries these strings ve
 - en: "Log in", "Log out", "You are logged out.", "No access", "Login failed", "Try again", "Legal"
 - de: "Anmelden", "Abmelden", "Du bist abgemeldet.", "Kein Zugang", "Anmeldung fehlgeschlagen", "Erneut versuchen"
 
-The tarball's `SignInPage` component renders these en strings and two kit-owned sentences from the family picture: "Sign-in did not work. Please try again." (login failed) and "You are signed in, but this account has no access to <app name>." (no access). The de strings are not ruled for it.
+The tarball's `SignInPage` component takes its words from the app's catalog through the `words` prop; the kit holds no language and no de string. The list above binds the sign-in words in every catalog. Without `words` it renders the en strings and two sentences from the family picture: "Sign-in did not work. Please try again." (login failed) and "You are signed in, but this account has no access to <app name>." (no access). The de strings of those two sentences are not ruled.
 
-The tarball's `AccountMenu` component renders the en words of the family picture's account menu: "Theme", "Follow system", "Light", "Dark" and "Log out", and `LegalLinks` names its `<nav>` "Legal" (an accessible name, not printed). The de strings are not ruled for it.
+The tarball's `AccountMenu` component takes its words from the app's catalog through the `words` prop: "Theme", "Follow system", "Light", "Dark" and "Log out". Without `words` it renders those en words of the family picture's account menu. The de strings of the theme rows are not ruled. `LegalLinks` names its `<nav>` "Legal" (an accessible name, not printed) in every app.
 
 Each state has one way out: Signed out shows "Log in" and never redirects by itself; No access shows "Log out" (no "Back": the page is reached through the Keycloak redirect chain, so going back returns to Keycloak, which sends a live session straight back here); Login failed shows "Try again".
 
