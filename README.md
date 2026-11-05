@@ -34,7 +34,7 @@ An app that serves the stylesheet from Python, without a JavaScript bundler,
 pins the wheel by URL with its hash (`scripts/publish_release` prints the sha256):
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v0.12.1/overnightworks_appkit-0.12.1-py3-none-any.whl#sha256=<sha256>
+https://github.com/overnightworks/appkit/releases/download/v0.13.0/overnightworks_appkit-0.13.0-py3-none-any.whl#sha256=<sha256>
 ```
 
 A SvelteKit app takes the tarball, pinned by URL. pnpm writes its `sha512-`
@@ -43,7 +43,7 @@ hit, and a frozen install enforces it; `scripts/publish_release` prints the
 value to compare or enter:
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v0.12.1/overnightworks-appkit-0.12.1.tgz
+https://github.com/overnightworks/appkit/releases/download/v0.13.0/overnightworks-appkit-0.13.0.tgz
 ```
 
 ## SignInPage
