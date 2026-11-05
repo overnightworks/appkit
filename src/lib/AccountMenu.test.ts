@@ -210,7 +210,16 @@ describe('words from the app', () => {
 		dark: 'Dunkel',
 		logOut: 'Abmelden'
 	};
-	const englishWords = ['Theme', 'Follow system', 'Light', 'Dark', 'Log out'];
+
+	function visibleWords(menu: HTMLElement): string[] {
+		const group = menu.querySelector('[role="radiogroup"]')!;
+		const groupLabel = document.getElementById(group.getAttribute('aria-labelledby')!);
+		return [
+			groupLabel?.textContent?.trim() ?? '',
+			...[...group.querySelectorAll('label')].map((row) => row.textContent?.trim() ?? ''),
+			menu.querySelector('.out button')?.textContent?.trim() ?? ''
+		];
+	}
 
 	it.each([
 		['a callback', { onLogOut: () => {} }],
@@ -228,6 +237,41 @@ describe('words from the app', () => {
 		expect(checkedLabel(menu)).toBe('Dunkel');
 		const logOutButton = menu.querySelector<HTMLButtonElement>('.out button')!;
 		expect(logOutButton.textContent?.trim()).toBe('Abmelden');
-		for (const word of englishWords) expect(menu.textContent).not.toContain(word);
+		const defaultMenu = await render({ theme: { choice: 'dark', onChange: () => {} }, ...logOut });
+		for (const word of visibleWords(defaultMenu)) expect(menu.textContent).not.toContain(word);
+	});
+
+	it('shows words given after the mount instead of the ones it first showed', async () => {
+		const state = new SvelteMap<string, AccountMenuWords | undefined>([['words', undefined]]);
+		const onChange = vi.fn();
+		const target = document.createElement('div');
+		document.body.append(target);
+		const props = {
+			...baseProps({ theme: { choice: 'dark', onChange } }),
+			get words() {
+				return state.get('words');
+			}
+		};
+		mounted.push({ target, component: mount(AccountMenu, { target, props }) });
+		await tick();
+		expect(checkedLabel(target)).toBe('Dark');
+		state.set('words', german);
+		await tick();
+		const group = target.querySelector('[role="radiogroup"]')!;
+		const label = document.getElementById(group.getAttribute('aria-labelledby')!);
+		expect(label?.textContent?.trim()).toBe('Darstellung');
+		expect([...group.querySelectorAll('label')].map((row) => row.textContent?.trim())).toEqual([
+			'Wie das System',
+			'Hell',
+			'Dunkel'
+		]);
+		expect(checkedLabel(target)).toBe('Dunkel');
+		expect(onChange).not.toHaveBeenCalled();
+	});
+
+	it('rejects a partial record of words at type level', () => {
+		// @ts-expect-error words are whole or absent
+		const partial: AccountMenuWords = { theme: 'Darstellung' };
+		expect(partial.theme).toBe('Darstellung');
 	});
 });

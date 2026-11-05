@@ -67,7 +67,7 @@ export type AccountMenuProps = {
 	/** Absent renders no theme rows. */
 	theme?: ThemeRows;
 	legalLinks: readonly LegalLink[];
-	/** Absent renders today's English words. */
+	/** Absent renders the en words. */
 	words?: AccountMenuWords;
 } & LogOut;
 
@@ -75,6 +75,6 @@ export interface SignInPageProps {
 	appName: string;
 	state: SignInState;
 	legalLinks: readonly LegalLink[];
-	/** Absent renders today's English words. */
+	/** Absent renders the en words. */
 	words?: SignInPageWords;
 }
