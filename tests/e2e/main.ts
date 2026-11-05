@@ -1,7 +1,7 @@
 import './app.css';
 import { mount } from 'svelte';
 import { SvelteMap } from 'svelte/reactivity';
-import { AccountMenu, SignInPage, type ThemeChoice } from 'overnightworks-appkit';
+import { AccountMenu, LegalLinks, SignInPage, type ThemeChoice } from 'overnightworks-appkit';
 
 declare global {
 	interface Window {
@@ -61,6 +61,15 @@ function mountMenu(variant: string): void {
 if (location.search === '?typed') {
 	// A person typed the name; the app wrote the words around it.
 	document.body.innerHTML = '<main><h1>Source <span class="as-typed">talks</span></h1></main>';
+} else if (location.search === '?legal') {
+	// The markup contract of a page that cannot render Svelte, beside the component's own row.
+	document.body.innerHTML = `<div id="written"><nav class="legal" aria-label="Legal">${legalLinks
+		.map((link) => `<a href="${link.href}">${link.label}</a>`)
+		.join('')}</nav></div><div id="component"></div>`;
+	mount(LegalLinks, {
+		target: document.getElementById('component')!,
+		props: { links: legalLinks }
+	});
 } else if (location.search.startsWith('?menu')) {
 	mountMenu(new URLSearchParams(location.search).get('menu') ?? '');
 } else {

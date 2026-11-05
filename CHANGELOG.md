@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.14.0
+
+Minor: a new global class (overnightworks/appkit#83). `appkit.css` carries the
+legal row's look as the class `legal` (with `legal menu` for the account menu's
+row), so a page that cannot render Svelte writes `<nav class="legal"
+aria-label="Legal">` with one `<a href>` per link and gets the same row as
+`LegalLinks`, whose look no longer lives in the component. `legal` is a global,
+generic class name: a product that already has its own should check at cutover.
+The one page known to have its own `.legal` is presentator's frozen mockup
+`docs/mockups/m0-lobby.html`, which only gains `position: relative; z-index: 1`,
+with nothing visible changed.
+
 ## v0.13.0
 
 Not breaking (overnightworks/appkit#80, slice of #25). `AccountMenu` and
