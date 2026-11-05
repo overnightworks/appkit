@@ -1,7 +1,0 @@
-claim_id = "e2a12ce5f7b84df9a3245c7427107ce4"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "0a859eb16b5ee5477fcdc45049e3b5b076378fd8"
-branch = "claude/issue-82-legal-links-rule"
-scope = ["docs/stylesheet.md"]
-opened_commit = "e4860e2368fae09c2bdd7913e981a2ae5b4f2179"
