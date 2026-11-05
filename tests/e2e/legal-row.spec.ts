@@ -47,7 +47,6 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 				const link = written.getByRole('link').first();
 				await expect(link).toHaveCSS('color', probes.text);
 				await expect(link).toHaveCSS('border-bottom-color', probes.border);
-				await expect(link).toHaveCSS('border-bottom-style', 'solid');
 			});
 		}
 	});

@@ -12,6 +12,11 @@ The one page known to have its own `.legal` is presentator's frozen mockup
 `docs/mockups/m0-lobby.html`, which only gains `position: relative; z-index: 1`,
 with nothing visible changed.
 
+Upgrade step: the global rules sit one class lower in specificity than the
+component's did. An app rule that reaches the row through an ancestor (a
+descendant selector on `nav` or `a`) now wins wherever its specificity ties or
+beats `.legal a`, so narrow it to the app's own elements.
+
 ## v0.13.0
 
 Not breaking (overnightworks/appkit#80, slice of #25). `AccountMenu` and

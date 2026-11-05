@@ -4,7 +4,7 @@ This package carries the family look that overnightworks products share: the
 family tokens, the fonts and two classes: `as-typed`, which keeps the case of text a
 person typed, and `legal`, the look of the legal row. It refuses product-specific page layout and JavaScript, with one
 exception: the tarball carries the Svelte components `SignInPage`, `AccountMenu`
-and `LegalLinks`. A product renders everything else with its own markup.
+and `LegalLinks`. A product renders everything else with its own markup, except the documented legal-row markup on a page that cannot render Svelte.
 
 `appkit.css` and every shared part follow the family picture
 [`docs/family.html`](docs/family.html).
@@ -62,7 +62,7 @@ states; a `LogOut` for `no-access`, below), `legalLinks` (an empty list shows no
 `LegalLinks` component (`<LegalLinks links={[{ label, href }]} />`): a `<nav>` named "Legal" of
 same-tab links in the given order, one per entry, even when two share an href;
 `newTab` opens them in a new tab with the same look.
-The look comes from `appkit.css`, not from the component. `place="menu"` is the look and the new-tab links of a row inside a menu: the account menu's, and hopin's call More menu.
+The look comes from `appkit.css`, not from the component. `place="menu"` is the look and the new-tab links of a row inside a menu (see "Where the legal links stand" in `docs/stylesheet.md`).
 
 `no-access` logs out in one of two forms (the exported type `LogOut`, shared with other kit
 components). With a callback, the button calls it and an optional `logOutFailure` text shows as
