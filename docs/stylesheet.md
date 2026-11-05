@@ -40,6 +40,18 @@ Each state has one way out: Signed out shows "Log in" and never redirects by its
 
 Which refusal shows which page, and the redirect rule, are in webauth's [Signed out and refused](https://github.com/overnightworks/webauth/blob/main/docs/host-contract.md#signed-out-and-refused).
 
+## Where the legal links stand
+
+The legal links stand in the same three places in every app (operator ruling 05.11.2026, appkit#82), and no app writes its own legal-row markup:
+
+- On every signed-in page, in the legal row of `AccountMenu`. A signed-in page carries no footer of legal links.
+- On the `SignInPage` states, in the row under the card.
+- On a page without the account menu (a public or session-less page), in `LegalLinks` with `place='page'`.
+
+Two kinds of page show no legal links: full-screen presentation views (presenter and projector), and pages that send themselves on, such as webauth's end-session page.
+
+One app deviates by name (operator ruling 05.11.2026, hopin#494): a running call in hopin shows no account menu, so its links stand in `LegalLinks` with `place='menu'` in the call's More menu.
+
 ## What it leaves to each product
 
 - **Wording.** Catalogs carry every string; the stylesheet has none. Only the sign-in wording list above is ruled here.
