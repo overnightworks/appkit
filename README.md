@@ -49,7 +49,15 @@ https://github.com/overnightworks/appkit/releases/download/v0.14.0/overnightwork
 ## SignInPage
 
 ```svelte
-<SignInPage appName="Hallucinai" state={{ page: 'signed-out', signInHref }} legalLinks={[{ label: 'Impressum', href: '/impressum' }]} />
+<SignInPage
+	appName="Hallucinai"
+	state={{ page: 'signed-out', signInHref }}
+	legalLinks={[
+		{ label: 'Impressum', href: 'https://hallucinai.de/impressum#songmaker' },
+		{ label: 'Datenschutz', href: 'https://hallucinai.de/datenschutz#songmaker' },
+		{ label: 'Nutzungsbedingungen', href: 'https://hallucinai.de/nutzungsbedingungen#songmaker' }
+	]}
+/>
 ```
 
 One component renders the three sign-in states of the family picture
@@ -70,8 +78,24 @@ an alert. With `logOutAction`, a URL, the button submits a plain same-origin POS
 no script, no token, no alert, so it works on a page prerendered with `csr = false`.
 
 ```svelte
-<SignInPage appName="Hallucinai" state={{ page: 'no-access', onLogOut, logOutFailure }} legalLinks={[]} />
-<SignInPage appName="Hallucinai" state={{ page: 'no-access', logOutAction: '/logout' }} legalLinks={[]} />
+<SignInPage
+	appName="Hallucinai"
+	state={{ page: 'no-access', onLogOut, logOutFailure }}
+	legalLinks={[
+		{ label: 'Impressum', href: 'https://hallucinai.de/impressum#songmaker' },
+		{ label: 'Datenschutz', href: 'https://hallucinai.de/datenschutz#songmaker' },
+		{ label: 'Nutzungsbedingungen', href: 'https://hallucinai.de/nutzungsbedingungen#songmaker' }
+	]}
+/>
+<SignInPage
+	appName="Hallucinai"
+	state={{ page: 'no-access', logOutAction: '/logout' }}
+	legalLinks={[
+		{ label: 'Impressum', href: 'https://hallucinai.de/impressum#songmaker' },
+		{ label: 'Datenschutz', href: 'https://hallucinai.de/datenschutz#songmaker' },
+		{ label: 'Nutzungsbedingungen', href: 'https://hallucinai.de/nutzungsbedingungen#songmaker' }
+	]}
+/>
 ```
 
 ## AccountMenu
@@ -83,7 +107,11 @@ no script, no token, no alert, so it works on a page prerendered with `csr = fal
 	onAccountOpen={() => popover.close(false)}
 	appRows={[{ label: 'Settings', icon: 'settings', onSelect: openSettings }]}
 	theme={{ choice, onChange: setChoice }}
-	legalLinks={[{ label: 'Impressum', href: '/impressum' }]}
+	legalLinks={[
+		{ label: 'Impressum', href: 'https://hallucinai.de/impressum#songmaker' },
+		{ label: 'Datenschutz', href: 'https://hallucinai.de/datenschutz#songmaker' },
+		{ label: 'Nutzungsbedingungen', href: 'https://hallucinai.de/nutzungsbedingungen#songmaker' }
+	]}
 	{onLogOut}
 	{logOutFailure}
 />
