@@ -5,7 +5,9 @@
    and their -soft partners) is shared; the app colour (--primary, --accent,
    --on-accent) and everything domain-specific stay with the app; the
    sign-in grid value is computed by the SignInPage component. Only the latin
-   and latin-ext subsets, woff2 only. */
+   and latin-ext subsets, woff2 only. The classes as-typed and legal are the
+   only rules outside the tokens and fonts; legal is the legal row of
+   LegalLinks and of a page that cannot render Svelte. */
 
 @font-face {
 	font-family: 'Oswald';
@@ -163,4 +165,32 @@
 .as-typed {
 	text-transform: none;
 	letter-spacing: normal;
+}
+
+.legal {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 4px 16px;
+	font-size: 12px;
+}
+.legal a {
+	color: var(--text-muted);
+	text-decoration: none;
+	border-bottom: 1px solid var(--border);
+}
+.legal.menu {
+	justify-content: flex-start;
+	gap: 2px 12px;
+	padding: 8px 14px 6px;
+	border-top: 1px solid var(--border);
+	font-size: 11.5px;
+}
+.legal.menu a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 24px;
+	border-bottom: none;
 }

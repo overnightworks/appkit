@@ -17,33 +17,3 @@
 		{/each}
 	</nav>
 {/if}
-
-<style>
-	.legal {
-		position: relative;
-		z-index: 1;
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: center;
-		gap: 4px 16px;
-		font-size: 12px;
-	}
-	.legal a {
-		color: var(--text-muted);
-		text-decoration: none;
-		border-bottom: 1px solid var(--border);
-	}
-	.legal.menu {
-		justify-content: flex-start;
-		gap: 2px 12px;
-		padding: 8px 14px 6px;
-		border-top: 1px solid var(--border);
-		font-size: 11.5px;
-	}
-	.legal.menu a {
-		display: inline-flex;
-		align-items: center;
-		min-height: 24px;
-		border-bottom: none;
-	}
-</style>

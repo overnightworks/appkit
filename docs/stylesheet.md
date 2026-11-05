@@ -16,12 +16,12 @@ no choice the page follows the device and either attribute forces its theme.
 Each theme sets `color-scheme`, so an app sets none. The app colour (`--primary`, `--accent`, `--on-accent`)
 and everything domain-specific stay with the app.
 
-It also owns one class, `as-typed`, which turns the case transform and the
+It also owns two classes. The first, `as-typed`, turns the case transform and the
 letter-spacing off. Text the app writes keeps the family's uppercase. Text a
 person typed (a name, slug or address) keeps its case, also in `h1`, `h2` and
 the page head's `h3`. An app marks such text with `as-typed` on the element that
 holds only the typed text: a `span` inside the heading, because a heading's own
-selector may outrank a single class on the heading itself.
+selector may outrank a single class on the heading itself. The second, `legal`, is the look of the legal row, described under "Where the legal links stand".
 
 ```html
 <h3>Source <span class="as-typed">talks</span></h3>
@@ -50,11 +50,17 @@ The legal links stand in the same three places in every app (operator ruling 05.
 
 Two kinds of page show no legal links: full-screen presentation views (presenter and projector), and pages that send themselves on, such as webauth's end-session page.
 
+A page that cannot render Svelte (Keycloak's login pages, for one) writes the same row by hand: `<nav class="legal" aria-label="Legal">` holding one `<a href>` per link in the app's order, with no separator characters. The accessible name is the literal "Legal". The row then gets its look from `appkit.css`, as the component's does; the menu form (`legal menu`) is the kit's own and is not offered. The page keeps the row's spacing and placement relative to its neighbours.
+
+```html
+<nav class="legal" aria-label="Legal"><a href="/imprint">Imprint</a><a href="/privacy">Privacy</a></nav>
+```
+
 One app deviates by name (operator ruling 05.11.2026, hopin#494): a running call in hopin shows no account menu, so its links stand in `LegalLinks` with `place='menu'` in the call's More menu.
 
 ## What it leaves to each product
 
 - **Wording.** Catalogs carry every string; the stylesheet has none. Only the sign-in wording list above is ruled here.
-- **Page layout and markup.** App bar, page structure, forms and any markup outside the three components stay in the product.
+- **Page layout and markup.** App bar, page structure, forms and any markup outside the three components stay in the product, as do the legal row's spacing and placement around it. A product keeps its own selectors off the legal row: a rule that reaches the row or its links through an ancestor (`.top nav a`, say) can change the kit's look.
 - **The app colour.** `--primary`, `--accent` and `--on-accent`; `appkit.css` defines none of them.
 - **Meaning that differs.** State words (reachable vs ready vs active) and which state a domain shows.

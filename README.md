@@ -1,10 +1,10 @@
 # appkit
 
 This package carries the family look that overnightworks products share: the
-family tokens, the fonts and the class `as-typed`, which keeps the case of text a
-person typed. It refuses product-specific page layout and JavaScript, with one
+family tokens, the fonts and two classes: `as-typed`, which keeps the case of text a
+person typed, and `legal`, the look of the legal row. It refuses product-specific page layout and JavaScript, with one
 exception: the tarball carries the Svelte components `SignInPage`, `AccountMenu`
-and `LegalLinks`. A product renders everything else with its own markup.
+and `LegalLinks`. A product renders everything else with its own markup, except the documented legal-row markup on a page that cannot render Svelte.
 
 `appkit.css` and every shared part follow the family picture
 [`docs/family.html`](docs/family.html).
@@ -14,7 +14,7 @@ the next patch tag. A release carries:
 
 - the wheel `overnightworks_appkit-<version>-py3-none-any.whl` (import
   `appkit`): `appkit/static/appkit.css`, the family tokens (light under `:root`,
-  dark under the device media query and `[data-theme='dark']`), the `@font-face` rules and the class `as-typed`, which keeps the case of text a person typed; and
+  dark under the device media query and `[data-theme='dark']`), the `@font-face` rules and the classes `as-typed`, which keeps the case of text a person typed, and `legal`, the look of the legal row; and
   `appkit/static/fonts/`, Oswald 400 and 700 and Open Sans 400 and 600, latin
   and latin-ext, woff2, with each family's OFL licence;
 - `overnightworks-appkit-<version>.tgz`, the npm form of the same stylesheet and
@@ -34,7 +34,7 @@ An app that serves the stylesheet from Python, without a JavaScript bundler,
 pins the wheel by URL with its hash (`scripts/publish_release` prints the sha256):
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v0.13.0/overnightworks_appkit-0.13.0-py3-none-any.whl#sha256=<sha256>
+https://github.com/overnightworks/appkit/releases/download/v0.14.0/overnightworks_appkit-0.14.0-py3-none-any.whl#sha256=<sha256>
 ```
 
 A SvelteKit app takes the tarball, pinned by URL. pnpm writes its `sha512-`
@@ -43,7 +43,7 @@ hit, and a frozen install enforces it; `scripts/publish_release` prints the
 value to compare or enter:
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v0.13.0/overnightworks-appkit-0.13.0.tgz
+https://github.com/overnightworks/appkit/releases/download/v0.14.0/overnightworks-appkit-0.14.0.tgz
 ```
 
 ## SignInPage
@@ -62,7 +62,7 @@ states; a `LogOut` for `no-access`, below), `legalLinks` (an empty list shows no
 `LegalLinks` component (`<LegalLinks links={[{ label, href }]} />`): a `<nav>` named "Legal" of
 same-tab links in the given order, one per entry, even when two share an href;
 `newTab` opens them in a new tab with the same look.
-`place="menu"` is the look and the new-tab links of a row inside `AccountMenu`.
+The look comes from `appkit.css`, not from the component. `place="menu"` is the look and the new-tab links of a row inside a menu (see "Where the legal links stand" in `docs/stylesheet.md`).
 
 `no-access` logs out in one of two forms (the exported type `LogOut`, shared with other kit
 components). With a callback, the button calls it and an optional `logOutFailure` text shows as
