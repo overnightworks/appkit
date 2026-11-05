@@ -14,8 +14,9 @@ with nothing visible changed.
 
 Upgrade step: the global rules sit one class lower in specificity than the
 component's did. An app rule that reaches the row through an ancestor (a
-descendant selector on `nav` or `a`) now wins wherever its specificity ties or
-beats `.legal a`, so narrow it to the app's own elements.
+descendant selector on `nav` or `a`) now wins where its specificity beats
+`.legal a`, or ties it and loads after `appkit.css`, so narrow it to the app's
+own elements.
 
 ## v0.13.0
 
