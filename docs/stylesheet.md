@@ -48,12 +48,14 @@ The legal links stand in the same three places in every app (operator ruling 05.
 - On the `SignInPage` states, in the row under the card.
 - On a page without the account menu (a public or session-less page), in `LegalLinks` with `place='page'`.
 
+Every legal row lists Impressum, Datenschutz and Nutzungsbedingungen, in that order (operator ruling 05.11.2026, appkit#86). Each link points to the app's own section on the central legal pages; a shared page with no app section, such as the central sign-in, links the pages without a section.
+
 Two kinds of page show no legal links: full-screen presentation views (presenter and projector), and pages that send themselves on, such as webauth's end-session page.
 
 A page that cannot render Svelte (Keycloak's login pages, for one) writes the same row by hand: `<nav class="legal" aria-label="Legal">` holding one `<a href>` per link in the app's order, with no separator characters. The accessible name is the literal "Legal". The row then gets its look from `appkit.css`, as the component's does; the menu form (`legal menu`) is the kit's own and is not offered. The page keeps the row's spacing and placement relative to its neighbours.
 
 ```html
-<nav class="legal" aria-label="Legal"><a href="/imprint">Imprint</a><a href="/privacy">Privacy</a></nav>
+<nav class="legal" aria-label="Legal"><a href="/imprint">Imprint</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
 ```
 
 One app deviates by name (operator ruling 05.11.2026, hopin#494): a running call in hopin shows no account menu, so its links stand in `LegalLinks` with `place='menu'` in the call's More menu.
