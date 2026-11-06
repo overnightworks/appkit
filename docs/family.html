@@ -102,10 +102,11 @@
 		U+A720-A7FF;
 }
 /* ------------------------------------------------------------------
-   Family values: appkit.css's family and state tokens. App values: the
-   slot, filled per app below.
+   Family values: appkit.css's family and state tokens, and the sign-in
+   grid's strength from SignInPage. App values: the slot, filled per app below.
    ------------------------------------------------------------------ */
-/* Family values (light, dark): appkit.css's family and state tokens. .light
+/* Family values (light, dark): appkit.css's family and state tokens, and the sign-in
+   grid's strength from SignInPage (--glow-mix). .light
    and .dark force a frame; .auto follows the page, which follows the device
    unless the switch above says otherwise. */
 :root, .light {
@@ -166,7 +167,7 @@
 	--accent: var(--app-d); --on-accent: var(--on-app-d); --primary: var(--primary-d);
 	}
 }
-/* --glow-primary, the faint sign-in grid: the app's colour. */
+/* The faint sign-in grid (SignInPage's --glow): the app's colour at --glow-mix. */
 .signin { --glow: color-mix(in srgb, var(--primary) var(--glow-mix), transparent); }
 
 /* ------------------------------------------------------------------ sheet */
@@ -524,7 +525,7 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 		<h2>3 · Sign-in page</h2>
 		<span class="tag fam">Family</span>
 	</div>
-	<p class="note">The three states, the same structure and the same words in every app; only the colours are the app's. These follow the page theme above. The faint grid is <code style="white-space:nowrap">--glow-primary</code>, drawn here in the app's colour; at 3 to 4&nbsp;% it is barely visible either way.</p>
+	<p class="note">The three states, the same structure and the same words in every app; only the colours are the app's. These follow the page theme above. The faint grid is <code style="white-space:nowrap">--glow</code>, the app's colour at <code style="white-space:nowrap">--glow-mix</code>; at 3 to 4&nbsp;% it is barely visible either way.</p>
 	<div class="grid3">
 		<figure class="board songmaker glow-app"><figcaption><b>Signed out</b> songmaker</figcaption>
 			<div class="frame auto"><div class="signin"><div class="grid-bg"></div><div class="gl gl1"></div><div class="gl gl2"></div>
@@ -672,7 +673,7 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 		<li><b>An app that cannot store the choice per person shows no theme rows</b> and follows the device. <span class="rec">Decided (operator, 30.10.2026).</span> Section 4, hopin.</li>
 		<li><b>A name a person typed keeps its case</b> in the uppercase headings. <span class="rec">Decided (operator, 30.10.2026).</span> Section 4.</li>
 	</ol>
-	<p class="src">Extended from: appkit's family tokens and its state grammar; songmaker's vocabulary (states, buttons, radii, colour meanings), its sign-in card and its account menu; presentator's lobby picture (sign-in states, person menu); hopin's colours. Every family value is appkit.css's own.</p>
+	<p class="src">Extended from: appkit's family tokens and its state grammar; songmaker's vocabulary (states, buttons, radii, colour meanings), its sign-in card and its account menu; presentator's lobby picture (sign-in states, person menu); hopin's colours. Every family value is appkit's own: appkit.css's tokens and SignInPage's grid strength.</p>
 </section>
 
 </main>
