@@ -1,0 +1,7 @@
+claim_id = "a3e5063861674c99a49372c585806e5f"
+agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
+role = "builder"
+base = "b4f4d5d78b323d638172f27b8896209181fe13d2"
+branch = "claude/issue-102-codeql-scans-appkit-s-code-and-dependabo"
+scope = [".github/dependabot.yml", ".github/workflows/code-scanning.yml"]
+opened_commit = "7bb509f2001ea678ca4a397a4a1c9990d2381bef"
