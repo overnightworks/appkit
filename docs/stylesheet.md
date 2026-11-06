@@ -60,7 +60,10 @@ An app's page that cannot render Svelte writes the same row by hand: `<nav class
 
 A shared page, such as Keycloak's login pages, writes the same row with the addresses the central legal pages give it.
 
-One app deviates by name (operator ruling 05.11.2026, hopin#494): a running call in hopin shows no account menu, so its links stand in `LegalLinks` with `place='menu'` in the call's More menu.
+hopin and hal deviate by name:
+
+- hopin (operator ruling 05.11.2026, hopin#494): a running call shows no account menu, so its links stand in `LegalLinks` with `place='menu'` in the call's More menu.
+- hal (hal#1024, lines 1 and 2): its account console shows no legal links, and its central sign-in pages show the row inside the card, in Keycloak's card-footer slot. hal's [docs/keycloak.md](https://github.com/overnightworks/hal/blob/main/docs/keycloak.md#theme-and-language) gives the reasons.
 
 ## What it leaves to each product
 
