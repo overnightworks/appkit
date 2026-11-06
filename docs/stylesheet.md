@@ -5,8 +5,6 @@ markup against the kit.
 
 ## What `appkit.css` owns
 
-The sign-in wording sentences in this section are ruled; the rest describes the stylesheet.
-
 The wheel's `appkit.css` owns the family tokens and the
 `@font-face` rules for Oswald and Open Sans. The token names are the release's
 `appkit-<version>-tokens.txt`, which `scripts/list_tokens` prints for any stylesheet.
@@ -27,12 +25,18 @@ selector may outrank a single class on the heading itself. The second, `legal`, 
 <h3>Source <span class="as-typed">talks</span></h3>
 ```
 
+## Sign-in wording
+
+The sentences in this section are ruled.
+
 Sign-in wording is identical in every app. Each catalog carries these strings verbatim; no button names Keycloak:
 
 - en: "Log in", "Log out", "You are logged out.", "No access", "Login failed", "Try again", "Legal"
 - de: "Anmelden", "Abmelden", "Du bist abgemeldet.", "Kein Zugang", "Anmeldung fehlgeschlagen", "Erneut versuchen"
 
-The tarball's `SignInPage` component takes its words from the app's catalog (the `words` prop, see the [README](../README.md#signinpage)); the kit holds no language and no de string. The list above binds the sign-in words in every catalog. Without `words` it renders the en strings, which include two sentences: "Sign-in did not work. Please try again." (login failed) and "You are signed in, but this account has no access to <app name>." (no access). The de strings of those two sentences are not ruled.
+## The components' words
+
+The tarball's `SignInPage` component takes its words from the app's catalog (the `words` prop, see the [README](../README.md#signinpage)); the kit holds no language and no de string. The list above binds the sign-in words in every catalog. Without `words` it renders its en defaults: the strings above and two sentences, "Sign-in did not work. Please try again." (login failed) and "You are signed in, but this account has no access to <app name>." (no access). The de strings of those two sentences are not ruled.
 
 The tarball's `AccountMenu` component takes its words from the app's catalog (see the [README](../README.md#accountmenu)): "Theme", "Follow system", "Light", "Dark" and "Log out". Without `words` it renders those en words as its defaults. The de strings of the theme rows are not ruled.
 
@@ -50,9 +54,18 @@ The legal links stand in the same three places in every app, and no app writes i
 - On the `SignInPage` states, in the row under the card.
 - On a page without the account menu (a public or session-less page), in `LegalLinks` with `place='page'`.
 
-Every legal row lists Impressum, Datenschutz and Nutzungsbedingungen, in that order. Each link carries the app's section anchor `#<app>`, as in `https://hallucinai.de/impressum#songmaker`. A page that belongs to no single app, such as the central sign-in, links the address the central legal pages give it.
+Every legal row lists Impressum, Datenschutz and Nutzungsbedingungen, in that order. Each link carries the app's section anchor `#<app>`, as in `https://hallucinai.de/impressum#songmaker`.
 
 Two kinds of page show no legal links: full-screen presentation views (presenter and projector), and pages that send themselves on, such as webauth's end-session page.
+
+hopin and hal deviate by name:
+
+- hopin: a running call shows no account menu, so its links stand in `LegalLinks` with `place='menu'` in the call's More menu.
+- hal: its account console shows no legal links, and its central sign-in pages show the row inside the card, in Keycloak's card-footer slot.
+
+## Writing the legal row by hand
+
+A page that belongs to no single app, such as the central sign-in, links the address the central legal pages give it.
 
 An app's page that cannot render Svelte writes the same row by hand: `<nav class="legal" aria-label="Legal">` holding one `<a href>` per link in that order, with no separator characters. The accessible name, not printed, is the literal "Legal" in every app, as in `LegalLinks`'s `<nav>`. The row then gets its look from `appkit.css`, as the component's does; the menu form (`legal menu`) is the kit's own and is not offered. The page keeps the row's spacing and placement relative to its neighbours.
 
@@ -64,10 +77,7 @@ A shared page, such as Keycloak's login pages, writes the same row with the addr
 
 `LegalLinks` takes `place`: `'page'` (the default) for a row on a page, `'menu'` for the look of a row inside a menu, whose links open in a new tab.
 
-hopin and hal deviate by name:
-
-- hopin: a running call shows no account menu, so its links stand in `LegalLinks` with `place='menu'` in the call's More menu.
-- hal: its account console shows no legal links, and its central sign-in pages show the row inside the card, in Keycloak's card-footer slot. hal's [docs/keycloak.md](https://github.com/overnightworks/hal/blob/main/docs/keycloak.md#theme-and-language) gives the reasons.
+hal's [docs/keycloak.md](https://github.com/overnightworks/hal/blob/main/docs/keycloak.md#theme-and-language) gives the reasons.
 
 ## What it leaves to each product
 
