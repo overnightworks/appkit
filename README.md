@@ -73,7 +73,7 @@ words are in the [stylesheet reference](docs/stylesheet.md#what-appkitcss-owns).
 `data-sveltekit-reload`, the page title is `appName`, and the glow follows the
 theme. The app passes `appName`, the state (`signInHref` for the two link
 states; a `LogOut` for `no-access`, below), `legalLinks` (an empty list shows no legal row) and optionally `words` (a `SignInPageWords`: every sign-in word, the no-access sentence as a function of `appName`; absent renders the en words). The row is the exported
-`LegalLinks` component (`<LegalLinks links={[{ label, href }]} />`): a `<nav>` named "Legal" of
+`LegalLinks` component (`<LegalLinks links={[{ label, href }]} />`): a `<nav>` of
 same-tab links in the given order, one per entry, even when two share an href;
 `newTab` opens them in a new tab with the same look.
 The look comes from `appkit.css`, not from the component. Where the links stand, `place` and the hand-written row are in [Where the legal links stand](docs/stylesheet.md#where-the-legal-links-stand).
@@ -112,12 +112,12 @@ no script, no token, no alert, so it works on a page prerendered with `csr = fal
 ```
 
 The panel of the family picture ([`docs/family.html`](docs/family.html), section 4): the name as
-a link to the account in a new tab, the app's rows, an optional Theme row with three radios
-("Follow system", "Light", "Dark"), "Log out" in either `LogOut` form (see `SignInPage`) and the
+a link to the account in a new tab, the app's rows, an optional theme row with three radios,
+the log-out button in either `LogOut` form (see `SignInPage`) and the
 legal row. The kit owns the panel and its rows, which are taller on a touch screen. The app owns
 the trigger, the popover with its focus handling and closing, where the menu sits, storing the
 theme and setting `data-theme`, how logging out works, and the labels, actions and visibility of
-its rows. The optional `words` prop (an `AccountMenuWords`: Theme, Follow system, Light, Dark, Log out) carries the menu's own words in the app's language; absent renders the en words. The kit stores, fetches and closes nothing.
+its rows. The optional `words` prop (an `AccountMenuWords`; its words are in the [stylesheet reference](docs/stylesheet.md#what-appkitcss-owns)) carries the menu's own words in the app's language; absent renders the en words. The kit stores, fetches and closes nothing.
 
 The theme radios are controlled: `onChange` reports only a different pick, and the checked radio
 always equals `theme.choice`, so an app that does not take the choice sees the radio snap back.
@@ -126,10 +126,8 @@ theme stays with the app.
 
 The app owns
 its routes, the sign-out mechanism, the wording of a sign-out failure, the legal
-targets, the colour slot (`--primary`, `--accent`, `--on-accent`) and loading
+targets, the [app colour](docs/stylesheet.md#what-it-leaves-to-each-product) and loading
 `appkit.css`. The component writes no `data-theme`.
-
-Writing markup against the kit: [stylesheet reference](docs/stylesheet.md).
 
 ## Release
 
