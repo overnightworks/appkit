@@ -28,11 +28,8 @@ export interface ThemeRows {
 	onChange: (choice: ThemeChoice) => void;
 }
 
-export type AppRowIcon = 'settings';
-
 export interface AppRow {
 	label: string;
-	icon: AppRowIcon;
 	onSelect: () => void;
 }
 

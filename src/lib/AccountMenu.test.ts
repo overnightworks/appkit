@@ -56,8 +56,8 @@ describe('app rows', () => {
 	it('renders each row as a button in order above Theme', async () => {
 		const menu = await render({
 			appRows: [
-				{ label: 'Settings', icon: 'settings', onSelect: () => {} },
-				{ label: 'Other', icon: 'settings', onSelect: () => {} }
+				{ label: 'Settings', onSelect: () => {} },
+				{ label: 'Other', onSelect: () => {} }
 			],
 			theme: { choice: 'light', onChange: () => {} }
 		});

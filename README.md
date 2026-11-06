@@ -103,7 +103,7 @@ no script, no token, no alert, so it works on a page prerendered with `csr = fal
 	name="Felix"
 	accountHref={accountConsoleUrl}
 	onAccountOpen={() => popover.close(false)}
-	appRows={[{ label: 'Settings', icon: 'settings', onSelect: openSettings }]}
+	appRows={[{ label: 'Settings', onSelect: openSettings }]}
 	theme={{ choice, onChange: setChoice }}
 	{legalLinks}
 	{onLogOut}

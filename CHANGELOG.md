@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.16.0
+
+Breaking: `AppRow` loses its `icon` field and `AppRowIcon` is no longer exported
+(overnightworks/appkit#100). An `AppRow` is `{ label, onSelect }`. `AccountMenu`
+never read the field and draws the same gear before every app row, so the menu
+looks as before.
+
+Upgrade step: drop `icon` from each `appRows` entry. A type error names any
+entry that still has one.
+
 ## v0.15.0
 
 Minor: a new hover look (overnightworks/appkit#88). `appkit.css` gains
