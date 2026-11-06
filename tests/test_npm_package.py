@@ -12,15 +12,29 @@ REPOSITORY = Path(__file__).resolve().parent.parent
 STATIC = "src/appkit/static"
 INSTALL_SCRIPTS = {"preinstall", "install", "postinstall", "prepare"}
 STORAGE_AND_NETWORK = (
-    "localStorage", "sessionStorage", "indexedDB", "document.cookie",
-    "fetch", "XMLHttpRequest", "sendBeacon", "WebSocket",
+    "localStorage",
+    "sessionStorage",
+    "indexedDB",
+    "document.cookie",
+    "fetch",
+    "XMLHttpRequest",
+    "sendBeacon",
+    "WebSocket",
     "dataset.theme",
 )
 TSC_ARGUMENTS = [
-    "--noEmit", "--strict", "--skipLibCheck",
-    "--module", "esnext", "--moduleResolution", "bundler",
-    "--target", "es2022", "--allowImportingTsExtensions",
-    "--verbatimModuleSyntax", "consumer.ts",
+    "--noEmit",
+    "--strict",
+    "--skipLibCheck",
+    "--module",
+    "esnext",
+    "--moduleResolution",
+    "bundler",
+    "--target",
+    "es2022",
+    "--allowImportingTsExtensions",
+    "--verbatimModuleSyntax",
+    "consumer.ts",
 ]
 COMPONENT_FILES = {
     "svelte-dist/index.js",
@@ -64,7 +78,9 @@ def export_targets(exports):
     return set().union(*(export_targets(value) for value in exports.values()))
 
 
-def test_tarball_holds_exactly_the_manifest_readme_licence_stylesheet_fonts_font_licences_and_component(tarball, font_files, licences):
+def test_tarball_holds_exactly_the_manifest_readme_licence_stylesheet_fonts_font_licences_and_component(
+    tarball, font_files, licences
+):
     expected = {"package.json", "README.md", "LICENSE", f"{STATIC}/appkit.css"} | COMPONENT_FILES
     expected |= {f"{STATIC}/fonts/{name}" for name in font_files | licences}
     assert packed_files(tarball) == expected
@@ -111,7 +127,9 @@ def test_package_has_only_svelte_as_a_peer_and_no_install_scripts(tarball):
     assert not INSTALL_SCRIPTS & manifest.get("scripts", {}).keys()
 
 
-def test_shipped_components_use_neither_light_dark_nor_inline_style_nor_style_directives_which_a_linked_stylesheet_cannot_serve(tarball):
+def test_shipped_components_use_no_light_dark_inline_style_or_style_directives_a_linked_stylesheet_cannot_serve(
+    tarball,
+):
     components = sorted((tarball / "svelte-dist").glob("*.svelte"))
     assert components
     for component in components:
@@ -151,10 +169,18 @@ def test_a_consumer_imports_legal_links_and_its_props_type_from_the_package_root
     result = subprocess.run(
         [
             str(REPOSITORY / "node_modules/.bin/tsc"),
-            "--noEmit", "--strict", "--skipLibCheck",
-            "--module", "esnext", "--moduleResolution", "bundler",
-            "--target", "es2022", "--allowImportingTsExtensions",
-            "--verbatimModuleSyntax", "consumer.ts",
+            "--noEmit",
+            "--strict",
+            "--skipLibCheck",
+            "--module",
+            "esnext",
+            "--moduleResolution",
+            "bundler",
+            "--target",
+            "es2022",
+            "--allowImportingTsExtensions",
+            "--verbatimModuleSyntax",
+            "consumer.ts",
         ],
         cwd=tmp_path,
         capture_output=True,
@@ -163,7 +189,9 @@ def test_a_consumer_imports_legal_links_and_its_props_type_from_the_package_root
     assert result.returncode == 0, result.stdout
 
 
-def test_a_consumer_gives_the_no_access_state_one_log_out_form_and_a_released_state_still_type_checks(tarball, tmp_path):
+def test_a_consumer_gives_the_no_access_state_one_log_out_form_and_a_released_state_still_type_checks(
+    tarball, tmp_path
+):
     name = json.loads((tarball / "package.json").read_text())["name"]
     modules = tmp_path / "node_modules"
     modules.mkdir()
@@ -184,10 +212,18 @@ def test_a_consumer_gives_the_no_access_state_one_log_out_form_and_a_released_st
     result = subprocess.run(
         [
             str(REPOSITORY / "node_modules/.bin/tsc"),
-            "--noEmit", "--strict", "--skipLibCheck",
-            "--module", "esnext", "--moduleResolution", "bundler",
-            "--target", "es2022", "--allowImportingTsExtensions",
-            "--verbatimModuleSyntax", "consumer.ts",
+            "--noEmit",
+            "--strict",
+            "--skipLibCheck",
+            "--module",
+            "esnext",
+            "--moduleResolution",
+            "bundler",
+            "--target",
+            "es2022",
+            "--allowImportingTsExtensions",
+            "--verbatimModuleSyntax",
+            "consumer.ts",
         ],
         cwd=tmp_path,
         capture_output=True,
@@ -209,14 +245,18 @@ def test_a_consumer_gives_the_account_menu_one_log_out_form_and_a_typed_theme_ch
         "export const callback: AccountMenuProps = { ...common, onLogOut: () => {}, logOutFailure: 'x' };\n"
         "export const action: AccountMenuProps = { ...common, logOutAction: '/logout' };\n"
         "export const choice: ThemeChoice = 'follow-system';\n"
-        "export const themed: AccountMenuProps = { ...common, logOutAction: '/l', theme: { choice: 'dark', onChange: (next: ThemeChoice) => void next } };\n"
-        "export const row: AccountMenuProps = { ...common, logOutAction: '/l', appRows: [{ label: 'S', onSelect: () => {} }] };\n"
+        "export const themed: AccountMenuProps = { ...common, logOutAction: '/l', "
+        "theme: { choice: 'dark', onChange: (next: ThemeChoice) => void next } };\n"
+        "export const row: AccountMenuProps = { ...common, logOutAction: '/l', "
+        "appRows: [{ label: 'S', onSelect: () => {} }] };\n"
         "// @ts-expect-error a choice outside the union\n"
-        "export const wrong: AccountMenuProps = { ...common, logOutAction: '/l', theme: { choice: 'sepia', onChange: () => {} } };\n"
+        "export const wrong: AccountMenuProps = { ...common, logOutAction: '/l', "
+        "theme: { choice: 'sepia', onChange: () => {} } };\n"
         "// @ts-expect-error a choice without its callback\n"
         "export const silent: AccountMenuProps = { ...common, logOutAction: '/l', theme: { choice: 'dark' } };\n"
         "// @ts-expect-error an app row that still carries icon\n"
-        "export const rowWithIcon: AccountMenuProps = { ...common, logOutAction: '/l', appRows: [{ label: 'S', icon: 'settings', onSelect: () => {} }] };\n"
+        "export const rowWithIcon: AccountMenuProps = { ...common, logOutAction: '/l', "
+        "appRows: [{ label: 'S', icon: 'settings', onSelect: () => {} }] };\n"
         "// @ts-expect-error neither log-out form\n"
         "export const neither: AccountMenuProps = { ...common };\n"
         "// @ts-expect-error both log-out forms\n"

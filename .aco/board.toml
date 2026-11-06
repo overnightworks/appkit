@@ -1,2 +1,1 @@
-body_contract = "block"
-dependency_paths = [".github/workflows/"]
+dependency_paths = [".github/workflows/", "package.json", "pnpm-lock.yaml", "pyproject.toml", "uv.lock"]
