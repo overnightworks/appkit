@@ -21,5 +21,5 @@ imports it.
 The operator runs `scripts/publish_release vX.Y.Z` himself; it tags `main` and
 attaches the wheel, the npm tarball and the token list to a GitHub release. After
 his run the head replaces the generated notes on the release page with the
-version's notes (what changed, breaking changes and upgrade steps); each
-release item names them. The head opens one release item per dependent.
+version's notes (what changed, breaking changes and upgrade steps). The head
+opens one release item per dependent, which names the notes.
