@@ -6,3 +6,20 @@ updates:
       interval: daily
     cooldown:
       default-days: 7
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: daily
+    cooldown:
+      default-days: 7
+    # why: svelte-check does not yet admit TypeScript 7 in its peer range, so a
+    # major bump cannot be installed. This ignore goes when it admits it.
+    ignore:
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: daily
+    cooldown:
+      default-days: 7
