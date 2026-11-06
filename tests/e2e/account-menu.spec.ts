@@ -168,6 +168,16 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			});
 		}
 
+		test('takes its body font from the family token', async ({ page }) => {
+			await open(page);
+
+			const { 'font-family': body } = await resolveStyle(page, { 'font-family': 'var(--font-body)' }, [
+				'font-family'
+			]);
+			await expect(panelOf(page)).toHaveCSS('font-family', body);
+			await expect(page.getByRole('link', { name: typedName })).toHaveCSS('font-family', body);
+		});
+
 		test('keeps the case of a mixed-case name', async ({ page }) => {
 			await open(page);
 			const name = panelOf(page).locator('.as-typed');

@@ -120,7 +120,7 @@
 		border: 1px solid var(--border);
 		border-radius: 6px;
 		box-shadow: 0 6px 24px rgba(0, 0, 0, 0.14);
-		font-family: 'Open Sans', system-ui, sans-serif;
+		font-family: var(--font-body);
 		font-size: 14px;
 	}
 	.row {

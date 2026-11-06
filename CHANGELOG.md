@@ -12,6 +12,12 @@ browser's ring.
 No upgrade step unless an app styles the row's hover itself, which no app does
 today.
 
+`SignInPage` and `AccountMenu` take their fonts from `--font-display` and
+`--font-body` instead of naming them. Their body fallback is now the token's
+`Arial`, no longer `system-ui`. It shows for glyphs outside the shipped Latin
+and Latin-ext subsets, such as a Greek or Cyrillic name, and while or if Open
+Sans does not load.
+
 ## v0.14.0
 
 Minor: a new global class (overnightworks/appkit#83). `appkit.css` carries the
