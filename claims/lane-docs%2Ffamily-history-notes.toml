@@ -1,0 +1,7 @@
+claim_id = "8be710cb54d4404fa6badd26a7506f1c"
+agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
+role = "builder"
+base = "28d3263fba9cc01129d1560f56470372bfb7c03c"
+branch = "docs/family-history-notes"
+scope = ["docs/family.html"]
+opened_commit = "419e101ef4d0bcdbf1a2b1f7776ec00faaf12be5"
