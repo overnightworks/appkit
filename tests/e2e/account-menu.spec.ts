@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { buildConsumer, origin, routeTo, type ConsumerName } from './build-consumer.ts';
+import { resolveStyle } from './probe.ts';
 
 const colorSchemes = ['light', 'dark'] as const;
 const widths = [390, 1280] as const;
@@ -75,14 +76,11 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 					await page.setViewportSize({ width, height: 800 });
 					await open(page);
 
-					const surface = await page.evaluate(() => {
-						const probe = document.createElement('div');
-						probe.style.background = 'var(--surface)';
-						document.body.append(probe);
-						const color = getComputedStyle(probe).backgroundColor;
-						probe.remove();
-						return color;
-					});
+					const { 'background-color': surface } = await resolveStyle(
+						page,
+						{ background: 'var(--surface)' },
+						['background-color']
+					);
 					expect(surface).not.toBe('rgba(0, 0, 0, 0)');
 					await expect(panelOf(page)).toHaveCSS('background-color', surface);
 					await expect(page.getByRole('radio', { name: 'Follow system' })).toBeChecked();
@@ -162,14 +160,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 
 				const link = page.getByRole('link', { name: legalNames[0] });
 				const resting = await link.evaluate((node) => getComputedStyle(node).color);
-				const text = await page.evaluate(() => {
-					const probe = document.createElement('div');
-					probe.style.color = 'var(--text)';
-					document.body.append(probe);
-					const color = getComputedStyle(probe).color;
-					probe.remove();
-					return color;
-				});
+				const { color: text } = await resolveStyle(page, { color: 'var(--text)' }, ['color']);
 
 				await link.hover();
 				await expect(link).toHaveCSS('color', text);
