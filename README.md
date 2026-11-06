@@ -8,9 +8,6 @@ and `LegalLinks`. A product renders everything else with its own markup. The
 stylesheet's classes, tokens and legal-row markup are in the
 [stylesheet reference](docs/stylesheet.md).
 
-`appkit.css` and every shared part follow the family picture
-[`docs/family.html`](docs/family.html).
-
 Distribution is a GitHub release. Tags are never moved; a broken release gets
 the next patch tag. A release carries:
 
@@ -66,8 +63,7 @@ https://github.com/overnightworks/appkit/releases/download/v<version>/overnightw
 />
 ```
 
-One component renders the three sign-in states of the family picture
-([`docs/family.html`](docs/family.html), section 3): `signed-out`,
+One component renders the three sign-in states: `signed-out`,
 `no-access` and `login-failed` (with the failure banner as an alert). Their ruled
 words are in the [stylesheet reference](docs/stylesheet.md#what-appkitcss-owns). The sign-in link carries
 `data-sveltekit-reload`, the page title is `appName`, and the glow follows the
@@ -111,7 +107,7 @@ no script, no token, no alert, so it works on a page prerendered with `csr = fal
 />
 ```
 
-The panel of the family picture ([`docs/family.html`](docs/family.html), section 4): the name as
+The account panel: the name as
 a link to the account in a new tab, the app's rows, an optional theme row with three radios,
 the log-out button in either `LogOut` form (see `SignInPage`) and the
 legal row. The kit owns the panel and its rows, which are taller on a touch screen. The app owns

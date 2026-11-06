@@ -1,9 +1,11 @@
 # appkit stylesheet reference
 
 Reference of `appkit.css` and the components' words, for an engineer writing
-markup against the kit. The family picture is [`family.html`](family.html).
+markup against the kit.
 
 ## What `appkit.css` owns
+
+The sign-in wording sentences in this section are ruled; the rest describes the stylesheet.
 
 The wheel's `appkit.css` owns the family tokens and the
 `@font-face` rules for Oswald and Open Sans. The token names are the release's
@@ -25,14 +27,14 @@ selector may outrank a single class on the heading itself. The second, `legal`, 
 <h3>Source <span class="as-typed">talks</span></h3>
 ```
 
-Sign-in wording is identical in every app. Each catalog carries these strings verbatim (operator ruling 19.10.2026, ui-console#6); no button names Keycloak:
+Sign-in wording is identical in every app. Each catalog carries these strings verbatim; no button names Keycloak:
 
 - en: "Log in", "Log out", "You are logged out.", "No access", "Login failed", "Try again", "Legal"
 - de: "Anmelden", "Abmelden", "Du bist abgemeldet.", "Kein Zugang", "Anmeldung fehlgeschlagen", "Erneut versuchen"
 
-The tarball's `SignInPage` component takes its words from the app's catalog (the `words` prop, see the [README](../README.md#signinpage)); the kit holds no language and no de string. The list above binds the sign-in words in every catalog. Without `words` it renders the en strings and two sentences from the family picture: "Sign-in did not work. Please try again." (login failed) and "You are signed in, but this account has no access to <app name>." (no access). The de strings of those two sentences are not ruled.
+The tarball's `SignInPage` component takes its words from the app's catalog (the `words` prop, see the [README](../README.md#signinpage)); the kit holds no language and no de string. The list above binds the sign-in words in every catalog. Without `words` it renders the en strings, which include two sentences: "Sign-in did not work. Please try again." (login failed) and "You are signed in, but this account has no access to <app name>." (no access). The de strings of those two sentences are not ruled.
 
-The tarball's `AccountMenu` component takes its words from the app's catalog (see the [README](../README.md#accountmenu)): "Theme", "Follow system", "Light", "Dark" and "Log out". Without `words` it renders those en words of the family picture's account menu. The de strings of the theme rows are not ruled.
+The tarball's `AccountMenu` component takes its words from the app's catalog (see the [README](../README.md#accountmenu)): "Theme", "Follow system", "Light", "Dark" and "Log out". Without `words` it renders those en words as its defaults. The de strings of the theme rows are not ruled.
 
 Each state has one way out: Signed out shows "Log in" and never redirects by itself; No access shows "Log out" (no "Back": the page is reached through the Keycloak redirect chain, so going back returns to Keycloak, which sends a live session straight back here); Login failed shows "Try again".
 
@@ -40,13 +42,15 @@ Which refusal shows which page, and the redirect rule, are in webauth's [Signed 
 
 ## Where the legal links stand
 
-The legal links stand in the same three places in every app (operator ruling 05.11.2026, appkit#82), and no app writes its own legal-row markup:
+The sentences in this section are ruled.
+
+The legal links stand in the same three places in every app, and no app writes its own legal-row markup:
 
 - On every signed-in page, in the legal row of `AccountMenu`. A signed-in page carries no footer of legal links.
 - On the `SignInPage` states, in the row under the card.
 - On a page without the account menu (a public or session-less page), in `LegalLinks` with `place='page'`.
 
-Every legal row lists Impressum, Datenschutz and Nutzungsbedingungen, in that order (operator ruling 05.11.2026, appkit#86). Each link carries the app's section anchor `#<app>`, as in `https://hallucinai.de/impressum#songmaker`. A page that belongs to no single app, such as the central sign-in, links the address the central legal pages give it.
+Every legal row lists Impressum, Datenschutz and Nutzungsbedingungen, in that order. Each link carries the app's section anchor `#<app>`, as in `https://hallucinai.de/impressum#songmaker`. A page that belongs to no single app, such as the central sign-in, links the address the central legal pages give it.
 
 Two kinds of page show no legal links: full-screen presentation views (presenter and projector), and pages that send themselves on, such as webauth's end-session page.
 
@@ -62,8 +66,8 @@ A shared page, such as Keycloak's login pages, writes the same row with the addr
 
 hopin and hal deviate by name:
 
-- hopin (operator ruling 05.11.2026, hopin#494): a running call shows no account menu, so its links stand in `LegalLinks` with `place='menu'` in the call's More menu.
-- hal (hal#1024, lines 1 and 2): its account console shows no legal links, and its central sign-in pages show the row inside the card, in Keycloak's card-footer slot. hal's [docs/keycloak.md](https://github.com/overnightworks/hal/blob/main/docs/keycloak.md#theme-and-language) gives the reasons.
+- hopin: a running call shows no account menu, so its links stand in `LegalLinks` with `place='menu'` in the call's More menu.
+- hal: its account console shows no legal links, and its central sign-in pages show the row inside the card, in Keycloak's card-footer slot. hal's [docs/keycloak.md](https://github.com/overnightworks/hal/blob/main/docs/keycloak.md#theme-and-language) gives the reasons.
 
 ## What it leaves to each product
 
