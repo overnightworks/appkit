@@ -22,7 +22,10 @@ hash:
 https://github.com/overnightworks/appkit/releases/download/v<version>/overnightworks_appkit-<version>-py3-none-any.whl#sha256=<sha256>
 ```
 
-A SvelteKit app pins the tarball by URL; its lockfile holds the integrity:
+A SvelteKit app pins the tarball by URL. pnpm writes the tarball's `sha512-`
+integrity into the lockfile only when it downloads the tarball, not on a store
+hit, and a frozen install enforces it; compare the lockfile's value with the one
+`scripts/publish_release` prints, or enter that one:
 
 ```
 https://github.com/overnightworks/appkit/releases/download/v<version>/overnightworks-appkit-<version>.tgz

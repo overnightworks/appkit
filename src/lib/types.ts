@@ -24,7 +24,7 @@ export interface LegalLink {
 	href: string;
 }
 
-/** `page` links open in the same tab; `menu` is the row inside `AccountMenu`, whose links open in a new tab. */
+/** `page` links open in the same tab unless `newTab` is set; `menu` is the row inside `AccountMenu`, whose links open in a new tab. */
 export type LegalLinksPlace = 'page' | 'menu';
 
 /**
@@ -80,9 +80,7 @@ export interface SignInPageWords {
 /**
  * The account panel: the name as a link to the account, the app's rows, an optional theme row,
  * the log-out button and the legal row. The kit owns the panel and its rows, which are taller
- * on a touch screen. The app owns the trigger, the popover with its focus handling and closing,
- * where the menu sits, storing the theme, how logging out works, and the labels, actions and
- * visibility of its rows. The kit stores, fetches and closes nothing.
+ * on a touch screen. It stores, fetches and closes nothing.
  */
 export type AccountMenuProps = {
 	/** The signed-in person's name; it keeps the case it was typed in. */
@@ -103,8 +101,7 @@ export type AccountMenuProps = {
 
 /**
  * The sign-in page. The sign-in link carries `data-sveltekit-reload`, and the glow follows the theme.
- * The app owns its routes, the sign-out mechanism, the wording of a sign-out failure, the legal
- * targets, the app colour and loading `appkit.css`.
+ * It stores, fetches and closes nothing.
  */
 export interface SignInPageProps {
 	/** The page title. */

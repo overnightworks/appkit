@@ -5,8 +5,8 @@
 appkit is the family look that overnightworks products share: one stylesheet,
 its fonts and three Svelte components. It runs no service. Outside it: the
 product apps that load the stylesheet (and, for SvelteKit apps, the components),
-the Keycloak sign-in pages, which show the family look too, the GitHub release that
-distributes it, and the shared quality gate that checks every pull request.
+the Keycloak themes, which take the wheel's stylesheet and fonts through the
+repository that builds them, the GitHub release that distributes it, and the shared quality gate that checks every pull request.
 Page layout and product-specific JavaScript stay in the products.
 
 ```mermaid
@@ -16,12 +16,12 @@ flowchart LR
   release[GitHub release]
   py[Python apps]
   kit[SvelteKit apps]
-  kc[Keycloak sign-in theme]
+  kc[Keycloak themes]
   gate -- checks every pull request --> appkit
   appkit -- publish_release --> release
   release -- wheel, pinned by URL and hash --> py
   release -- tarball, pinned by URL --> kit
-  release -- family look --> kc
+  py -- copies appkit.css and fonts under a versioned path --> kc
 ```
 
 ## 2. Building Block View
@@ -41,11 +41,11 @@ flowchart TB
   tokens[tokens.txt] -. listed from .-> css
 ```
 
-- **Stylesheet and fonts** (`appkit.css`, `docs/stylesheet.md`): the family
+- **Stylesheet and fonts** (`appkit.css`, [`stylesheet.md`](stylesheet.md)): the family
   tokens, the `@font-face` rules and the classes `as-typed` and `legal`.
 - **Components**: `SignInPage` and `AccountMenu` render the page and the panel,
   and both render `LegalLinks`. Each prop's meaning is a docstring in
-  `src/lib/types.ts`.
+  [`src/lib/types.ts`](../src/lib/types.ts).
 - **Wheel**: the stylesheet and fonts for apps without a JavaScript bundler. It
   holds no `.svelte`.
 - **Tarball**: the stylesheet, fonts and components; `svelte` is its only
@@ -55,19 +55,24 @@ flowchart TB
 
 ## 3. Runtime View
 
-The core flow is how one change reaches every app.
+The core flow is how one change reaches every app. The operator runs
+`publish_release`; the [release step](../AGENTS.md) and what follows it are in
+`AGENTS.md`.
 
 ```mermaid
 sequenceDiagram
   actor Op as Operator
   participant Pub as publish_release
   participant GH as GitHub release
+  actor Head as Releasing head
   participant App as App repository
   participant Build as App build
   Op->>Pub: v<version>
   Pub->>GH: tag main, attach wheel, tarball, token list
   Pub-->>Op: wheel sha256, tarball integrity
-  Op->>App: set the pin: URL with its hash
+  Op->>Head: release is out
+  Head->>App: one release item per dependent, naming the notes
+  App->>App: its head moves the pin: URL with its hash
   App->>Build: install
   Build->>GH: download the artefact
   Build->>Build: reject on hash mismatch
@@ -82,11 +87,14 @@ In the browser the result is static CSS, fonts and component markup.
 
 ## 5. Crosscutting Concepts
 
-**Trust.** appkit holds no secrets and handles no user data. What it ships is
-static CSS, fonts and Svelte components, so the question is the supply path. A
-tag never moves, so a release is immutable, and a consumer pins a URL together
-with its content hash: the wheel's sha256 in the URL, the tarball's integrity in
-the consumer's lockfile.
+**Trust.** appkit holds no secrets. What it ships is static CSS, fonts and Svelte
+components. The app passes the signed-in person's name, account URL and failure
+text in; the components render them and keep none. So the question is the supply
+path. GitHub enforces immutable releases for the organization, so a release's tag
+and assets cannot change. A consumer pins a URL together with its content hash:
+the wheel's sha256 in the URL, the tarball's sha512 integrity in the consumer's
+lockfile, which pnpm writes only when it downloads the tarball and a frozen
+install enforces.
 
 **Ownership of the components.** A component owns its markup and look. The app
 owns what needs a decision about its product: routes, the trigger and popover
@@ -107,8 +115,8 @@ cover them.
 
 - The stylesheet and fonts exist once and are packaged in both forms, so no app
   sees a different look from its packaging.
-- Tags never move; a broken release gets the next patch tag. A moved tag would
-  change what a hash-pinned URL means.
+- Releases are immutable, enforced by GitHub; a broken release gets the next
+  patch tag.
 - Pins carry a content hash, so a changed or substituted artefact fails the
   consumer's build instead of shipping.
 - `svelte` is the tarball's only dependency, as a peer, so the app's own Svelte
@@ -118,11 +126,22 @@ cover them.
 
 ## 7. Not chosen
 
-- An npm registry: `package.json` is `private`, and the tarball attached to the
-  GitHub release is the only npm distribution.
+- A custom element, or pages the kit renders on the server, instead of Svelte
+  components: every app is on one stack, SvelteKit, and non-Svelte consumers (the
+  Keycloak themes) take only the stylesheet. Reopens if an app that cannot run
+  Svelte needs a component.
+- Each consumer keeping its own copy of a shared rule set, such as the legal
+  row's CSS: copies drift, so one rule set lives in `appkit.css`. Reopens only if
+  a consumer cannot load `appkit.css`.
+- A template fragment the kit ships for one provider (a Keycloak FTL or HTML
+  fragment): it carries one provider's template format for one consumer and still
+  needs the rules in the stylesheet, so such a page writes the documented markup.
+  Reopens if several consumers share one template format.
+- Git pins (`github:overnightworks/appkit#vX.Y.Z`) instead of release assets: a
+  git pin loses the content hash a consumer's lock checks, sha256 in the wheel
+  URL and sha512 in pnpm's lock. Reopens if a git pin can carry a checked content
+  hash.
 
 ## 8. Risks and Technical Debt
 
 - SonarCloud does not analyse `.svelte` files.
-- The Keycloak theme's way of taking the kit is not described here; the
-  stylesheet reference only names its sign-in pages.
