@@ -48,6 +48,36 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 				await expect(link).toHaveCSS('color', probes.text);
 				await expect(link).toHaveCSS('border-bottom-color', probes.border);
 			});
+
+			test(`a hovered legal link looks the same in both rows and takes the text colour in ${colorScheme}`, async ({
+				page
+			}) => {
+				await page.emulateMedia({ colorScheme });
+				await routeTo(page.context(), outDir);
+				await page.goto(`${origin}/?legal`);
+
+				const written = page.locator('#written nav').getByRole('link').first();
+				const component = page.locator('#component nav').getByRole('link').first();
+				const resting = await computedOf(written, linkProperties);
+
+				await written.hover();
+				const hoveredWritten = await computedOf(written, linkProperties);
+				await component.hover();
+				const hoveredComponent = await computedOf(component, linkProperties);
+
+				const text = await page.evaluate(() => {
+					const probe = document.createElement('div');
+					probe.style.color = 'var(--text)';
+					document.body.append(probe);
+					const color = getComputedStyle(probe).color;
+					probe.remove();
+					return color;
+				});
+				expect(hoveredWritten).toEqual(hoveredComponent);
+				expect(hoveredWritten.color).toBe(text);
+				expect(hoveredWritten['border-bottom-color']).toBe(text);
+				expect(hoveredWritten.color).not.toBe(resting.color);
+			});
 		}
 	});
 }

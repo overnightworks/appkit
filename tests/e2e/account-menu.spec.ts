@@ -154,6 +154,29 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			});
 		});
 
+		for (const colorScheme of colorSchemes) {
+			test(`a hovered legal link takes the text colour in ${colorScheme}`, async ({ page }) => {
+				await page.emulateMedia({ colorScheme });
+				await page.setViewportSize({ width: 1280, height: 800 });
+				await open(page);
+
+				const link = page.getByRole('link', { name: legalNames[0] });
+				const resting = await link.evaluate((node) => getComputedStyle(node).color);
+				const text = await page.evaluate(() => {
+					const probe = document.createElement('div');
+					probe.style.color = 'var(--text)';
+					document.body.append(probe);
+					const color = getComputedStyle(probe).color;
+					probe.remove();
+					return color;
+				});
+
+				await link.hover();
+				await expect(link).toHaveCSS('color', text);
+				expect(resting).not.toBe(text);
+			});
+		}
+
 		test('keeps the case of a mixed-case name', async ({ page }) => {
 			await open(page);
 			const name = panelOf(page).locator('.as-typed');
