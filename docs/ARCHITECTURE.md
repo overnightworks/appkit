@@ -5,7 +5,7 @@
 appkit is the family look that overnightworks products share: one stylesheet,
 its fonts and three Svelte components. It runs no service. Outside it: the
 product apps that load the stylesheet (and, for SvelteKit apps, the components),
-the Keycloak themes, which take the wheel's stylesheet and fonts through the
+the Keycloak themes and the legal pages, which take the wheel's stylesheet and fonts through the
 repository that builds them, the GitHub release that distributes it, and the shared quality gate that checks every pull request.
 Page layout and product-specific JavaScript stay in the products.
 
@@ -16,7 +16,7 @@ flowchart LR
   release[GitHub release]
   py[Python apps]
   kit[SvelteKit apps]
-  kc[Keycloak themes]
+  kc[Keycloak themes and legal pages]
   gate -- checks every pull request --> appkit
   appkit -- publish_release --> release
   release -- wheel, pinned by URL and hash --> py
@@ -128,7 +128,7 @@ cover them.
 
 - A custom element, or pages the kit renders on the server, instead of Svelte
   components: every app is on one stack, SvelteKit, and non-Svelte consumers (the
-  Keycloak themes) take only the stylesheet. Reopens if an app that cannot run
+  Keycloak themes and the legal pages) take only the stylesheet. Reopens if an app that cannot run
   Svelte needs a component.
 - Each consumer keeping its own copy of a shared rule set, such as the legal
   row's CSS: copies drift, so one rule set lives in `appkit.css`. Reopens only if
