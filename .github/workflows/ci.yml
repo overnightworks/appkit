@@ -61,6 +61,8 @@ jobs:
           pnpm run test:consumer
       - name: Run the package tests and build the wheel
         run: |
+          uv run --frozen ruff check .
+          uv run --frozen ruff format --check .
           uv run --frozen pytest -q tests
           uv build --wheel
 

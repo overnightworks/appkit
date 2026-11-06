@@ -9,7 +9,7 @@ requires-python = ">=3.14"
 dependencies = []
 
 [dependency-groups]
-dev = ["pytest>=8"]
+dev = ["pytest>=8", "ruff>=0.15"]
 
 [build-system]
 requires = ["uv_build>=0.10,<0.11"]
@@ -20,3 +20,34 @@ module-name = "appkit"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+src = [".", "src"]
+target-version = "py314"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "F",      # pyflakes
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "A",      # flake8-builtins
+    "C4",     # flake8-comprehensions
+    "DTZ",    # flake8-datetimez
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "PTH",    # flake8-use-pathlib
+    "RUF",    # ruff-specific rules
+    "RET",    # flake8-return
+    "PT",     # flake8-pytest-style
+]
+# quality owns S and T20; its noqa lines would read as unused here
+external = ["S", "T20"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

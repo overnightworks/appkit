@@ -8,9 +8,23 @@ import pytest
 
 REPOSITORY = Path(__file__).resolve().parent.parent
 FAMILY_TOKENS = {
-    "--bg", "--bg-deep", "--surface", "--surface-hover", "--border", "--text",
-    "--text-muted", "--card-bg", "--header-bg", "--font-display", "--font-body",
-    "--ok", "--ok-soft", "--busy", "--busy-soft", "--fail", "--fail-soft",
+    "--bg",
+    "--bg-deep",
+    "--surface",
+    "--surface-hover",
+    "--border",
+    "--text",
+    "--text-muted",
+    "--card-bg",
+    "--header-bg",
+    "--font-display",
+    "--font-body",
+    "--ok",
+    "--ok-soft",
+    "--busy",
+    "--busy-soft",
+    "--fail",
+    "--fail-soft",
 }
 
 
@@ -119,12 +133,20 @@ def test_light_is_the_no_choice_case_and_dark_follows_the_device_or_the_attribut
 
 
 LIGHT_STATE_COLOURS = {
-    "ok": "#1e7a1e", "ok-soft": "#e0f5e0", "busy": "#9a6200",
-    "busy-soft": "#fef3e0", "fail": "#c02020", "fail-soft": "#fde8e8",
+    "ok": "#1e7a1e",
+    "ok-soft": "#e0f5e0",
+    "busy": "#9a6200",
+    "busy-soft": "#fef3e0",
+    "fail": "#c02020",
+    "fail-soft": "#fde8e8",
 }
 DARK_STATE_COLOURS = {
-    "ok": "#44aa44", "ok-soft": "#1a3a1a", "busy": "#f0a030",
-    "busy-soft": "#2a1f10", "fail": "#ff4444", "fail-soft": "#3a1a1a",
+    "ok": "#44aa44",
+    "ok-soft": "#1a3a1a",
+    "busy": "#f0a030",
+    "busy-soft": "#2a1f10",
+    "fail": "#ff4444",
+    "fail-soft": "#3a1a1a",
 }
 
 

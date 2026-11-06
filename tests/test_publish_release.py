@@ -10,8 +10,22 @@ RELEASED_VERSION = "9.9.9"
 TAG = f"v{RELEASED_VERSION}"
 RELEASE_URL = f"https://example.test/releases/tag/{TAG}"
 BORROWED_TOOLS = (
-    "bash", "env", "git", "sed", "ls", "cat", "cut", "tr", "grep", "sort", "mktemp",
-    "rm", "dirname", "sha256sum", "openssl", "base64",
+    "bash",
+    "env",
+    "git",
+    "sed",
+    "ls",
+    "cat",
+    "cut",
+    "tr",
+    "grep",
+    "sort",
+    "mktemp",
+    "rm",
+    "dirname",
+    "sha256sum",
+    "openssl",
+    "base64",
 )
 # Each fake records its arguments in the file named by RECORD and fails on request.
 FAKE_GH = """#!/usr/bin/env bash
@@ -41,9 +55,7 @@ def write_executable(path, text):
 
 
 def git(directory, *arguments):
-    return subprocess.run(
-        ["git", "-C", str(directory), *arguments], check=True, capture_output=True, text=True
-    ).stdout
+    return subprocess.run(["git", "-C", str(directory), *arguments], check=True, capture_output=True, text=True).stdout
 
 
 class Release:
@@ -100,7 +112,14 @@ class Release:
             cwd=self.clone,
             capture_output=True,
             text=True,
-            env={"PATH": path, "RECORD": str(self.record), "RELEASE_URL": RELEASE_URL, "HOME": str(self.root), "TMPDIR": str(self.root), **environment},
+            env={
+                "PATH": path,
+                "RECORD": str(self.record),
+                "RELEASE_URL": RELEASE_URL,
+                "HOME": str(self.root),
+                "TMPDIR": str(self.root),
+                **environment,
+            },
         )
 
     def calls(self, program):
@@ -118,14 +137,16 @@ def release(tmp_path):
     return Release(tmp_path)
 
 
-def test_a_good_release_attaches_the_wheel_the_tarball_and_the_token_list_and_prints_only_the_release_line_and_both_hashes(release):
+def test_a_good_release_attaches_wheel_tarball_and_token_list_and_prints_only_release_line_and_both_hashes(
+    release,
+):
     result = release.publish()
     assert result.returncode == 0, result.stderr
     assert release.origin_tags() == [TAG]
     (create,) = release.calls("gh release create")
     assert re.search(
-        rf"overnightworks_appkit-9\.9\.9-py3-none-any\.whl .*overnightworks-appkit-9\.9\.9\.tgz "
-        rf".*appkit-9\.9\.9-tokens\.txt",
+        r"overnightworks_appkit-9\.9\.9-py3-none-any\.whl .*overnightworks-appkit-9\.9\.9\.tgz "
+        r".*appkit-9\.9\.9-tokens\.txt",
         create,
     )
     release_line, wheel_line, tarball_line = result.stdout.splitlines()
