@@ -5,11 +5,9 @@ markup against the kit. The family picture is [`family.html`](family.html).
 
 ## What `appkit.css` owns
 
-The wheel's `appkit.css` owns the family tokens (`--bg`, `--bg-deep`,
-`--surface`, `--surface-hover`, `--border`, `--text`, `--text-muted`,
-`--card-bg`, `--header-bg`, `--ok`, `--ok-soft`, `--busy`, `--busy-soft`, `--fail`,
-`--fail-soft`, `--font-display`, `--font-body`) and the
-`@font-face` rules for Oswald and Open Sans, with songmaker's names and values.
+The wheel's `appkit.css` owns the family tokens and the
+`@font-face` rules for Oswald and Open Sans. The token names are the release's
+`appkit-<version>-tokens.txt`, which `scripts/list_tokens` prints for any stylesheet.
 Light is under `:root`; dark sits under the device media query guarded by
 `:root:not([data-theme='light'])` and under `:root[data-theme='dark']`, so with
 no choice the page follows the device and either attribute forces its theme.
@@ -59,6 +57,8 @@ An app's page that cannot render Svelte writes the same row by hand: `<nav class
 ```
 
 A shared page, such as Keycloak's login pages, writes the same row with the addresses the central legal pages give it.
+
+`LegalLinks` takes `place`: `'page'` (the default) for a row on a page, `'menu'` for the look of a row inside a menu, whose links open in a new tab.
 
 hopin and hal deviate by name:
 
