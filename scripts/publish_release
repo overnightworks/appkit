@@ -30,7 +30,7 @@ gh auth status >/dev/null 2>&1 || fail "gh is missing or not logged in"
 staging=$(mktemp -d)
 keep_staging=false
 trap '$keep_staging || rm -rf "$staging"' EXIT
-uv build --wheel --out-dir "$staging" >/dev/null
+uv build --wheel --out-dir "$staging" --quiet
 wheel=$(ls "$staging"/*.whl)
 pnpm pack --pack-destination "$staging" >/dev/null || fail "pnpm pack failed"
 tarball=$(ls "$staging"/*.tgz)
@@ -38,9 +38,10 @@ tokens="$staging/appkit-$version-tokens.txt"
 scripts/list_tokens src/appkit/static/appkit.css >"$tokens"
 
 git tag "$tag"
-git push origin "$tag"
+git push --quiet origin "$tag"
 release=(gh release create "$tag" "$wheel" "$tarball" "$tokens" --title "$tag" --generate-notes)
-"${release[@]}" || { keep_staging=true; fail "tag $tag is pushed but has no release; tags are never moved, so run: ${release[*]}"; }
+url=$("${release[@]}") || { keep_staging=true; fail "tag $tag is pushed but has no release; tags are never moved, so run: ${release[*]}"; }
+echo "release $tag: $url"
 echo "wheel sha256: $(sha256sum "$wheel" | cut -d' ' -f1)"
 digest=$(openssl dgst -sha512 -binary "$tarball" | base64 -w0) || fail "tarball integrity could not be computed"
 echo "tarball integrity: sha512-$digest"

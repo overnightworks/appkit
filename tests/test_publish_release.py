@@ -8,6 +8,7 @@ import pytest
 REPOSITORY = Path(__file__).resolve().parent.parent
 RELEASED_VERSION = "9.9.9"
 TAG = f"v{RELEASED_VERSION}"
+RELEASE_URL = f"https://example.test/releases/tag/{TAG}"
 BORROWED_TOOLS = (
     "bash", "env", "git", "sed", "ls", "cat", "cut", "tr", "grep", "sort", "mktemp",
     "rm", "dirname", "sha256sum", "openssl", "base64",
@@ -16,6 +17,7 @@ BORROWED_TOOLS = (
 FAKE_GH = """#!/usr/bin/env bash
 echo "gh $*" >>"$RECORD"
 [[ $1 == release && -n ${FAIL_RELEASE:-} ]] && exit 1
+[[ $1 == release ]] && echo "$RELEASE_URL"
 exit 0
 """
 FAKE_UV = """#!/usr/bin/env bash
@@ -98,7 +100,7 @@ class Release:
             cwd=self.clone,
             capture_output=True,
             text=True,
-            env={"PATH": path, "RECORD": str(self.record), "HOME": str(self.root), "TMPDIR": str(self.root), **environment},
+            env={"PATH": path, "RECORD": str(self.record), "RELEASE_URL": RELEASE_URL, "HOME": str(self.root), "TMPDIR": str(self.root), **environment},
         )
 
     def calls(self, program):
@@ -116,7 +118,7 @@ def release(tmp_path):
     return Release(tmp_path)
 
 
-def test_a_good_release_pushes_the_tag_attaches_the_wheel_the_tarball_and_the_token_list_without_ui_style_and_prints_both_hashes(release):
+def test_a_good_release_attaches_the_wheel_the_tarball_and_the_token_list_and_prints_only_the_release_line_and_both_hashes(release):
     result = release.publish()
     assert result.returncode == 0, result.stderr
     assert release.origin_tags() == [TAG]
@@ -127,8 +129,11 @@ def test_a_good_release_pushes_the_tag_attaches_the_wheel_the_tarball_and_the_to
         create,
     )
     assert "ui-style.css" not in create
-    assert re.search(r"^wheel sha256: [0-9a-f]{64}$", result.stdout, re.MULTILINE)
-    assert re.search(r"^tarball integrity: sha512-[A-Za-z0-9+/]{86}==$", result.stdout, re.MULTILINE)
+    release_line, wheel_line, tarball_line = result.stdout.splitlines()
+    assert release_line == f"release {TAG}: {RELEASE_URL}"
+    assert re.fullmatch(r"wheel sha256: [0-9a-f]{64}", wheel_line)
+    assert re.fullmatch(r"tarball integrity: sha512-[A-Za-z0-9+/]{86}==", tarball_line)
+    assert result.stderr == ""
 
 
 def test_a_package_json_version_that_differs_from_the_tag_refuses_without_a_tag(release):
