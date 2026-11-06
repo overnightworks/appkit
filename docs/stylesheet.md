@@ -19,7 +19,7 @@ letter-spacing off. Text the app writes keeps the family's uppercase. Text a
 person typed (a name, slug or address) keeps its case, also in `h1`, `h2` and
 the page head's `h3`. An app marks such text with `as-typed` on the element that
 holds only the typed text: a `span` inside the heading, because a heading's own
-selector may outrank a single class on the heading itself. The second, `legal`, is the look of the legal row, described under "Where the legal links stand".
+selector may outrank a single class on the heading itself. The second, `legal`, is the look of the legal row, described under [Writing the legal row by hand](#writing-the-legal-row-by-hand).
 
 ```html
 <h3>Source <span class="as-typed">talks</span></h3>
@@ -65,19 +65,17 @@ hopin and hal deviate by name:
 
 ## Writing the legal row by hand
 
-A page that belongs to no single app, such as the central sign-in, links the address the central legal pages give it.
-
 An app's page that cannot render Svelte writes the same row by hand: `<nav class="legal" aria-label="Legal">` holding one `<a href>` per link in that order, with no separator characters. The accessible name, not printed, is the literal "Legal" in every app, as in `LegalLinks`'s `<nav>`. The row then gets its look from `appkit.css`, as the component's does; the menu form (`legal menu`) is the kit's own and is not offered. The page keeps the row's spacing and placement relative to its neighbours.
 
 ```html
 <nav class="legal" aria-label="Legal"><a href="https://hallucinai.de/impressum#songmaker">Impressum</a><a href="https://hallucinai.de/datenschutz#songmaker">Datenschutz</a><a href="https://hallucinai.de/nutzungsbedingungen#songmaker">Nutzungsbedingungen</a></nav>
 ```
 
-A shared page, such as Keycloak's login pages, writes the same row with the addresses the central legal pages give it.
+A page that belongs to no single app, such as Keycloak's central sign-in pages, writes the same row with the addresses the central legal pages give it.
 
 `LegalLinks` takes `place`: `'page'` (the default) for a row on a page, `'menu'` for the look of a row inside a menu, whose links open in a new tab.
 
-hal's [docs/keycloak.md](https://github.com/overnightworks/hal/blob/main/docs/keycloak.md#theme-and-language) gives the reasons.
+hal's [docs/keycloak.md](https://github.com/overnightworks/hal/blob/main/docs/keycloak.md#theme-and-language) gives the reasons for hal's deviations above.
 
 ## What it leaves to each product
 
