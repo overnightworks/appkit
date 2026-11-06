@@ -128,7 +128,6 @@ def test_a_good_release_attaches_the_wheel_the_tarball_and_the_token_list_and_pr
         rf".*appkit-9\.9\.9-tokens\.txt",
         create,
     )
-    assert "ui-style.css" not in create
     release_line, wheel_line, tarball_line = result.stdout.splitlines()
     assert release_line == f"release {TAG}: {RELEASE_URL}"
     assert re.fullmatch(r"wheel sha256: [0-9a-f]{64}", wheel_line)

@@ -5,16 +5,14 @@ markup against the kit. The family picture is [`family.html`](family.html).
 
 ## What `appkit.css` owns
 
-The wheel's `appkit.css` owns the family tokens (`--bg`, `--bg-deep`,
-`--surface`, `--surface-hover`, `--border`, `--text`, `--text-muted`,
-`--card-bg`, `--header-bg`, `--ok`, `--ok-soft`, `--busy`, `--busy-soft`, `--fail`,
-`--fail-soft`, `--font-display`, `--font-body`) and the
-`@font-face` rules for Oswald and Open Sans, with songmaker's names and values.
+The wheel's `appkit.css` owns the family tokens and the
+`@font-face` rules for Oswald and Open Sans. The token names are the release's
+`appkit-<version>-tokens.txt`, which `scripts/list_tokens` prints for any stylesheet.
 Light is under `:root`; dark sits under the device media query guarded by
 `:root:not([data-theme='light'])` and under `:root[data-theme='dark']`, so with
 no choice the page follows the device and either attribute forces its theme.
-Each theme sets `color-scheme`, so an app sets none. The app colour (`--primary`, `--accent`, `--on-accent`)
-and everything domain-specific stay with the app.
+Each theme sets `color-scheme`, so an app sets none. Everything
+domain-specific stays with the app.
 
 It also owns two classes. The first, `as-typed`, turns the case transform and the
 letter-spacing off. Text the app writes keeps the family's uppercase. Text a
@@ -32,9 +30,9 @@ Sign-in wording is identical in every app. Each catalog carries these strings ve
 - en: "Log in", "Log out", "You are logged out.", "No access", "Login failed", "Try again", "Legal"
 - de: "Anmelden", "Abmelden", "Du bist abgemeldet.", "Kein Zugang", "Anmeldung fehlgeschlagen", "Erneut versuchen"
 
-The tarball's `SignInPage` component takes its words from the app's catalog through the `words` prop; the kit holds no language and no de string. The list above binds the sign-in words in every catalog. Without `words` it renders the en strings and two sentences from the family picture: "Sign-in did not work. Please try again." (login failed) and "You are signed in, but this account has no access to <app name>." (no access). The de strings of those two sentences are not ruled.
+The tarball's `SignInPage` component takes its words from the app's catalog (the `words` prop, see the [README](../README.md#signinpage)); the kit holds no language and no de string. The list above binds the sign-in words in every catalog. Without `words` it renders the en strings and two sentences from the family picture: "Sign-in did not work. Please try again." (login failed) and "You are signed in, but this account has no access to <app name>." (no access). The de strings of those two sentences are not ruled.
 
-The tarball's `AccountMenu` component takes its words from the app's catalog through the `words` prop: "Theme", "Follow system", "Light", "Dark" and "Log out". Without `words` it renders those en words of the family picture's account menu. The de strings of the theme rows are not ruled. `LegalLinks` names its `<nav>` "Legal" (an accessible name, not printed) in every app.
+The tarball's `AccountMenu` component takes its words from the app's catalog (see the [README](../README.md#accountmenu)): "Theme", "Follow system", "Light", "Dark" and "Log out". Without `words` it renders those en words of the family picture's account menu. The de strings of the theme rows are not ruled.
 
 Each state has one way out: Signed out shows "Log in" and never redirects by itself; No access shows "Log out" (no "Back": the page is reached through the Keycloak redirect chain, so going back returns to Keycloak, which sends a live session straight back here); Login failed shows "Try again".
 
@@ -52,13 +50,15 @@ Every legal row lists Impressum, Datenschutz and Nutzungsbedingungen, in that or
 
 Two kinds of page show no legal links: full-screen presentation views (presenter and projector), and pages that send themselves on, such as webauth's end-session page.
 
-An app's page that cannot render Svelte writes the same row by hand: `<nav class="legal" aria-label="Legal">` holding one `<a href>` per link in that order, with no separator characters. The accessible name is the literal "Legal". The row then gets its look from `appkit.css`, as the component's does; the menu form (`legal menu`) is the kit's own and is not offered. The page keeps the row's spacing and placement relative to its neighbours.
+An app's page that cannot render Svelte writes the same row by hand: `<nav class="legal" aria-label="Legal">` holding one `<a href>` per link in that order, with no separator characters. The accessible name, not printed, is the literal "Legal" in every app, as in `LegalLinks`'s `<nav>`. The row then gets its look from `appkit.css`, as the component's does; the menu form (`legal menu`) is the kit's own and is not offered. The page keeps the row's spacing and placement relative to its neighbours.
 
 ```html
 <nav class="legal" aria-label="Legal"><a href="https://hallucinai.de/impressum#songmaker">Impressum</a><a href="https://hallucinai.de/datenschutz#songmaker">Datenschutz</a><a href="https://hallucinai.de/nutzungsbedingungen#songmaker">Nutzungsbedingungen</a></nav>
 ```
 
 A shared page, such as Keycloak's login pages, writes the same row with the addresses the central legal pages give it.
+
+`LegalLinks` takes `place`: `'page'` (the default) for a row on a page, `'menu'` for the look of a row inside a menu, whose links open in a new tab.
 
 hopin and hal deviate by name:
 
