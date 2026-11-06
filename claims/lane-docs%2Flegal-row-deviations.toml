@@ -1,7 +1,0 @@
-claim_id = "8ce75f2f4eb94019b00f82494ccfc65b"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "a9744f93c36e55b891017ee146f819327485a2bb"
-branch = "docs/legal-row-deviations"
-scope = ["docs/stylesheet.md"]
-opened_commit = "78e3e5982742334cc5625d9cbbcb45a98a4b0f9d"
