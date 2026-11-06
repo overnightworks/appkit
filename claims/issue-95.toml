@@ -1,0 +1,7 @@
+claim_id = "cc785f00e57f491f89eb54840a83ca71"
+agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
+role = "builder"
+base = "57e8786d3531b12f1022635a3e9c20f1ebdecae4"
+branch = "claude/issue-95-docs-own-facts"
+scope = ["README.md", "docs/stylesheet.md", "tests/test_publish_release.py"]
+opened_commit = "a58ed249175201b7515d63d9fb602c7dde7287a2"
