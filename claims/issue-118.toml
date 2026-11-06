@@ -1,0 +1,8 @@
+claim_id = "0f83b946c88f4063beeb3ec921e9d775"
+agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
+role = "builder"
+base = "255e6df655b699adf2bfcfdbc9385331abdb7542"
+branch = "claude/issue-118-finished-mockup-leaves"
+scope = ["README.md", "docs/family.html", "docs/stylesheet.md", "tests/e2e/app.css"]
+opened_commit = "60beea165c7ff12aeaf4f307cf96fe220081c393"
+whole_reason = "One mockup's exit: the file and every document and comment that points to it, plus the reference's provenance in the same sentences."
