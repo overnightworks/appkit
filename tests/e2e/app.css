@@ -5,7 +5,7 @@
 	--on-accent: #1a1a1a;
 }
 
-/* The app uppercases its headings, as the family picture does. */
+/* The app uppercases its headings, so the test covers typed text inside an uppercase heading. */
 h1 {
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
