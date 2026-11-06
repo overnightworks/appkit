@@ -1,7 +1,0 @@
-claim_id = "249820946cd24807925f371449bdd245"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "e266113ec81c9b59f38dd864d081a0812f209850"
-branch = "claude/issue-91-release-output"
-scope = ["scripts/publish_release", "tests/test_publish_release.py"]
-opened_commit = "d125747fc1bfd8e92bc8f585cb9581ac775958ba"
