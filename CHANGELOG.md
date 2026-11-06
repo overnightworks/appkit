@@ -7,8 +7,9 @@ Breaking: `AppRow` loses its `icon` field and `AppRowIcon` is no longer exported
 never read the field and draws the same gear before every app row, so the menu
 looks as before.
 
-Upgrade step: drop `icon` from each `appRows` entry. A type error names any
-entry that still has one.
+Upgrade step: drop `icon` from each `appRows` entry. An entry written inline in
+`appRows` that still has one fails to type-check; an entry built in a variable
+first keeps type-checking, and its `icon` is ignored.
 
 ## v0.15.0
 
