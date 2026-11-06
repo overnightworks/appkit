@@ -19,5 +19,5 @@ imports it.
 ## Release
 
 The operator runs `scripts/publish_release vX.Y.Z` himself; it tags `main` and
-publishes the wheel and the npm tarball. The head opens one release item per
-dependent.
+attaches the wheel, the npm tarball and the token list to a GitHub release. The
+head opens one release item per dependent.
