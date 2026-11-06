@@ -2,10 +2,6 @@
 mandatory_jobs = ["checks"]
 
 [[root.allow]]
-entry = "CHANGELOG.md"
-reason = "release history that consumers read at the repository root; no owner directory exists for it"
-
-[[root.allow]]
 entry = "tsconfig.json"
 reason = "svelte-check and the editor find the TypeScript configuration at the root"
 
