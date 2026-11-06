@@ -230,8 +230,6 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 .srow .what { padding: 12px 16px; display: flex; flex-direction: column; justify-content: center; gap: 4px; font-size: 14px; border-left: 1px solid var(--border); }
 .srow .what .name { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
 .srow .what .name b { font-family: 'Oswald', Impact, sans-serif; font-size: 17px; font-weight: 400; letter-spacing: .04em; }
-.srow .what .was { font-size: 13px; color: var(--text-muted); }
-.srow .what .was s { text-decoration-thickness: 1px; }
 @media (max-width: 640px) {
 	.srow { grid-template-columns: 1fr 1fr; }
 	.srow .what { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--border); }
@@ -379,17 +377,17 @@ code, .hex { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; f
 		<div class="srow">
 			<div class="spec light"><span class="st ok"><i></i>ready</span><span class="pill st ok"><i></i>Ready</span><span class="hex">#1e7a1e</span></div>
 			<div class="spec dark"><span class="st ok"><i></i>ready</span><span class="pill st ok"><i></i>Ready</span><span class="hex">#44aa44</span></div>
-			<div class="what"><span class="name"><b>ok</b><code>--ok · --ok-soft</code></span><span>Done and fine. A filled disc.</span><span class="was">Replaces songmaker's <s>--success</s>, same values. ui-style's name survives.</span></div>
+			<div class="what"><span class="name"><b>ok</b><code>--ok · --ok-soft</code></span><span>Done and fine. A filled disc.</span></div>
 		</div>
 		<div class="srow">
 			<div class="spec light"><span class="st busy live"><i></i>building</span><span class="pill st busy"><i></i>Queued</span><span class="hex">#9a6200</span></div>
 			<div class="spec dark"><span class="st busy live"><i></i>building</span><span class="pill st busy"><i></i>Queued</span><span class="hex">#f0a030</span></div>
-			<div class="what"><span class="name"><b>busy</b><code>--busy · --busy-soft</code></span><span>Working or waiting. An open ring; it turns only while work runs.</span><span class="was">songmaker's “Queued” ring. Light value is ui-style's: songmaker's #b07000 reads 4.1:1, below AA.</span></div>
+			<div class="what"><span class="name"><b>busy</b><code>--busy · --busy-soft</code></span><span>Working or waiting. An open ring; it turns only while work runs.</span></div>
 		</div>
 		<div class="srow">
 			<div class="spec light"><span class="st fail"><i></i>failed</span><span class="pill st fail"><i></i>Failed</span><span class="hex">#c02020</span></div>
 			<div class="spec dark"><span class="st fail"><i></i>failed</span><span class="pill st fail"><i></i>Failed</span><span class="hex">#ff4444</span></div>
-			<div class="what"><span class="name"><b>fail</b><code>--fail · --fail-soft</code></span><span>Only a person can end this. A triangle. Red means nothing else.</span><span class="was">songmaker's danger red. ui-style's own reds retire.</span></div>
+			<div class="what"><span class="name"><b>fail</b><code>--fail · --fail-soft</code></span><span>Only a person can end this. A triangle. Red means nothing else.</span></div>
 		</div>
 		<div class="srow">
 			<div class="spec light"><span class="st never"><i></i>never run</span></div>
