@@ -67,11 +67,11 @@ https://github.com/overnightworks/appkit/releases/download/v<version>/overnightw
 ```
 
 One component renders the three sign-in states of the family picture
-([`docs/family.html`](docs/family.html), section 3) with the ruled words:
-`signed-out` ("Log in"), `no-access` ("Log out") and `login-failed` ("Try
-again", with the failure banner as an alert). The sign-in link carries
+([`docs/family.html`](docs/family.html), section 3): `signed-out`,
+`no-access` and `login-failed` (with the failure banner as an alert). Their ruled
+words are in the [stylesheet reference](docs/stylesheet.md#what-appkitcss-owns). The sign-in link carries
 `data-sveltekit-reload`, the page title is `appName`, and the glow follows the
-theme. The sign-in words are ruled in the [stylesheet reference](docs/stylesheet.md). The app passes `appName`, the state (`signInHref` for the two link
+theme. The app passes `appName`, the state (`signInHref` for the two link
 states; a `LogOut` for `no-access`, below), `legalLinks` (an empty list shows no legal row) and optionally `words` (a `SignInPageWords`: every sign-in word, the no-access sentence as a function of `appName`; absent renders the en words). The row is the exported
 `LegalLinks` component (`<LegalLinks links={[{ label, href }]} />`): a `<nav>` named "Legal" of
 same-tab links in the given order, one per entry, even when two share an href;
