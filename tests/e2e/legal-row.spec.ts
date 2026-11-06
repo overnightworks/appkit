@@ -1,5 +1,6 @@
 import { expect, test, type Locator } from '@playwright/test';
 import { buildConsumer, origin, routeTo, type ConsumerName } from './build-consumer.ts';
+import { resolveStyle } from './probe.ts';
 
 const colorSchemes = ['light', 'dark'] as const;
 const rowProperties = ['display', 'flex-wrap', 'justify-content', 'gap', 'font-size'] as const;
@@ -34,19 +35,37 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 					await computedOf(component.getByRole('link').first(), linkProperties)
 				);
 
-				const probes = await page.evaluate(() => {
-					const probe = document.createElement('div');
-					probe.style.color = 'var(--text-muted)';
-					probe.style.borderBottom = '1px solid var(--border)';
-					document.body.append(probe);
-					const style = getComputedStyle(probe);
-					const colors = { text: style.color, border: style.borderBottomColor };
-					probe.remove();
-					return colors;
-				});
+				const probes = await resolveStyle(
+					page,
+					{ color: 'var(--text-muted)', 'border-bottom': '1px solid var(--border)' },
+					['color', 'border-bottom-color']
+				);
 				const link = written.getByRole('link').first();
-				await expect(link).toHaveCSS('color', probes.text);
-				await expect(link).toHaveCSS('border-bottom-color', probes.border);
+				await expect(link).toHaveCSS('color', probes.color);
+				await expect(link).toHaveCSS('border-bottom-color', probes['border-bottom-color']);
+			});
+
+			test(`a hovered legal link looks the same in both rows and takes the text colour in ${colorScheme}`, async ({
+				page
+			}) => {
+				await page.emulateMedia({ colorScheme });
+				await routeTo(page.context(), outDir);
+				await page.goto(`${origin}/?legal`);
+
+				const written = page.locator('#written nav').getByRole('link').first();
+				const component = page.locator('#component nav').getByRole('link').first();
+				const resting = await computedOf(written, linkProperties);
+
+				await written.hover();
+				const hoveredWritten = await computedOf(written, linkProperties);
+				await component.hover();
+				const hoveredComponent = await computedOf(component, linkProperties);
+
+				const { color: text } = await resolveStyle(page, { color: 'var(--text)' }, ['color']);
+				expect(hoveredWritten).toEqual(hoveredComponent);
+				expect(hoveredWritten.color).toBe(text);
+				expect(hoveredWritten['border-bottom-color']).toBe(text);
+				expect(hoveredWritten.color).not.toBe(resting.color);
 			});
 		}
 	});

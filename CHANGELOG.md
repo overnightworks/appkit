@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.15.0
+
+Minor: a new hover look (overnightworks/appkit#88). `appkit.css` gains
+`.legal a:hover`, so a legal link takes `var(--text)` under the pointer, and the
+page row's underline takes the same colour. It applies to the page row and to
+`legal menu`, whose links have no underline, so there only the colour changes.
+The rule is (0,2,1) and beats an app's bare `a:hover`. Keyboard focus keeps the
+browser's ring.
+
+No upgrade step unless an app styles the row's hover itself, which no app does
+today.
+
 ## v0.14.0
 
 Minor: a new global class (overnightworks/appkit#83). `appkit.css` carries the
