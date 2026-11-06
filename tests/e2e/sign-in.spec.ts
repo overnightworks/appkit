@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { buildConsumer, origin, routeTo, type ConsumerName } from './build-consumer.ts';
+import { resolveStyle } from './probe.ts';
 
 const colorSchemes = ['light', 'dark'] as const;
 
@@ -49,6 +50,25 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 
 			const snapshot = await page.getByRole('main').ariaSnapshot();
 			expect(snapshot.match(/Probe/gi)).toHaveLength(1);
+		});
+
+		test('takes its display and body fonts from the family tokens', async ({ page }) => {
+			await routeTo(page, outDir);
+			await page.goto(`${origin}/`);
+
+			const card = page.getByRole('main');
+			const { 'font-family': display } = await resolveStyle(
+				page,
+				{ 'font-family': 'var(--font-display)' },
+				['font-family']
+			);
+			const { 'font-family': body } = await resolveStyle(page, { 'font-family': 'var(--font-body)' }, [
+				'font-family'
+			]);
+			await expect(card.getByRole('heading')).toBeVisible();
+			await expect(card.getByText('Probe').first()).toHaveCSS('font-family', display);
+			await expect(card.getByRole('link')).toHaveCSS('font-family', display);
+			await expect(card).toHaveCSS('font-family', body);
 		});
 
 		test('keeps the case of typed text in an uppercase heading', async ({ page }) => {

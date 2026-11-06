@@ -70,7 +70,7 @@
 		gap: 18px;
 		background: var(--bg-deep);
 		color: var(--text);
-		font-family: 'Open Sans', system-ui, sans-serif;
+		font-family: var(--font-body);
 	}
 	:global(:root[data-theme='dark']) .signin {
 		--glow-mix: 3%;
@@ -128,7 +128,7 @@
 	.wordmark {
 		position: relative;
 		display: inline-block;
-		font-family: 'Oswald', Impact, sans-serif;
+		font-family: var(--font-display);
 		font-size: 27px;
 		letter-spacing: 0.14em;
 		text-transform: uppercase;
@@ -155,7 +155,7 @@
 	}
 	h1 {
 		margin: 0;
-		font-family: 'Oswald', Impact, sans-serif;
+		font-family: var(--font-display);
 		font-weight: 400;
 		font-size: 18px;
 		letter-spacing: 0.03em;
@@ -204,7 +204,7 @@
 		padding: 0 14px;
 		border: 1px solid transparent;
 		border-radius: 4px;
-		font-family: 'Oswald', Impact, sans-serif;
+		font-family: var(--font-display);
 		font-size: 14px;
 		letter-spacing: 0.05em;
 		text-transform: uppercase;
