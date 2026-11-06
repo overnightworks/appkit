@@ -1,8 +1,0 @@
-claim_id = "896c3323c2e4468fbfa27dcc042f475e"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "b4f4d5d78b323d638172f27b8896209181fe13d2"
-branch = "claude/issue-104-agents-md-and-ruff"
-scope = [".github/workflows/ci.yml", "AGENTS.md", "CLAUDE.md", "pyproject.toml", "tests", "uv.lock"]
-opened_commit = "337398b05f12941303cb1468e7677e16dab6a43c"
-whole_reason = "Agent guidance and the lint that its commands name: the guidance file and its pointer, ruff's configuration, lock and CI step, and the test files whose findings it fixes."
