@@ -5,7 +5,6 @@ export type {
 	AccountMenuProps,
 	AccountMenuWords,
 	AppRow,
-	AppRowIcon,
 	LegalLink,
 	LegalLinksPlace,
 	LegalLinksProps,

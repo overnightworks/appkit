@@ -49,7 +49,7 @@ function mountMenu(variant: string): void {
 		name: 'Felix mcDonald',
 		accountHref: '/account',
 		onAccountOpen: report('account'),
-		appRows: [{ label: 'Settings', icon: 'settings', onSelect: report('settings') }] as const,
+		appRows: [{ label: 'Settings', onSelect: report('settings') }] as const,
 		legalLinks: menuLegalLinks
 	};
 	const logOut =
