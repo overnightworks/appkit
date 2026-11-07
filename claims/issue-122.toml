@@ -1,0 +1,7 @@
+claim_id = "f7dfb308a576487da109f50fe1751a29"
+agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
+role = "builder"
+base = "6b8ca75dd847809bbfecbeab861f00370f67ddb5"
+branch = "claude/issue-122-appkit-s-vision-enters-the-tree-as-bless"
+scope = ["README.md", "docs/VISION.md", "docs/stylesheet.md"]
+opened_commit = "27b7e67b19d34f8ee4da06cc0e090268fa0edd8a"
