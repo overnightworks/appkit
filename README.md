@@ -66,6 +66,7 @@ components render.
 
 ## Documentation
 
+- [Vision](docs/VISION.md): what appkit is for and what it is not.
 - [Stylesheet reference](docs/stylesheet.md): the classes, tokens, wording and
   legal-row markup.
 - [Architecture](docs/ARCHITECTURE.md): the parts, the trust and the proof.

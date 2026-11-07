@@ -36,9 +36,9 @@ Sign-in wording is identical in every app. Each catalog carries these strings ve
 
 ## The components' words
 
-The tarball's `SignInPage` component takes its words from the app's catalog (the `words` prop, see the [README](../README.md#signinpage)); the kit holds no language and no de string. The list above binds the sign-in words in every catalog. Without `words` it renders its en defaults: the strings above and two sentences, "Sign-in did not work. Please try again." (login failed) and "You are signed in, but this account has no access to <app name>." (no access). The de strings of those two sentences are not ruled.
+The tarball's `SignInPage` component takes its words from the app's catalog (the `words` prop, see the [`types.ts`](../src/lib/types.ts)); the kit holds no language and no de string. The list above binds the sign-in words in every catalog. Without `words` it renders its en defaults: the strings above and two sentences, "Sign-in did not work. Please try again." (login failed) and "You are signed in, but this account has no access to <app name>." (no access). The de strings of those two sentences are not ruled.
 
-The tarball's `AccountMenu` component takes its words from the app's catalog (see the [README](../README.md#accountmenu)): "Theme", "Follow system", "Light", "Dark" and "Log out". Without `words` it renders those en words as its defaults. The de strings of the theme rows are not ruled.
+The tarball's `AccountMenu` component takes its words from the app's catalog (see the [`types.ts`](../src/lib/types.ts)): "Theme", "Follow system", "Light", "Dark" and "Log out". Without `words` it renders those en words as its defaults. The de strings of the theme rows are not ruled.
 
 Each state has one way out: Signed out shows "Log in" and never redirects by itself; No access shows "Log out" (no "Back": the page is reached through the Keycloak redirect chain, so going back returns to Keycloak, which sends a live session straight back here); Login failed shows "Try again".
 
