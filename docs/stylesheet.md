@@ -25,6 +25,12 @@ selector may outrank a single class on the heading itself. The second, `legal`, 
 <h3>Source <span class="as-typed">talks</span></h3>
 ```
 
+## What the fail colour marks
+
+The sentences in this section are ruled.
+
+The fail colour (`--fail` and `--fail-soft`) marks only two things: that something failed, and a control that deletes something for good. Such a control is the Delete in a menu or a toolbar and the button that confirms a deletion. A delete icon beside each row stays neutral, so the signal does not wear out.
+
 ## Sign-in wording
 
 The sentences in this section are ruled.
