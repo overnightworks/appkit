@@ -6,7 +6,7 @@ appkit is the family look that overnightworks products share: one stylesheet,
 its fonts and three Svelte components. It runs no service. Outside it: the
 product apps that load the stylesheet (and, for SvelteKit apps, the components),
 the Keycloak themes and the legal pages, which take the wheel's stylesheet and fonts through the
-repository that builds them, the GitHub release that distributes it, and the shared quality gate that checks every pull request.
+repository that builds them, the GitHub release that distributes it, and the shared quality gate that checks every pull request and every release.
 Page layout and product-specific JavaScript stay in the products.
 
 ```mermaid
@@ -17,8 +17,8 @@ flowchart LR
   py[Python apps]
   kit[SvelteKit apps]
   kc[Keycloak themes and legal pages]
-  gate -- checks every pull request --> appkit
-  appkit -- publish_release --> release
+  gate -- checks every pull request and release --> appkit
+  appkit -- release.yml --> release
   release -- wheel, pinned by URL and hash --> py
   release -- tarball, pinned by URL --> kit
   py -- copies appkit.css and fonts under a versioned path --> kc
@@ -55,22 +55,22 @@ flowchart TB
 
 ## 3. Runtime View
 
-The core flow is how one change reaches every app. The operator runs
-`publish_release`; the [release step](../AGENTS.md) and what follows it are in
-`AGENTS.md`.
+The core flow is how one change reaches every app. The operator dispatches `release.yml`; the [release step](../AGENTS.md) and what
+follows it are in `AGENTS.md`.
 
 ```mermaid
 sequenceDiagram
   actor Op as Operator
-  participant Pub as publish_release
+  participant Rel as release.yml
   participant GH as GitHub release
   actor Head as Releasing head
   participant App as App repository
   participant Build as App build
-  Op->>Pub: v<version>
-  Pub->>GH: tag main, attach wheel, tarball, token list
-  Pub-->>Op: wheel sha256, tarball integrity
+  Op->>Rel: dispatch with the version
+  Rel->>Rel: gate, build, tag
+  Rel->>GH: tag, attach wheel, tarball, token list, notes with both hashes
   Op->>Head: release is out
+  Head->>GH: write the version's notes below the hashes
   Head->>App: one release item per dependent, naming the notes
   App->>App: its head moves the pin: URL with its hash
   App->>Build: install
@@ -80,7 +80,8 @@ sequenceDiagram
 
 ## 4. Deployment View
 
-appkit itself is not deployed. A GitHub release holds the artefacts. The apps'
+appkit itself is not deployed. A GitHub-hosted runner builds the artefacts from
+the gated commit, and a GitHub release holds them. The apps'
 builds download them: Python servers serve the wheel's `appkit.css`, and
 SvelteKit builds bundle the tarball's stylesheet and components into the app.
 In the browser the result is static CSS, fonts and component markup.
@@ -94,7 +95,10 @@ path. GitHub enforces immutable releases for the organization, so a release's ta
 and assets cannot change. A consumer pins a URL together with its content hash:
 the wheel's sha256 in the URL, the tarball's sha512 integrity in the consumer's
 lockfile, which pnpm writes only when it downloads the tarball and a frozen
-install enforces.
+install enforces. A release is built only from a commit that passed quality's
+release gate, with no cache read, by a workflow whose actions are pinned to
+commits and whose only write grant is the tag job's. The residuals of that path
+are quality's to name, in its release documentation.
 
 **Ownership of the components.** A component owns its markup and look. The app
 owns what needs a decision about its product: routes, the trigger and popover
@@ -104,7 +108,8 @@ works, wording of failures, legal link targets, the app colour and loading
 `data-theme`.
 
 **Proof strategy.** CI runs `svelte-check` and vitest for the components, pytest
-for the wheel, the tarball and `publish_release`, and ruff. Two Playwright
+for the wheel and the tarball, and ruff. The release gate and a check of the
+built file list guard `release.yml`. Two Playwright
 consumers are built for production from the packed tarball and paint the page
 in a browser. The shared quality gate adds the secret scan, the
 workflow-security scan and SonarCloud for CSS, HTML, Python and TypeScript. It
@@ -121,7 +126,7 @@ cover them.
   consumer's build instead of shipping.
 - `svelte` is the tarball's only dependency, as a peer, so the app's own Svelte
   runs the components.
-- `publish_release` builds everything before it tags, so a failed build leaves
+- `release.yml` builds everything before it tags, so a failed build leaves
   nothing to undo.
 
 ## 7. Not chosen

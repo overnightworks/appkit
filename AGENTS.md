@@ -18,8 +18,11 @@ imports it.
 
 ## Release
 
-The operator runs `scripts/publish_release vX.Y.Z` himself; it tags `main` and
-attaches the wheel, the npm tarball and the token list to a GitHub release. After
-his run the head replaces the generated notes on the release page with the
-version's notes (what changed, breaking changes and upgrade steps). The head
-opens one release item per dependent, which names the notes.
+The operator releases himself. Once `pyproject.toml` and `package.json` carry the
+version on `main`, he dispatches
+`gh workflow run release.yml -R overnightworks/appkit -f version=X.Y.Z`. The
+workflow gates, builds and tags, and attaches the wheel, the npm tarball and the
+token list to a GitHub release. The release notes open with the wheel's and the
+tarball's hashes. After his run the head writes the version's notes (what
+changed, breaking changes and upgrade steps) below them. The head opens one
+release item per dependent, which names the notes.

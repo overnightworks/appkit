@@ -32,8 +32,3 @@ reason = "tests the built wheel and its release scripts, not a module of src/app
 path = "tests/test_npm_package.py"
 rule = "test-layout"
 reason = "tests the packed npm tarball, not a module of src/appkit"
-
-[[layout.allow]]
-path = "tests/test_publish_release.py"
-rule = "test-layout"
-reason = "tests the release script, not a module of src/appkit"
