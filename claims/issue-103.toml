@@ -1,8 +1,0 @@
-claim_id = "43ed6f1167824d8fb4e5c78d5c1504b6"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "a172b9749464fa29c3c9bc8059e2747267f7f9b5"
-branch = "claude/issue-103-typescript-coverage-reaches-sonar"
-scope = [".github/dependabot.yml", ".github/workflows/ci.yml", ".gitignore", "package.json", "pnpm-lock.yaml", "sonar-project.properties", "vitest.config.ts"]
-opened_commit = "02adf755022238821ac5d6174bbc8af01b91dce1"
-whole_reason = "One coverage path: the report's producer, its dev dependency and lock, the CI job that uploads it, the Sonar key that reads it, and the ignore entry for its local output; a part alone measures nothing."
