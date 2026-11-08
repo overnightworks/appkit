@@ -11,7 +11,7 @@ imports it.
   `tests/test_npm_package.py` needs `pnpm install --frozen-lockfile` first.
 - Python lint, both must pass: `uv run --frozen ruff check .` and
   `uv run --frozen ruff format --check .`.
-- `quality hygiene .` is the remaining static check.
+- `quality check` is the remaining static check.
 - The Playwright consumers (`pnpm run test:consumer`) are a probe stack: run them
   only under the `flock` rule in the global contract's section "Machine load and
   local runs". CI's `checks` job runs them, and the full suites.
