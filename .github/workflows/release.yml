@@ -41,10 +41,20 @@ jobs:
     env:
       VERSION: ${{ inputs.version }}
     steps:
+      # The checkout takes github.sha, the dispatch's commit; the gate refuses unless main's head is still that commit.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          ref: ${{ needs.gate.outputs.commit }}
           persist-credentials: false
+
+      - name: Refuse unless the checkout is the commit the gate judged
+        env:
+          COMMIT: ${{ needs.gate.outputs.commit }}
+        run: |
+          head=$(git rev-parse HEAD)
+          if [ "$head" != "$COMMIT" ]; then
+            echo "Refused: the checkout is $head, not the gated commit $COMMIT." >&2
+            exit 1
+          fi
 
       - name: Refuse unless pyproject.toml and package.json carry the version
         run: |
@@ -75,7 +85,7 @@ jobs:
       - name: Build the wheel, the npm tarball and the token list
         run: |
           pnpm install --frozen-lockfile
-          uv build --wheel --out-dir dist
+          uv build --wheel --no-create-gitignore --out-dir dist
           pnpm pack --pack-destination dist
           scripts/list_tokens src/appkit/static/appkit.css >"dist/appkit-$VERSION-tokens.txt"
 

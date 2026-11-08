@@ -24,8 +24,8 @@ https://github.com/overnightworks/appkit/releases/download/v<version>/overnightw
 
 A SvelteKit app pins the tarball by URL. pnpm writes the tarball's `sha512-`
 integrity into the lockfile only when it downloads the tarball, not on a store
-hit, and a frozen install enforces it; compare the lockfile's value with the one at the top of the release notes, or
-enter that one:
+hit, and a frozen install enforces it; compare the lockfile's value with the
+one at the top of the release notes, or enter that one:
 
 ```
 https://github.com/overnightworks/appkit/releases/download/v<version>/overnightworks-appkit-<version>.tgz

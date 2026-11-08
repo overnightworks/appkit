@@ -23,6 +23,7 @@ version on `main`, he dispatches
 `gh workflow run release.yml -R overnightworks/appkit -f version=X.Y.Z`. The
 workflow gates, builds and tags, and attaches the wheel, the npm tarball and the
 token list to a GitHub release. The release notes open with the wheel's and the
-tarball's hashes. After his run the head writes the version's notes (what
-changed, breaking changes and upgrade steps) below them. The head opens one
+tarball's hashes. After his run the head replaces GitHub's generated notes,
+below the hashes, with the version's notes (what changed, breaking changes and
+upgrade steps). The head opens one
 release item per dependent, which names the notes.

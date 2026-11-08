@@ -55,8 +55,9 @@ flowchart TB
 
 ## 3. Runtime View
 
-The core flow is how one change reaches every app. The operator dispatches `release.yml`; the [release step](../AGENTS.md) and what
-follows it are in `AGENTS.md`.
+The core flow is how one change reaches every app. The operator dispatches
+`release.yml`; the [release step](../AGENTS.md) and what follows it are in
+`AGENTS.md`.
 
 ```mermaid
 sequenceDiagram
@@ -97,8 +98,9 @@ the wheel's sha256 in the URL, the tarball's sha512 integrity in the consumer's
 lockfile, which pnpm writes only when it downloads the tarball and a frozen
 install enforces. A release is built only from a commit that passed quality's
 release gate, with no cache read, by a workflow whose actions are pinned to
-commits and whose only write grant is the tag job's. The residuals of that path
-are quality's to name, in its release documentation.
+commits and whose only write grant is the tag job's. The
+[residuals of that path](https://github.com/overnightworks/quality/blob/main/docs/release.md#residual)
+are quality's to name.
 
 **Ownership of the components.** A component owns its markup and look. The app
 owns what needs a decision about its product: routes, the trigger and popover
