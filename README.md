@@ -16,7 +16,7 @@ Distribution is a GitHub release. It carries:
   defines.
 
 An app that serves the stylesheet from Python pins the wheel by URL with its
-hash:
+hash, which the release notes give:
 
 ```
 https://github.com/overnightworks/appkit/releases/download/v<version>/overnightworks_appkit-<version>-py3-none-any.whl#sha256=<sha256>
@@ -24,8 +24,8 @@ https://github.com/overnightworks/appkit/releases/download/v<version>/overnightw
 
 A SvelteKit app pins the tarball by URL. pnpm writes the tarball's `sha512-`
 integrity into the lockfile only when it downloads the tarball, not on a store
-hit, and a frozen install enforces it; compare the lockfile's value with the one
-`scripts/publish_release` prints, or enter that one:
+hit, and a frozen install enforces it; compare the lockfile's value with the
+one at the top of the release notes, or enter that one:
 
 ```
 https://github.com/overnightworks/appkit/releases/download/v<version>/overnightworks-appkit-<version>.tgz
@@ -73,10 +73,11 @@ components render.
 
 ## Release
 
-`scripts/publish_release v<version>` builds the wheel and the tarball, tags
-`main` and attaches both and the token list to a GitHub release. It prints the
-wheel's sha256 and the tarball's integrity for the pins. The repository's
-targeted checks are in [AGENTS.md](AGENTS.md).
+A release is dispatched with the version alone and passes quality's release gate
+before it builds the wheel and the tarball, tags `main` and attaches both and the
+token list to a GitHub release. The release notes carry the hashes for the pins.
+The dispatch command and the repository's targeted checks are in
+[AGENTS.md](AGENTS.md).
 
 ## Licence
 
