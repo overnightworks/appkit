@@ -1,29 +1,27 @@
-# appkit - Agent Guidance
+# appkit
 
-This file holds appkit's own facts on top of the global contract. `CLAUDE.md`
-imports it.
+## Commands
 
-## Targeted proof
+- `pnpm run` lists the package scripts. appkit has no other task runner.
+- `pnpm exec vitest run <file>`: one Vitest file of `src/lib`. Needs `pnpm install --frozen-lockfile`.
+- `pnpm run check`: the Svelte and TypeScript type check. Needs `pnpm install --frozen-lockfile`.
+- `uv run --frozen pytest -q tests/<module>.py -k <behaviour>`: one Python module. `tests/test_npm_package.py` needs `pnpm install --frozen-lockfile` first.
+- `uv run --frozen ruff check .` and `uv run --frozen ruff format --check .`: Python lint; both must pass.
+- `quality check`: the shared static check. Run it at the release `.github/workflows/ci.yml` pins.
+- `pnpm run test:consumer`: the Playwright consumers, a probe stack. Run it only under the `flock` rule in the global contract's section "Machine load and local runs".
+- `gh workflow run release.yml -R overnightworks/appkit -f version=X.Y.Z`: the operator's release dispatch. `main` must carry X.Y.Z in `pyproject.toml` and `package.json`.
 
-- One Vitest file: `pnpm exec vitest run <file>`; type check: `pnpm run check`.
-- One Python module: `uv run --frozen pytest -q tests/<module>.py -k <behaviour>`
-  (no pytest-xdist here, so no worker setting).
-  `tests/test_npm_package.py` needs `pnpm install --frozen-lockfile` first.
-- Python lint, both must pass: `uv run --frozen ruff check .` and
-  `uv run --frozen ruff format --check .`.
-- `quality check` is the remaining static check.
-- The Playwright consumers (`pnpm run test:consumer`) are a probe stack: run them
-  only under the `flock` rule in the global contract's section "Machine load and
-  local runs". CI's `checks` job runs them, and the full suites.
+## Rules
 
-## Release
+- After the operator's release run, the head replaces GitHub's generated release notes, below the hashes, with the version's notes: what changed, the breaking changes and the upgrade steps.
 
-The operator releases himself. Once `pyproject.toml` and `package.json` carry the
-version on `main`, he dispatches
-`gh workflow run release.yml -R overnightworks/appkit -f version=X.Y.Z`. The
-workflow gates, builds and tags, and attaches the wheel, the npm tarball and the
-token list to a GitHub release. The release notes open with the wheel's and the
-tarball's hashes. After his run the head replaces GitHub's generated notes,
-below the hashes, with the version's notes (what changed, breaking changes and
-upgrade steps). The head opens one release item per dependent, which names the
-notes.
+## Owners
+
+- The operator dispatches every release.
+
+## Documents
+
+- `README.md`: read to use the kit or to see how it is distributed and released.
+- `docs/VISION.md`: read to learn what appkit is for and whom it serves.
+- `docs/ARCHITECTURE.md`: read before changing the parts, the build or the release path.
+- `docs/stylesheet.md`: read when writing markup against `appkit.css` or the components.
