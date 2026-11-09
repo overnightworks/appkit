@@ -1,0 +1,7 @@
+claim_id = "e0fd7121dd0c4f9988d82b8e35bfdbf7"
+agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
+role = "builder"
+base = "0482ef336b543db2eb92c7c5e547d194ac65af9f"
+branch = "claude/issue-146-concurrency-group-per-run"
+scope = [".github/workflows/ci.yml", ".github/workflows/code-scanning.yml"]
+opened_commit = "14b53852506b63f600fc2af89471431404a8737d"
