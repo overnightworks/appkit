@@ -1,0 +1,8 @@
+claim_id = "1eba3ba3a7db421bb480a5ed86b724e5"
+agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
+role = "builder"
+base = "4314a54b64716b8531320f7e8f26f08db321b752"
+branch = "claude/issue-133-sign-in-in-a-separate-window"
+scope = ["README.md", "docs/ARCHITECTURE.md", "docs/stylesheet.md", "package.json", "pyproject.toml", "src/lib/SignInPage.ssr.test.ts", "src/lib/SignInPage.svelte", "src/lib/SignInPage.test.ts", "src/lib/types.ts", "tests/e2e/main.ts", "tests/e2e/sign-in.spec.ts", "tests/test_npm_package.py", "uv.lock"]
+opened_commit = "4952702d06a7ad45426def005d0f2964ff685236"
+whole_reason = "One component contract and its release: the state, its types, its words and its documentation change together, and a split ships a release Skat cannot build on."
