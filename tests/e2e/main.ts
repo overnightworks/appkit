@@ -1,11 +1,11 @@
 import './app.css';
 import { mount } from 'svelte';
 import { SvelteMap } from 'svelte/reactivity';
-import { AccountMenu, LegalLinks, SignInPage, type ThemeChoice } from 'overnightworks-appkit';
+import { AccountMenu, LegalLinks, SignInPage, type SignInState, type ThemeChoice } from 'overnightworks-appkit';
 
 declare global {
 	interface Window {
-		/** Every report the menu made, in order. */
+		/** Every report the menu or the sign-in page made, in order. */
 		reports: string[];
 	}
 }
@@ -73,11 +73,21 @@ if (location.search === '?typed') {
 } else if (location.search.startsWith('?menu')) {
 	mountMenu(new URLSearchParams(location.search).get('menu') ?? '');
 } else {
+	window.reports = [];
+	const variant = location.search;
+	const state: SignInState =
+		variant === '?signing-in'
+			? { page: 'signing-in', tabHref: '/app' }
+			: variant === '?unfinished'
+				? { page: 'signed-out', signInHref: '/login', unfinished: true }
+				: variant === '?on-sign-in'
+					? { page: 'signed-out', signInHref: '/login', onSignIn: () => void window.reports.push('sign-in') }
+					: { page: 'signed-out', signInHref: '/login' };
 	mount(SignInPage, {
 		target: document.body,
 		props: {
 			appName: 'Probe',
-			state: { page: 'signed-out', signInHref: '/login' },
+			state,
 			legalLinks: legalLinks.slice(0, 2)
 		}
 	});

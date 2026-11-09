@@ -10,11 +10,29 @@
 		tryAgain: 'Try again',
 		noAccess: 'No access',
 		noAccessSentence: (appName) => `You are signed in, but this account has no access to ${appName}.`,
-		logOut: 'Log out'
+		logOut: 'Log out',
+		signingIn: 'Signing in',
+		inOtherWindow: 'In the other window',
+		openInTab: 'Open in a tab',
+		signInUnfinished: 'Sign-in did not finish.'
 	};
 
 	let { appName, state, legalLinks, words = english }: SignInPageProps = $props();
+
+	/** A plain primary click starts the app's own sign-in; any modified or non-primary click keeps the browser's behaviour. */
+	function startSignIn(event: MouseEvent, onSignIn: () => void): void {
+		if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+		event.preventDefault();
+		onSignIn();
+	}
 </script>
+
+{#snippet banner(text: string)}
+	<div class="banner" role="alert">
+		<span class="fail-shape"><i></i></span>
+		<span>{text}</span>
+	</div>
+{/snippet}
 
 <svelte:head>
 	<title>{appName}</title>
@@ -28,13 +46,33 @@
 		<span class="wordmark" data-text={appName}>{appName}</span>
 		{#if state.page === 'signed-out'}
 			<h1>{words.loggedOut}</h1>
-			<a class="action primary" href={state.signInHref} data-sveltekit-reload>{words.logIn}</a>
+			{#if state.unfinished}
+				{@render banner(words.signInUnfinished)}
+			{/if}
+			{@const onSignIn = state.onSignIn}
+			<a
+				class="action primary"
+				href={state.signInHref}
+				data-sveltekit-reload
+				onclick={onSignIn && ((event) => startSignIn(event, onSignIn))}>{words.logIn}</a
+			>
+		{:else if state.page === 'signing-in'}
+			<h1>{words.signingIn}</h1>
+			<p>{words.inOtherWindow}</p>
+			<div class="wait" aria-hidden="true">
+				<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2" /><path d="M3.5 9.5h17" /></svg>
+				<span class="dots"><i></i><i></i><i></i></span>
+			</div>
+			<a class="plain-link" href={state.tabHref} target="_blank" rel="noopener">
+				<svg viewBox="0 0 24 24" aria-hidden="true"
+					><path d="M14 4h6v6M20 4l-8 8" /><path
+						d="M19 13v6a1.5 1.5 0 0 1-1.5 1.5h-12A1.5 1.5 0 0 1 4 19V7a1.5 1.5 0 0 1 1.5-1.5H11"
+					/></svg
+				>{words.openInTab}
+			</a>
 		{:else if state.page === 'login-failed'}
 			<h1>{words.loginFailed}</h1>
-			<div class="banner" role="alert">
-				<span class="fail-shape"><i></i></span>
-				<span>{words.loginFailedBanner}</span>
-			</div>
+			{@render banner(words.loginFailedBanner)}
 			<a class="action primary" href={state.signInHref} data-sveltekit-reload>{words.tryAgain}</a>
 		{:else}
 			<h1>{words.noAccess}</h1>
@@ -193,6 +231,78 @@
 		display: inline-block;
 		background: var(--fail);
 		clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+	}
+	.wait {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		height: 44px;
+		color: var(--text-muted);
+	}
+	.wait svg {
+		width: 24px;
+		height: 24px;
+	}
+	svg {
+		flex: none;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+	.dots {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
+	.dots i {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: currentColor;
+		opacity: 0.6;
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.dots i {
+			animation: hop 1.2s ease-in-out infinite;
+		}
+		.dots i:nth-child(2) {
+			animation-delay: 0.12s;
+		}
+		.dots i:nth-child(3) {
+			animation-delay: 0.24s;
+		}
+	}
+	@keyframes hop {
+		0%,
+		60%,
+		100% {
+			translate: 0 0;
+			opacity: 0.45;
+		}
+		30% {
+			translate: 0 -5px;
+			opacity: 1;
+		}
+	}
+	.plain-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 14px;
+		color: var(--text);
+		text-decoration: none;
+		border-bottom: 1px solid var(--text-muted);
+	}
+	.plain-link svg {
+		width: 14px;
+		height: 14px;
+	}
+	.plain-link:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
 	}
 	.action {
 		display: inline-flex;

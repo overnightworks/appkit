@@ -42,11 +42,11 @@ Sign-in wording is identical in every app. Each catalog carries these strings ve
 
 ## The components' words
 
-The tarball's `SignInPage` component takes its words from the app's catalog (the `words` prop, see the [`types.ts`](../src/lib/types.ts)); the kit holds no language and no de string. The list above binds the sign-in words in every catalog. Without `words` it renders its en defaults: the strings above and two sentences, "Sign-in did not work. Please try again." (login failed) and "You are signed in, but this account has no access to <app name>." (no access). The de strings of those two sentences are not ruled.
+The tarball's `SignInPage` component takes its words from the app's catalog (the `words` prop, see the [`types.ts`](../src/lib/types.ts)); the kit holds no language and no de string. The list above binds the sign-in words in every catalog. Without `words` it renders its en defaults: the strings above and the sentences "Sign-in did not work. Please try again." (login failed), "You are signed in, but this account has no access to <app name>." (no access) and "Sign-in did not finish." (signed out after a sign-in that did not finish), and the words of the signing-in state: "Signing in", "In the other window" and "Open in a tab". The de strings of these words are not ruled, except that the blessed picture shows "Anmeldung läuft", "Im anderen Fenster", "Tab öffnen" and "Anmeldung nicht beendet".
 
 The tarball's `AccountMenu` component takes its words from the app's catalog (see the [`types.ts`](../src/lib/types.ts)): "Theme", "Follow system", "Light", "Dark" and "Log out". Without `words` it renders those en words as its defaults. The de strings of the theme rows are not ruled.
 
-Each state has one way out: Signed out shows "Log in" and never redirects by itself; No access shows "Log out" (no "Back": the page is reached through the Keycloak redirect chain, so going back returns to Keycloak, which sends a live session straight back here); Login failed shows "Try again".
+Each state has one way out: Signed out shows "Log in" and never redirects by itself; No access shows "Log out" (no "Back": the page is reached through the Keycloak redirect chain, so going back returns to Keycloak, which sends a live session straight back here); Login failed shows "Try again"; Signing in shows only "Open in a tab", a link that opens the app in a tab of its own.
 
 Which refusal shows which page, and the redirect rule, are in webauth's [Signed out and refused](https://github.com/overnightworks/webauth/blob/main/docs/host-contract.md#signed-out-and-refused).
 

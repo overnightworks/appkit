@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator } from '@playwright/test';
 import { buildConsumer, origin, routeTo, type ConsumerName } from './build-consumer.ts';
 import { resolveStyle } from './probe.ts';
 
@@ -42,6 +42,71 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 					expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
 				}
 			});
+		}
+
+		test('starts the app\'s own sign-in on a plain click and does not navigate', async ({ page }) => {
+			await routeTo(page, outDir);
+			await page.goto(`${origin}/?on-sign-in`);
+
+			await page.getByRole('link', { name: 'Log in' }).click();
+			expect(page.url()).toBe(`${origin}/?on-sign-in`);
+			expect(await page.evaluate(() => window.reports)).toEqual(['sign-in']);
+			await expect(page.getByRole('link')).toHaveCount(3);
+		});
+
+		for (const [name, click] of [
+			['a Ctrl-click', (link: Locator) => link.click({ modifiers: ['Control'] })],
+			['a Meta-click', (link: Locator) => link.click({ modifiers: ['Meta'] })],
+			['a middle click', (link: Locator) => link.click({ button: 'middle' })]
+		] as const) {
+			test(`leaves ${name} on Log in to the browser`, async ({ page }) => {
+				await routeTo(page, outDir);
+				await page.goto(`${origin}/?on-sign-in`);
+
+				await click(page.getByRole('link', { name: 'Log in' }));
+				// Where the click navigates this page (Meta on Linux), the new page holds no reports.
+				expect((await page.evaluate(() => window.reports)) ?? []).toEqual([]);
+			});
+		}
+
+		test('keeps the dots of the waiting shape still under reduced motion and moves them otherwise', async ({
+			page
+		}) => {
+			await routeTo(page, outDir);
+			await page.goto(`${origin}/?signing-in`);
+			const dot = page.locator('main i').first();
+			await page.emulateMedia({ reducedMotion: 'no-preference' });
+			await expect(dot).not.toHaveCSS('animation-name', 'none');
+			await page.emulateMedia({ reducedMotion: 'reduce' });
+			await expect(dot).toHaveCSS('animation-name', 'none');
+		});
+
+		for (const width of [390, 1280]) {
+			for (const colorScheme of colorSchemes) {
+				for (const variant of ['signing-in', 'unfinished']) {
+					test(`fits the ${variant} card at ${width} px in ${colorScheme}`, async ({ page }) => {
+						await page.setViewportSize({ width, height: 800 });
+						await page.emulateMedia({ colorScheme });
+						await routeTo(page, outDir);
+						await page.goto(`${origin}/?${variant}`);
+
+						const card = page.getByRole('main');
+						await expect(card.getByRole('heading')).toBeVisible();
+						const box = (await card.boundingBox())!;
+						expect(box.x).toBeGreaterThanOrEqual(0);
+						expect(box.x + box.width).toBeLessThanOrEqual(width);
+						expect(
+							await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
+						).toBe(true);
+						if (variant === 'signing-in') {
+							await expect(card.locator('svg').first()).toBeVisible();
+							await expect(card.locator('i').first()).toBeVisible();
+						} else {
+							await expect(card.getByRole('alert')).toBeVisible();
+						}
+					});
+				}
+			}
 		}
 
 		test('names the app once in the card for screen readers', async ({ page }) => {
