@@ -189,7 +189,7 @@ def test_a_consumer_imports_legal_links_and_its_props_type_from_the_package_root
     assert result.returncode == 0, result.stdout
 
 
-def test_a_consumer_gives_the_no_access_state_one_log_out_form_and_a_released_state_still_type_checks(
+def test_a_consumer_gives_the_no_access_state_at_most_one_log_out_form_and_a_released_state_still_type_checks(
     tarball, tmp_path
 ):
     name = json.loads((tarball / "package.json").read_text())["name"]
@@ -202,29 +202,65 @@ def test_a_consumer_gives_the_no_access_state_one_log_out_form_and_a_released_st
         "export const callback: SignInState = { page: 'no-access', onLogOut: () => {}, logOutFailure: 'x' };\n"
         "export const action: SignInState = { page: 'no-access', logOutAction: '/logout' };\n"
         "export const shared: LogOut = { logOutAction: '/logout' };\n"
-        "// @ts-expect-error neither form\n"
-        "export const neither: SignInState = { page: 'no-access' };\n"
+        "export const none: SignInState = { page: 'no-access' };\n"
+        "// @ts-expect-error a failure text needs the callback form\n"
+        "export const failureWithoutForm: SignInState = { page: 'no-access', logOutFailure: 'x' };\n"
         "// @ts-expect-error both forms\n"
         "export const both: SignInState = { page: 'no-access', onLogOut: () => {}, logOutAction: '/logout' };\n"
         "// @ts-expect-error a failure text belongs to the callback form\n"
         "export const mixed: SignInState = { page: 'no-access', logOutAction: '/logout', logOutFailure: 'x' };\n"
     )
     result = subprocess.run(
-        [
-            str(REPOSITORY / "node_modules/.bin/tsc"),
-            "--noEmit",
-            "--strict",
-            "--skipLibCheck",
-            "--module",
-            "esnext",
-            "--moduleResolution",
-            "bundler",
-            "--target",
-            "es2022",
-            "--allowImportingTsExtensions",
-            "--verbatimModuleSyntax",
-            "consumer.ts",
-        ],
+        [str(REPOSITORY / "node_modules/.bin/tsc"), *TSC_ARGUMENTS],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stdout
+
+
+def test_a_consumer_gives_each_sign_in_state_only_its_own_props(tarball, tmp_path):
+    name = json.loads((tarball / "package.json").read_text())["name"]
+    modules = tmp_path / "node_modules"
+    modules.mkdir()
+    shutil.copytree(tarball, modules / name)
+    (modules / "svelte").symlink_to(REPOSITORY / "node_modules/svelte")
+    (tmp_path / "consumer.ts").write_text(
+        f"import type {{ SignInPageProps }} from '{name}';\n"
+        "export const starting: SignInPageProps = {\n"
+        "  appName: 'A', state: { page: 'signed-out', signInHref: '/in', onSignIn: () => {}, unfinished: true },\n"
+        "  legalLinks: [],\n"
+        "};\n"
+        "export const waiting: SignInPageProps = {\n"
+        "  appName: 'A', state: { page: 'signing-in', tabHref: '/t' }, legalLinks: [],\n"
+        "};\n"
+        "export const waitingWithoutLink: SignInPageProps = {\n"
+        "  appName: 'A',\n"
+        "  // @ts-expect-error signing-in needs tabHref\n"
+        "  state: { page: 'signing-in' },\n"
+        "  legalLinks: [],\n"
+        "};\n"
+        "export const waitingWithSignInHref: SignInPageProps = {\n"
+        "  appName: 'A',\n"
+        "  // @ts-expect-error signing-in refuses signInHref\n"
+        "  state: { page: 'signing-in', tabHref: '/t', signInHref: '/in' },\n"
+        "  legalLinks: [],\n"
+        "};\n"
+        "export const failedWithHandler: SignInPageProps = {\n"
+        "  appName: 'A',\n"
+        "  // @ts-expect-error onSignIn exists only on signed-out\n"
+        "  state: { page: 'login-failed', signInHref: '/in', onSignIn: () => {} },\n"
+        "  legalLinks: [],\n"
+        "};\n"
+        "export const failedUnfinished: SignInPageProps = {\n"
+        "  appName: 'A',\n"
+        "  // @ts-expect-error unfinished exists only on signed-out\n"
+        "  state: { page: 'login-failed', signInHref: '/in', unfinished: true },\n"
+        "  legalLinks: [],\n"
+        "};\n"
+    )
+    result = subprocess.run(
+        [str(REPOSITORY / "node_modules/.bin/tsc"), *TSC_ARGUMENTS],
         cwd=tmp_path,
         capture_output=True,
         text=True,
@@ -293,37 +329,6 @@ def test_a_consumer_imports_both_words_types_from_the_package_root_and_gives_eac
         "};\n"
         "export const page: SignInPageProps = {\n"
         "  appName: 'A', state: { page: 'signed-out', signInHref: '/in' }, legalLinks: [], words: pageWords,\n"
-        "};\n"
-        "export const starting: SignInPageProps = {\n"
-        "  appName: 'A', state: { page: 'signed-out', signInHref: '/in', onSignIn: () => {}, unfinished: true },\n"
-        "  legalLinks: [],\n"
-        "};\n"
-        "export const waiting: SignInPageProps = {\n"
-        "  appName: 'A', state: { page: 'signing-in', tabHref: '/t' }, legalLinks: [],\n"
-        "};\n"
-        "export const waitingWithoutLink: SignInPageProps = {\n"
-        "  appName: 'A',\n"
-        "  // @ts-expect-error signing-in needs tabHref\n"
-        "  state: { page: 'signing-in' },\n"
-        "  legalLinks: [],\n"
-        "};\n"
-        "export const waitingWithSignInHref: SignInPageProps = {\n"
-        "  appName: 'A',\n"
-        "  // @ts-expect-error signing-in refuses signInHref\n"
-        "  state: { page: 'signing-in', tabHref: '/t', signInHref: '/in' },\n"
-        "  legalLinks: [],\n"
-        "};\n"
-        "export const failedWithHandler: SignInPageProps = {\n"
-        "  appName: 'A',\n"
-        "  // @ts-expect-error onSignIn exists only on signed-out\n"
-        "  state: { page: 'login-failed', signInHref: '/in', onSignIn: () => {} },\n"
-        "  legalLinks: [],\n"
-        "};\n"
-        "export const failedUnfinished: SignInPageProps = {\n"
-        "  appName: 'A',\n"
-        "  // @ts-expect-error unfinished exists only on signed-out\n"
-        "  state: { page: 'login-failed', signInHref: '/in', unfinished: true },\n"
-        "  legalLinks: [],\n"
         "};\n"
         "type OptionalKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? K : never }[keyof T];\n"
         "export const menuHasNoOptionalWord: [OptionalKeys<AccountMenuWords>] extends [never] ? true : false = true;\n"

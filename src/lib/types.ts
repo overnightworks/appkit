@@ -10,7 +10,8 @@ export type LogOut =
 
 /**
  * The four sign-in states: `signed-out` and `login-failed` link to `signInHref`
- * (`login-failed` adds a failure banner, as an alert); `no-access` logs out in either `LogOut` form.
+ * (`login-failed` adds a failure banner, as an alert); `no-access` logs out in either `LogOut` form,
+ * or shows no log-out action when the app passes none (inside a call's frame).
  * `signed-out` may carry `onSignIn`, called by a plain click on "Log in" instead of following the link
  * (an app opens the sign-in in a separate window), and `unfinished`, which shows that a sign-in did not finish.
  * `signing-in` shows that the sign-in runs in the other window and links to `tabHref`, which opens the app in a tab.
@@ -20,6 +21,7 @@ export type SignInState =
 	| { page: 'signed-out'; signInHref: string; onSignIn?: () => void; unfinished?: true }
 	| { page: 'signing-in'; tabHref: string }
 	| ({ page: 'no-access' } & LogOut)
+	| { page: 'no-access'; onLogOut?: never; logOutAction?: never; logOutFailure?: never }
 	| { page: 'login-failed'; signInHref: string };
 
 /** One entry of the legal row; the row keeps the given order and renders one link per entry, even when two share an href. */

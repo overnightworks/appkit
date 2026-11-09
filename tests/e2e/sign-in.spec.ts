@@ -54,17 +54,18 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			await expect(page.getByRole('link')).toHaveCount(3);
 		});
 
-		for (const [name, click] of [
-			['a Ctrl-click', (link: Locator) => link.click({ modifiers: ['Control'] })],
-			['a Meta-click', (link: Locator) => link.click({ modifiers: ['Meta'] })],
-			['a middle click', (link: Locator) => link.click({ button: 'middle' })]
+		for (const [name, click, navigatesThisPage] of [
+			['a Ctrl-click', (link: Locator) => link.click({ modifiers: ['Control'] }), false],
+			['a Meta-click', (link: Locator) => link.click({ modifiers: ['Meta'] }), true],
+			['a middle click', (link: Locator) => link.click({ button: 'middle' }), false]
 		] as const) {
 			test(`leaves ${name} on Log in to the browser`, async ({ page }) => {
 				await routeTo(page, outDir);
 				await page.goto(`${origin}/?on-sign-in`);
 
 				await click(page.getByRole('link', { name: 'Log in' }));
-				// Where the click navigates this page (Meta on Linux), the new page holds no reports.
+				// Meta on Linux is no new-tab modifier: the browser follows the link in this page.
+				if (navigatesThisPage) await expect(page).toHaveURL(`${origin}/login`);
 				expect((await page.evaluate(() => window.reports)) ?? []).toEqual([]);
 			});
 		}

@@ -81,7 +81,7 @@
 				<form class="log-out" method="post" action={state.logOutAction}>
 					<button class="action secondary" type="submit">{words.logOut}</button>
 				</form>
-			{:else}
+			{:else if state.onLogOut !== undefined}
 				{#if state.logOutFailure}
 					<p role="alert">{state.logOutFailure}</p>
 				{/if}

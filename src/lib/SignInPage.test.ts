@@ -59,6 +59,22 @@ describe('signed-out with onSignIn', () => {
 	});
 });
 
+describe('signed-out with onSignIn, a click that keeps the browser its own way', () => {
+	it.each([
+		['Ctrl', { ctrlKey: true }],
+		['Meta', { metaKey: true }],
+		['Shift', { shiftKey: true }],
+		['Alt', { altKey: true }],
+		['a non-primary button', { button: 1 }]
+	])('calls nothing and does not prevent the default on %s', async (_name, init) => {
+		const onSignIn = vi.fn();
+		const page = await render({ state: { page: 'signed-out', signInHref: '/auth/login', onSignIn } });
+		const event = click(page.querySelector('a')!, init);
+		expect(onSignIn).not.toHaveBeenCalled();
+		expect(event.defaultPrevented).toBe(false);
+	});
+});
+
 describe('signed-out, unfinished', () => {
 	it('shows the banner as an alert above the one Log in action and keeps the heading', async () => {
 		const onSignIn = vi.fn();
@@ -126,6 +142,15 @@ describe('no-access', () => {
 		expect(page.textContent).not.toContain('Back');
 		button.click();
 		expect(onLogOut).toHaveBeenCalledTimes(1);
+	});
+
+	it('shows only the heading and the sentence when the app passes no log-out form', async () => {
+		const page = await render({ state: { page: 'no-access' } });
+		expect(page.querySelector('h1')?.textContent).toBe('No access');
+		expect(page.textContent).toContain(
+			'You are signed in, but this account has no access to Hallucinai.'
+		);
+		expect(page.querySelector('form, button, a, [role="alert"]')).toBeNull();
 	});
 
 	it('shows the log out failure in an alert when the app gives one', async () => {
