@@ -21,7 +21,7 @@
 
 ## Documents
 
-- `README.md`: read to use the kit or to see how it is distributed and released.
-- `docs/VISION.md`: read to learn what appkit is for and whom it serves.
-- `docs/ARCHITECTURE.md`: read before changing the parts, the build or the release path.
+- `README.md`: read when you need to use the kit or see how it is distributed and released.
+- `docs/VISION.md`: read when you need what appkit is for and whom it serves.
+- `docs/ARCHITECTURE.md`: read when you change the parts, the build or the release path.
 - `docs/stylesheet.md`: read when writing markup against `appkit.css` or the components.
