@@ -1,8 +1,0 @@
-claim_id = "bece7dab097d4ee3ae87f79af582a6c3"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "20b187ade73c021b6821bdd5dc00cc7e03668b0f"
-branch = "claude/issue-141-sign-in-legal-links-new-tab"
-scope = ["package.json", "pyproject.toml", "src/lib/SignInPage.svelte", "src/lib/SignInPage.test.ts", "src/lib/types.ts", "uv.lock"]
-opened_commit = "fea0d9cabd3adf7f6a314423ea4c6f1cb219a9e1"
-whole_reason = "One option: its type, its pass-through, its proof and the version that ships it are useless apart."
