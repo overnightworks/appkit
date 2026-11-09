@@ -1,0 +1,7 @@
+claim_id = "ef78317203384f259be68a58dfba37f6"
+agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
+role = "builder"
+base = "03db853fd5b3dcc41389d4b2781a2742ad91801c"
+branch = "claude/issue-131-agents-md-takes-the-fleet-shape"
+scope = ["AGENTS.md"]
+opened_commit = "7d99dfaf97829c84cacda947f4a9a5935c101c8c"
