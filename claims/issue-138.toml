@@ -1,8 +1,0 @@
-claim_id = "45102e6f9369425db5b8f781474a4d4f"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "6ff174a54c6da443ce3811241c575cc9c5d78958"
-branch = "claude/issue-138-names-become-design"
-scope = [".github/workflows/release.yml", "AGENTS.md", "README.md", "docs/ARCHITECTURE.md", "docs/VISION.md", "docs/stylesheet.md", "package.json", "pyproject.toml", "quality/config.toml", "sonar-project.properties", "src/appkit", "src/design", "src/lib/types.ts", "tests/e2e/account-menu.spec.ts", "tests/e2e/app.css", "tests/e2e/build-consumer.ts", "tests/e2e/imported/main.ts", "tests/e2e/legal-row.spec.ts", "tests/e2e/linked/index.html", "tests/e2e/main.ts", "tests/e2e/sign-in.spec.ts", "tests/test_npm_package.py", "tests/test_wheel.py", "uv.lock"]
-opened_commit = "4742c900ba499cfd43baf0cf901e905aaaa19379"
-whole_reason = "One identity behind one rollback boundary: the package, export, stylesheet, release and Sonar names change in one pull request that stays open across the rename window, so main keeps v0.17.0's names until the window closes."
