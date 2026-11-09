@@ -119,6 +119,8 @@ export interface SignInPageProps {
 	state: SignInState;
 	/** An empty list shows no legal row. */
 	legalLinks: readonly LegalLink[];
+	/** Opens the legal row's links in a new tab, for a page shown inside another app's frame. */
+	legalLinksNewTab?: boolean;
 	/** Absent renders the en words. */
 	words?: SignInPageWords;
 }

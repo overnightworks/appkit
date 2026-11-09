@@ -184,6 +184,32 @@ describe('page frame', () => {
 			href: anchor.getAttribute('href')
 		}));
 		expect(shown).toEqual(links);
+		for (const anchor of page.querySelectorAll('nav a')) {
+			expect(anchor.hasAttribute('target')).toBe(false);
+			expect(anchor.hasAttribute('rel')).toBe(false);
+		}
+	});
+
+	it.each<[string, SignInPageProps['state']]>([
+		['signed-out', { page: 'signed-out', signInHref: '/auth/login' }],
+		['signing-in', { page: 'signing-in', tabHref: '/app' }],
+		['login-failed', { page: 'login-failed', signInHref: '/auth/login' }],
+		['no-access', { page: 'no-access', onLogOut: () => {} }]
+	])('opens every legal link in a new tab with legalLinksNewTab on the %s state', async (_name, state) => {
+		const page = await render({
+			state,
+			legalLinksNewTab: true,
+			legalLinks: [
+				{ label: 'Impressum', href: '/impressum' },
+				{ label: 'Datenschutz', href: '/datenschutz' }
+			]
+		});
+		const anchors = [...page.querySelectorAll('nav a')];
+		expect(anchors).toHaveLength(2);
+		for (const anchor of anchors) {
+			expect(anchor.getAttribute('target')).toBe('_blank');
+			expect(anchor.getAttribute('rel')).toBe('noopener');
+		}
 	});
 
 	it('shows no legal row when the list is empty', async () => {

@@ -17,7 +17,7 @@
 		signInUnfinished: 'Sign-in did not finish.'
 	};
 
-	let { appName, state, legalLinks, words = english }: SignInPageProps = $props();
+	let { appName, state, legalLinks, legalLinksNewTab = false, words = english }: SignInPageProps = $props();
 
 	/** A plain primary click starts the app's own sign-in; any modified or non-primary click keeps the browser's behaviour. */
 	function startSignIn(event: MouseEvent, onSignIn: () => void): void {
@@ -89,7 +89,7 @@
 			{/if}
 		{/if}
 	</main>
-	<LegalLinks links={legalLinks} />
+	<LegalLinks links={legalLinks} newTab={legalLinksNewTab} />
 </div>
 
 <style>
