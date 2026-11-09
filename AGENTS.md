@@ -1,15 +1,15 @@
-# appkit
+# design
 
 ## Commands
 
-- `pnpm run` lists the package scripts. appkit has no other task runner.
+- `pnpm run` lists the package scripts. design has no other task runner.
 - `pnpm exec vitest run <file>`: one Vitest file of `src/lib`. Needs `pnpm install --frozen-lockfile`.
 - `pnpm run check`: the Svelte and TypeScript type check. Needs `pnpm install --frozen-lockfile`.
 - `uv run --frozen pytest -q tests/<module>.py -k <behaviour>`: one Python module. `tests/test_npm_package.py` needs `pnpm install --frozen-lockfile` first.
 - `uv run --frozen ruff check .` and `uv run --frozen ruff format --check .`: Python lint; both must pass.
 - `quality check`: the shared static check. Run it at the release `.github/workflows/ci.yml` pins.
 - `pnpm run test:consumer`: the Playwright consumers, a probe stack. Run it only under the `flock` rule in the global contract's section "Machine load and local runs".
-- `gh workflow run release.yml -R overnightworks/appkit -f version=X.Y.Z`: the operator's release dispatch. `main` must carry X.Y.Z in `pyproject.toml` and `package.json`.
+- `gh workflow run release.yml -R overnightworks/design -f version=X.Y.Z`: the operator's release dispatch. `main` must carry X.Y.Z in `pyproject.toml` and `package.json`.
 
 ## Rules
 
@@ -22,6 +22,6 @@
 ## Documents
 
 - `README.md`: read when you need to use the kit or see how it is distributed and released.
-- `docs/VISION.md`: read when you need to know what appkit is for and whom it serves.
+- `docs/VISION.md`: read when you need to know what design is for and whom it serves.
 - `docs/ARCHITECTURE.md`: read when you change the parts, the build or the release path.
-- `docs/stylesheet.md`: read when writing markup against `appkit.css` or the components.
+- `docs/stylesheet.md`: read when writing markup against `design.css` or the components.

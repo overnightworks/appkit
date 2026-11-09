@@ -13,7 +13,7 @@ const computedOf = (element: Locator, properties: readonly string[]) =>
 	}, properties);
 
 for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[]) {
-	test.describe(`the legal row in a production consumer that ${consumer === 'imported' ? 'imports' : 'statically links'} appkit.css`, () => {
+	test.describe(`the legal row in a production consumer that ${consumer === 'imported' ? 'imports' : 'statically links'} design.css`, () => {
 		let outDir: string;
 		test.beforeAll(async () => {
 			outDir = await buildConsumer(consumer);

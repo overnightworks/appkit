@@ -1,8 +1,8 @@
-# appkit architecture
+# design architecture
 
 ## 1. Context and Scope
 
-appkit is the family look that overnightworks products share: one stylesheet,
+design is the family look that overnightworks products share: one stylesheet,
 its fonts and three Svelte components. It runs no service. Outside it: the
 product apps that load the stylesheet (and, for SvelteKit apps, the components),
 the Keycloak themes and the legal pages, which take the wheel's stylesheet and fonts through the
@@ -11,17 +11,17 @@ Page layout and product-specific JavaScript stay in the products.
 
 ```mermaid
 flowchart LR
-  appkit[appkit repository]
+  design[design repository]
   gate[quality gate]
   release[GitHub release]
   py[Python apps]
   kit[SvelteKit apps]
   kc[Keycloak themes and legal pages]
-  gate -- checks every pull request and release --> appkit
-  appkit -- release.yml --> release
+  gate -- checks every pull request and release --> design
+  design -- release.yml --> release
   release -- wheel, pinned by URL and hash --> py
   release -- tarball, pinned by URL --> kit
-  py -- copies appkit.css and fonts under a versioned path --> kc
+  py -- copies design.css and fonts under a versioned path --> kc
 ```
 
 ## 2. Building Block View
@@ -32,16 +32,16 @@ get identical CSS and fonts. The components exist only in the tarball.
 ```mermaid
 flowchart TB
   subgraph source[src]
-    css[appkit/static: appkit.css and fonts]
+    css[design/static: design.css and fonts]
     comp[lib: SignInPage, AccountMenu, LegalLinks and types]
   end
-  css --> wheel[wheel: import appkit]
-  css --> tgz[tarball: appkit.css and fonts]
+  css --> wheel[wheel: import design]
+  css --> tgz[tarball: design.css and fonts]
   comp --> tgz
   tokens[tokens.txt] -. listed from .-> css
 ```
 
-- **Stylesheet and fonts** (`appkit.css`, [`stylesheet.md`](stylesheet.md)): the family
+- **Stylesheet and fonts** (`design.css`, [`stylesheet.md`](stylesheet.md)): the family
   tokens, the `@font-face` rules and the classes `as-typed` and `legal`.
 - **Components**: `SignInPage` and `AccountMenu` render the page and the panel,
   and both render `LegalLinks`. Each prop's meaning is a docstring in
@@ -81,15 +81,15 @@ sequenceDiagram
 
 ## 4. Deployment View
 
-appkit itself is not deployed. A GitHub-hosted runner builds the artefacts from
+design itself is not deployed. A GitHub-hosted runner builds the artefacts from
 the gated commit, and a GitHub release holds them. The apps'
-builds download them: Python servers serve the wheel's `appkit.css`, and
+builds download them: Python servers serve the wheel's `design.css`, and
 SvelteKit builds bundle the tarball's stylesheet and components into the app.
 In the browser the result is static CSS, fonts and component markup.
 
 ## 5. Crosscutting Concepts
 
-**Trust.** appkit holds no secrets. What it ships is static CSS, fonts and Svelte
+**Trust.** design holds no secrets. What it ships is static CSS, fonts and Svelte
 components. The app passes the signed-in person's name, account URL and failure
 text in; the components render them and keep none. So the question is the supply
 path. GitHub enforces immutable releases for the organization, so a release's tag
@@ -106,7 +106,7 @@ are quality's to name.
 owns what needs a decision about its product: routes, the trigger and popover
 of the account menu, storing the theme and setting `data-theme`, how logging out
 works, how a sign-in starts, wording of failures, legal link targets, the app colour and loading
-`appkit.css`. The components store, fetch and close nothing and write no
+`design.css`. The components store, fetch and close nothing and write no
 `data-theme`.
 
 **Proof strategy.** CI runs `svelte-check` and vitest for the components, pytest
@@ -138,13 +138,13 @@ cover them.
   Keycloak themes and the legal pages) take only the stylesheet. Reopens if an app that cannot run
   Svelte needs a component.
 - Each consumer keeping its own copy of a shared rule set, such as the legal
-  row's CSS: copies drift, so one rule set lives in `appkit.css`. Reopens only if
-  a consumer cannot load `appkit.css`.
+  row's CSS: copies drift, so one rule set lives in `design.css`. Reopens only if
+  a consumer cannot load `design.css`.
 - A template fragment the kit ships for one provider (a Keycloak FTL or HTML
   fragment): it carries one provider's template format for one consumer and still
   needs the rules in the stylesheet, so such a page writes the documented markup.
   Reopens if several consumers share one template format.
-- Git pins (`github:overnightworks/appkit#vX.Y.Z`) instead of release assets: a
+- Git pins (`github:overnightworks/design#vX.Y.Z`) instead of release assets: a
   git pin loses the content hash a consumer's lock checks, sha256 in the wheel
   URL and sha512 in pnpm's lock. Reopens if a git pin can carry a checked content
   hash.

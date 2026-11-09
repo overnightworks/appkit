@@ -1,2 +1,2 @@
-import 'overnightworks-appkit/appkit.css';
+import 'overnightworks-design/design.css';
 import '../main.ts';

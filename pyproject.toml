@@ -1,6 +1,6 @@
 [project]
-name = "overnightworks-appkit"
-version = "0.17.0"
+name = "overnightworks-design"
+version = "0.18.0"
 description = "Family design tokens and fonts shared by overnightworks products"
 readme = "README.md"
 license = "MIT"
@@ -16,7 +16,7 @@ requires = ["uv_build>=0.10,<0.14"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
-module-name = "appkit"
+module-name = "design"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

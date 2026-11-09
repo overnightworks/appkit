@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.14"
 
 [[package]]
@@ -21,8 +21,8 @@ wheels = [
 ]
 
 [[package]]
-name = "overnightworks-appkit"
-version = "0.17.0"
+name = "overnightworks-design"
+version = "0.18.0"
 source = { editable = "." }
 
 [package.dev-dependencies]

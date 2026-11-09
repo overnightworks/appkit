@@ -14,21 +14,21 @@ entry = "patches/"
 reason = "pnpm reads patchedDependencies from its default patches/ folder at the root"
 
 [[layout.allow]]
-path = "src/appkit/static/fonts/open-sans-LICENSE"
+path = "src/design/static/fonts/open-sans-LICENSE"
 rule = "file-suffix"
 reason = "licence text shipped verbatim beside the font it covers"
 
 [[layout.allow]]
-path = "src/appkit/static/fonts/oswald-LICENSE"
+path = "src/design/static/fonts/oswald-LICENSE"
 rule = "file-suffix"
 reason = "licence text shipped verbatim beside the font it covers"
 
 [[layout.allow]]
 path = "tests/test_wheel.py"
 rule = "test-layout"
-reason = "tests the built wheel and its release scripts, not a module of src/appkit"
+reason = "tests the built wheel and its release scripts, not a module of src/design"
 
 [[layout.allow]]
 path = "tests/test_npm_package.py"
 rule = "test-layout"
-reason = "tests the packed npm tarball, not a module of src/appkit"
+reason = "tests the packed npm tarball, not a module of src/design"

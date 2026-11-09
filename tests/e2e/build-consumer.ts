@@ -17,9 +17,8 @@ export type ConsumerName = 'imported' | 'linked';
 
 let tarballPath: string | undefined;
 
-/** The tarball a consumer installs: APPKIT_TARBALL, or the working tree packed by pnpm. */
+/** The tarball a consumer installs: the working tree packed by pnpm. */
 function tarball(): string {
-	if (process.env.APPKIT_TARBALL) return resolve(process.env.APPKIT_TARBALL);
 	if (!tarballPath) {
 		rmSync(packDirectory, { recursive: true, force: true });
 		mkdirSync(packDirectory, { recursive: true });
@@ -34,7 +33,7 @@ function tarball(): string {
 
 /** Lays the tarball out as `npm install` does, under node_modules, where both consumers resolve it. */
 function installPackage(): void {
-	const installed = join(consumersRoot, 'node_modules/overnightworks-appkit');
+	const installed = join(consumersRoot, 'node_modules/overnightworks-design');
 	rmSync(installed, { recursive: true, force: true });
 	mkdirSync(installed, { recursive: true });
 	execFileSync('tar', ['-xzf', tarball(), '-C', installed, '--strip-components=1']);
@@ -55,9 +54,9 @@ export async function buildConsumer(name: ConsumerName): Promise<string> {
 	if (name === 'linked') {
 		// A linked stylesheet is copied into the page's origin untouched, bypassing the bundler.
 		const stylesheet = createRequire(join(consumersRoot, 'package.json')).resolve(
-			'overnightworks-appkit/appkit.css'
+			'overnightworks-design/design.css'
 		);
-		cpSync(stylesheet, join(outDir, 'appkit.css'));
+		cpSync(stylesheet, join(outDir, 'design.css'));
 		cpSync(join(dirname(stylesheet), 'fonts'), join(outDir, 'fonts'), { recursive: true });
 	}
 	return outDir;

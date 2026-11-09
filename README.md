@@ -1,4 +1,4 @@
-# appkit
+# design
 
 The family look that overnightworks products share (tokens, fonts, two classes
 and three Svelte components), for the engineers of those products.
@@ -7,19 +7,19 @@ and three Svelte components), for the engineers of those products.
 
 Distribution is a GitHub release. It carries:
 
-- the wheel `overnightworks_appkit-<version>-py3-none-any.whl` (import `appkit`):
-  `appkit/static/appkit.css` and `appkit/static/fonts/`;
-- `overnightworks-appkit-<version>.tgz`: the same stylesheet and fonts, plus the
+- the wheel `overnightworks_design-<version>-py3-none-any.whl` (import `design`):
+  `design/static/design.css` and `design/static/fonts/`;
+- `overnightworks-design-<version>.tgz`: the same stylesheet and fonts, plus the
   components `SignInPage`, `AccountMenu` and `LegalLinks`. It is the only npm
   distribution, and `svelte` ^5.20 is its only, peer, dependency;
-- `appkit-<version>-tokens.txt`: the sorted custom-property names `appkit.css`
+- `design-<version>-tokens.txt`: the sorted custom-property names `design.css`
   defines.
 
 An app that serves the stylesheet from Python pins the wheel by URL with its
 hash, which the release notes give:
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v<version>/overnightworks_appkit-<version>-py3-none-any.whl#sha256=<sha256>
+https://github.com/overnightworks/design/releases/download/v<version>/overnightworks_design-<version>-py3-none-any.whl#sha256=<sha256>
 ```
 
 A SvelteKit app pins the tarball by URL. pnpm writes the tarball's `sha512-`
@@ -28,11 +28,11 @@ hit, and a frozen install enforces it; compare the lockfile's value with the
 one at the top of the release notes, or enter that one:
 
 ```
-https://github.com/overnightworks/appkit/releases/download/v<version>/overnightworks-appkit-<version>.tgz
+https://github.com/overnightworks/design/releases/download/v<version>/overnightworks-design-<version>.tgz
 ```
 
-Then `import 'overnightworks-appkit/appkit.css'` and
-`import { SignInPage } from 'overnightworks-appkit'`.
+Then `import 'overnightworks-design/design.css'` and
+`import { SignInPage } from 'overnightworks-design'`.
 
 ## SignInPage
 
@@ -66,7 +66,7 @@ components render.
 
 ## Documentation
 
-- [Vision](docs/VISION.md): what appkit is for and what it is not.
+- [Vision](docs/VISION.md): what design is for and what it is not.
 - [Stylesheet reference](docs/stylesheet.md): the classes, tokens, wording and
   legal-row markup.
 - [Architecture](docs/ARCHITECTURE.md): the parts, the trust and the proof.

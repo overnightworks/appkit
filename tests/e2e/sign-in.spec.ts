@@ -5,7 +5,7 @@ import { resolveStyle } from './probe.ts';
 const colorSchemes = ['light', 'dark'] as const;
 
 for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[]) {
-	test.describe(`a production consumer that ${consumer === 'imported' ? 'imports' : 'statically links'} appkit.css`, () => {
+	test.describe(`a production consumer that ${consumer === 'imported' ? 'imports' : 'statically links'} design.css`, () => {
 		let outDir: string;
 		test.beforeAll(async () => {
 			outDir = await buildConsumer(consumer);

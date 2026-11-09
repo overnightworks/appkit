@@ -1,4 +1,4 @@
-/* The colour slot belongs to the app, not to appkit.css. */
+/* The colour slot belongs to the app, not to design.css. */
 :root {
 	--primary: #0b7285;
 	--accent: #f08c00;

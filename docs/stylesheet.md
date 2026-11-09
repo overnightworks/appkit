@@ -1,13 +1,13 @@
-# appkit stylesheet reference
+# design stylesheet reference
 
-Reference of `appkit.css` and the components' words, for an engineer writing
+Reference of `design.css` and the components' words, for an engineer writing
 markup against the kit.
 
-## What `appkit.css` owns
+## What `design.css` owns
 
-The wheel's `appkit.css` owns the family tokens and the
+The wheel's `design.css` owns the family tokens and the
 `@font-face` rules for Oswald and Open Sans. The token names are the release's
-`appkit-<version>-tokens.txt`, which `scripts/list_tokens` prints for any stylesheet.
+`design-<version>-tokens.txt`, which `scripts/list_tokens` prints for any stylesheet.
 Light is under `:root`; dark sits under the device media query guarded by
 `:root:not([data-theme='light'])` and under `:root[data-theme='dark']`, so with
 no choice the page follows the device and either attribute forces its theme.
@@ -71,7 +71,7 @@ hopin and hal deviate by name:
 
 ## Writing the legal row by hand
 
-An app's page that cannot render Svelte writes the same row by hand: `<nav class="legal" aria-label="Legal">` holding one `<a href>` per link in that order, with no separator characters. The accessible name, not printed, is the literal "Legal" in every app, as in `LegalLinks`'s `<nav>`. The row then gets its look from `appkit.css`, as the component's does; the menu form (`legal menu`) is the kit's own and is not offered. The page keeps the row's spacing and placement relative to its neighbours.
+An app's page that cannot render Svelte writes the same row by hand: `<nav class="legal" aria-label="Legal">` holding one `<a href>` per link in that order, with no separator characters. The accessible name, not printed, is the literal "Legal" in every app, as in `LegalLinks`'s `<nav>`. The row then gets its look from `design.css`, as the component's does; the menu form (`legal menu`) is the kit's own and is not offered. The page keeps the row's spacing and placement relative to its neighbours.
 
 ```html
 <nav class="legal" aria-label="Legal"><a href="https://hallucinai.de/impressum#songmaker">Impressum</a><a href="https://hallucinai.de/datenschutz#songmaker">Datenschutz</a><a href="https://hallucinai.de/nutzungsbedingungen#songmaker">Nutzungsbedingungen</a></nav>
@@ -87,5 +87,5 @@ hal's [docs/keycloak.md](https://github.com/overnightworks/hal/blob/main/docs/ke
 
 - **Wording.** Catalogs carry every string; the stylesheet has none. Only the sign-in wording list above is ruled here.
 - **Page layout and markup.** App bar, page structure, forms and any markup outside the three components stay in the product, as do the legal row's spacing and placement around it. A product keeps its own selectors off the legal row: a rule that reaches the row or its links through an ancestor (`.top nav a`, say) can change the kit's look.
-- **The app colour.** `--primary`, `--accent` and `--on-accent`; `appkit.css` defines none of them.
+- **The app colour.** `--primary`, `--accent` and `--on-accent`; `design.css` defines none of them.
 - **Meaning that differs.** State words (reachable vs ready vs active) and which state a domain shows.

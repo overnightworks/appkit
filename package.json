@@ -1,12 +1,12 @@
 {
-  "name": "overnightworks-appkit",
-  "version": "0.17.0",
+  "name": "overnightworks-design",
+  "version": "0.18.0",
   "private": true,
   "type": "module",
   "license": "MIT",
   "files": [
-    "src/appkit/static/appkit.css",
-    "src/appkit/static/fonts",
+    "src/design/static/design.css",
+    "src/design/static/fonts",
     "svelte-dist",
     "!svelte-dist/**/*.test.*"
   ],
@@ -15,7 +15,7 @@
       "types": "./svelte-dist/index.d.ts",
       "svelte": "./svelte-dist/index.js"
     },
-    "./appkit.css": "./src/appkit/static/appkit.css"
+    "./design.css": "./src/design/static/design.css"
   },
   "sideEffects": [
     "**/*.css"
