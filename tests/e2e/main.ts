@@ -1,7 +1,7 @@
 import './app.css';
 import { mount } from 'svelte';
 import { SvelteMap } from 'svelte/reactivity';
-import { AccountMenu, LegalLinks, SignInPage, type SignInState, type ThemeChoice } from 'overnightworks-appkit';
+import { AccountMenu, LegalLinks, SignInPage, type SignInState, type ThemeChoice } from 'overnightworks-design';
 
 declare global {
 	interface Window {

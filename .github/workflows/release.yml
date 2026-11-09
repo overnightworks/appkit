@@ -87,14 +87,14 @@ jobs:
           pnpm install --frozen-lockfile
           uv build --wheel --no-create-gitignore --out-dir dist
           pnpm pack --pack-destination dist
-          scripts/list_tokens src/appkit/static/appkit.css >"dist/appkit-$VERSION-tokens.txt"
+          scripts/list_tokens src/design/static/design.css >"dist/design-$VERSION-tokens.txt"
 
       - name: Refuse unless dist holds exactly the wheel, the tarball and the token list
         run: |
           expected=$(printf '%s\n' \
-            "appkit-$VERSION-tokens.txt" \
-            "overnightworks-appkit-$VERSION.tgz" \
-            "overnightworks_appkit-$VERSION-py3-none-any.whl")
+            "design-$VERSION-tokens.txt" \
+            "overnightworks-design-$VERSION.tgz" \
+            "overnightworks_design-$VERSION-py3-none-any.whl")
           found=$(LC_ALL=C ls -A dist)
           if [ "$found" != "$expected" ]; then
             echo "Refused: dist holds" >&2

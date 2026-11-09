@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 REPOSITORY = Path(__file__).resolve().parent.parent
-STATIC = "src/appkit/static"
+STATIC = "src/design/static"
 INSTALL_SCRIPTS = {"preinstall", "install", "postinstall", "prepare"}
 STORAGE_AND_NETWORK = (
     "localStorage",
@@ -81,7 +81,7 @@ def export_targets(exports):
 def test_tarball_holds_exactly_the_manifest_readme_licence_stylesheet_fonts_font_licences_and_component(
     tarball, font_files, licences
 ):
-    expected = {"package.json", "README.md", "LICENSE", f"{STATIC}/appkit.css"} | COMPONENT_FILES
+    expected = {"package.json", "README.md", "LICENSE", f"{STATIC}/design.css"} | COMPONENT_FILES
     expected |= {f"{STATIC}/fonts/{name}" for name in font_files | licences}
     assert packed_files(tarball) == expected
 
@@ -94,7 +94,7 @@ def test_every_export_target_is_a_packed_file(tarball):
 
 
 def test_every_url_in_the_packed_stylesheet_names_a_packed_font(tarball, font_files, stylesheet_urls):
-    stylesheet = tarball / STATIC / "appkit.css"
+    stylesheet = tarball / STATIC / "design.css"
     urls = stylesheet_urls(stylesheet)
     assert len(urls) == len(font_files)
     for url in urls:
@@ -102,17 +102,17 @@ def test_every_url_in_the_packed_stylesheet_names_a_packed_font(tarball, font_fi
 
 
 def test_packed_stylesheet_is_byte_equal_to_the_source_stylesheet(tarball):
-    source = REPOSITORY / STATIC / "appkit.css"
-    assert (tarball / STATIC / "appkit.css").read_bytes() == source.read_bytes()
+    source = REPOSITORY / STATIC / "design.css"
+    assert (tarball / STATIC / "design.css").read_bytes() == source.read_bytes()
 
 
-def test_manifest_is_private_and_exports_the_component_with_types_and_the_stylesheet_as_appkit_css(tarball):
+def test_manifest_is_private_and_exports_the_component_with_types_and_the_stylesheet_as_design_css(tarball):
     manifest = json.loads((tarball / "package.json").read_text())
     assert manifest["private"] is True
     exports = manifest["exports"]
-    assert set(exports) == {".", "./appkit.css"}
+    assert set(exports) == {".", "./design.css"}
     assert set(exports["."]) == {"types", "svelte"}
-    assert exports["./appkit.css"] == f"./{STATIC}/appkit.css"
+    assert exports["./design.css"] == f"./{STATIC}/design.css"
 
 
 def test_package_version_equals_the_python_package_version(tarball):

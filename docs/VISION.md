@@ -1,13 +1,13 @@
-# appkit vision
+# design vision
 
-appkit is the shared toolbox of a family of web apps. It holds the parts every
+design is the shared toolbox of a family of web apps. It holds the parts every
 app needs, so that no app builds them again and a change made once reaches all
 of them.
 
 ## Why it exists, and for whom
 
 Left alone, every app rebuilds the same things: its look, its sign-in page, its
-account menu. The copies drift apart and a fix is made once per app. appkit
+account menu. The copies drift apart and a fix is made once per app. design
 keeps one copy of each shared thing, so the family looks and reads as one
 product and stays that way. It serves the people who build the apps: they take
 what is shared and write only what is their own, which is data, rules and an
@@ -26,7 +26,7 @@ familiar.
 - Carry one change to every app: an app takes the new version when its builders
   choose, and a breaking change is announced openly.
 
-A part joins appkit when an app needs it and stays only if it holds in every
+A part joins design when an app needs it and stays only if it holds in every
 app. Nothing is built ahead of use.
 
 ## What it is not

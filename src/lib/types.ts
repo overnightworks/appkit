@@ -36,7 +36,7 @@ export type LegalLinksPlace = 'page' | 'menu';
 /**
  * Props of `LegalLinks`, a `<nav>` of the given links; an empty list renders nothing.
  * `newTab` opens a `page` row's links in a new tab with the same look.
- * The look comes from `appkit.css`, not from the component.
+ * The look comes from `design.css`, not from the component.
  */
 export type LegalLinksProps =
 	| { links: readonly LegalLink[]; place?: 'page'; newTab?: boolean }

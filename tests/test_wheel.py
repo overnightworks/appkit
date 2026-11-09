@@ -43,7 +43,7 @@ def installed_package(tmp_path_factory):
     probe = (
         "import sys; sys.path.insert(0, sys.argv[1]);"
         "from importlib.resources import files;"
-        "print(files('appkit') / 'static')"
+        "print(files('design') / 'static')"
     )
     static = subprocess.run(
         [sys.executable, "-I", "-c", probe, str(unpacked)],
@@ -54,16 +54,27 @@ def installed_package(tmp_path_factory):
     return wheel, Path(static)
 
 
+def test_wheel_top_level_is_the_design_package_and_its_dist_info(installed_package):
+    wheel, _ = installed_package
+    top_level = {name.split("/")[0] for name in zipfile.ZipFile(wheel).namelist()}
+    assert top_level == {"design", f"{wheel.name.split('-py3')[0]}.dist-info"}
+
+
+def test_design_resolves_inside_the_unpacked_wheel(installed_package):
+    wheel, static = installed_package
+    assert static.is_relative_to(wheel.parent / "site")
+
+
 def test_wheel_holds_the_stylesheet_the_fonts_and_both_licences(installed_package, font_files, licences):
     _, static = installed_package
-    assert (static / "appkit.css").is_file()
+    assert (static / "design.css").is_file()
     assert {path.name for path in (static / "fonts").iterdir()} == font_files | licences
 
 
 def test_wheel_stylesheet_is_byte_equal_to_the_source_stylesheet(installed_package):
     _, static = installed_package
-    source = REPOSITORY / "src" / "appkit" / "static" / "appkit.css"
-    assert (static / "appkit.css").read_bytes() == source.read_bytes()
+    source = REPOSITORY / "src" / "design" / "static" / "design.css"
+    assert (static / "design.css").read_bytes() == source.read_bytes()
 
 
 def test_wheel_holds_only_data_and_no_tests(installed_package):
@@ -80,7 +91,7 @@ def test_wheel_holds_no_svelte_component_and_no_component_build(installed_packag
 
 def test_every_url_in_the_stylesheet_names_a_font_in_the_wheel(installed_package, font_files, stylesheet_urls):
     _, static = installed_package
-    urls = stylesheet_urls(static / "appkit.css")
+    urls = stylesheet_urls(static / "design.css")
     assert len(urls) == len(font_files)
     for url in urls:
         assert (static / url).is_file(), url
@@ -89,7 +100,7 @@ def test_every_url_in_the_stylesheet_names_a_font_in_the_wheel(installed_package
 def test_token_list_holds_exactly_the_properties_the_stylesheet_defines(installed_package):
     _, static = installed_package
     listing = subprocess.run(
-        [str(REPOSITORY / "scripts" / "list_tokens"), str(static / "appkit.css")],
+        [str(REPOSITORY / "scripts" / "list_tokens"), str(static / "design.css")],
         check=True,
         capture_output=True,
         text=True,
@@ -118,7 +129,7 @@ def top_level_rules(stylesheet):
 
 def test_light_is_the_no_choice_case_and_dark_follows_the_device_or_the_attribute(installed_package):
     _, static = installed_package
-    rules = top_level_rules((static / "appkit.css").read_text())
+    rules = top_level_rules((static / "design.css").read_text())
     (device_dark,) = rules["@media (prefers-color-scheme: dark)"]
     assert ":root:not([data-theme='light'])" in device_dark
     bodies = {
@@ -152,7 +163,7 @@ DARK_STATE_COLOURS = {
 
 def test_state_tokens_carry_the_pictures_colours_in_light_and_both_dark_branches(installed_package):
     _, static = installed_package
-    rules = top_level_rules((static / "appkit.css").read_text())
+    rules = top_level_rules((static / "design.css").read_text())
     (device_dark,) = rules["@media (prefers-color-scheme: dark)"]
     bodies = {
         "light": (rules[":root"][0], LIGHT_STATE_COLOURS),

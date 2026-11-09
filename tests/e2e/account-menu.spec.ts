@@ -46,7 +46,7 @@ async function expectNothingStoredOrFetched(
 ): Promise<void> {
 	for (const { method, pathname } of requests) {
 		expect(method).toBe('GET');
-		expect(pathname).toMatch(/^\/($|assets\/|fonts\/|appkit\.css$)/);
+		expect(pathname).toMatch(/^\/($|assets\/|fonts\/|design\.css$)/);
 	}
 	const stored = await page.evaluate(
 		() => localStorage.length + sessionStorage.length + document.cookie.length
@@ -55,7 +55,7 @@ async function expectNothingStoredOrFetched(
 }
 
 for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[]) {
-	test.describe(`the account menu in a production consumer that ${consumer === 'imported' ? 'imports' : 'statically links'} appkit.css`, () => {
+	test.describe(`the account menu in a production consumer that ${consumer === 'imported' ? 'imports' : 'statically links'} design.css`, () => {
 		let outDir: string;
 		test.beforeAll(async () => {
 			outDir = await buildConsumer(consumer);
