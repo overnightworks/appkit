@@ -12,7 +12,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: codeql-${{ github.ref }}
+  # Every non-pull-request run gets its own group: GitHub keeps one pending run per group and cancels it when another queues, so a shared group on main loses runs.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
