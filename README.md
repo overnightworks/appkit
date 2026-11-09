@@ -36,7 +36,7 @@ Then `import 'overnightworks-appkit/appkit.css'` and
 
 ## SignInPage
 
-The sign-in page in its three states. Props and behaviour are documented in
+The sign-in page in its four states: signed out, signing in (in a separate window), login failed and no access. Props and behaviour are documented in
 [`src/lib/types.ts`](src/lib/types.ts).
 
 ```svelte

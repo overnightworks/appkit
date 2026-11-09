@@ -105,7 +105,7 @@ are quality's to name.
 **Ownership of the components.** A component owns its markup and look. The app
 owns what needs a decision about its product: routes, the trigger and popover
 of the account menu, storing the theme and setting `data-theme`, how logging out
-works, wording of failures, legal link targets, the app colour and loading
+works, how a sign-in starts, wording of failures, legal link targets, the app colour and loading
 `appkit.css`. The components store, fetch and close nothing and write no
 `data-theme`.
 
