@@ -16,6 +16,7 @@ jobs:
   checks:
     name: checks
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
@@ -66,11 +67,12 @@ jobs:
         run: |
           pnpm exec playwright install --with-deps chromium
           pnpm run test:consumer
+      # loadfile keeps test_npm_package.py on one worker: its pnpm pack runs prepack, which rewrites the shared svelte-dist/.
       - name: Run the package tests and build the wheel
         run: |
           uv run --frozen ruff check .
           uv run --frozen ruff format --check .
-          uv run --frozen pytest -q tests
+          uv run --frozen pytest -q -n auto --dist loadfile tests
           uv build --wheel
 
   quality:
