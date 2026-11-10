@@ -9,17 +9,19 @@ export type LogOut =
 	| { logOutAction: string; onLogOut?: never; logOutFailure?: never };
 
 /**
- * The four sign-in states: `signed-out` and `login-failed` link to `signInHref`
+ * The five sign-in states: `signed-out` and `login-failed` link to `signInHref`
  * (`login-failed` adds a failure banner, as an alert); `no-access` logs out in either `LogOut` form,
  * or shows no log-out action when the app passes none (inside a call's frame).
  * `signed-out` may carry `onSignIn`, called by a plain click on "Log in" instead of following the link
  * (an app opens the sign-in in a separate window), and `unfinished`, which shows that a sign-in did not finish.
  * `signing-in` shows that the sign-in runs in the other window and links to `tabHref`, which opens the app in a tab.
+ * `window-blocked` shows that the browser blocked that window and offers only the same link to `tabHref`.
  * Their words are listed in docs/stylesheet.md.
  */
 export type SignInState =
 	| { page: 'signed-out'; signInHref: string; onSignIn?: () => void; unfinished?: true }
 	| { page: 'signing-in'; tabHref: string }
+	| { page: 'window-blocked'; tabHref: string }
 	| ({ page: 'no-access' } & LogOut)
 	| { page: 'no-access'; onLogOut?: never; logOutAction?: never; logOutFailure?: never }
 	| { page: 'login-failed'; signInHref: string };
@@ -84,6 +86,8 @@ export interface SignInPageWords {
 	signingIn: string;
 	inOtherWindow: string;
 	openInTab: string;
+	windowBlocked: string;
+	windowBlockedSentence: string;
 	signInUnfinished: string;
 }
 

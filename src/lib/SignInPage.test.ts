@@ -109,6 +109,22 @@ describe('signing-in', () => {
 	});
 });
 
+describe('window-blocked', () => {
+	it('says the window was blocked, shows no wait and offers only a link that opens the app in a tab', async () => {
+		const page = await render({ state: { page: 'window-blocked', tabHref: '/app' } });
+		expect(page.querySelector('h1')?.textContent).toBe('Window blocked');
+		expect(page.textContent).toContain('Your browser blocked the sign-in window.');
+		expect(page.querySelector('main [aria-hidden="true"]:not(a *)')).toBeNull();
+		expect(page.querySelector('[role="alert"], button')).toBeNull();
+		const actions = page.querySelectorAll('a, button');
+		expect(actions).toHaveLength(1);
+		expect(actions[0].textContent?.trim()).toBe('Open in a tab');
+		expect(actions[0].getAttribute('href')).toBe('/app');
+		expect(actions[0].getAttribute('target')).toBe('_blank');
+		expect(actions[0].getAttribute('rel')).toBe('noopener');
+	});
+});
+
 describe('login-failed', () => {
 	it('shows the failure banner as an alert and offers one Try again link that reloads the page', async () => {
 		const page = await render({ state: { page: 'login-failed', signInHref: '/auth/login?retry' } });
@@ -193,6 +209,7 @@ describe('page frame', () => {
 	it.each<[string, SignInPageProps['state']]>([
 		['signed-out', { page: 'signed-out', signInHref: '/auth/login' }],
 		['signing-in', { page: 'signing-in', tabHref: '/app' }],
+		['window-blocked', { page: 'window-blocked', tabHref: '/app' }],
 		['login-failed', { page: 'login-failed', signInHref: '/auth/login' }],
 		['no-access', { page: 'no-access', onLogOut: () => {} }]
 	])('opens every legal link in a new tab with legalLinksNewTab on the %s state', async (_name, state) => {
@@ -251,6 +268,8 @@ describe('words from the app', () => {
 		signingIn: 'Anmeldung läuft',
 		inOtherWindow: 'Im anderen Fenster',
 		openInTab: 'Tab öffnen',
+		windowBlocked: 'Fenster blockiert',
+		windowBlockedSentence: 'Dein Browser hat das Anmeldefenster blockiert.',
 		signInUnfinished: 'Anmeldung nicht beendet'
 	};
 	function visibleTexts(page: HTMLElement): string[] {
@@ -272,6 +291,11 @@ describe('words from the app', () => {
 			'signing-in',
 			{ page: 'signing-in', tabHref: '/app' },
 			['Anmeldung läuft', 'Im anderen Fenster', 'Tab öffnen']
+		],
+		[
+			'window-blocked',
+			{ page: 'window-blocked', tabHref: '/app' },
+			['Fenster blockiert', 'Dein Browser hat das Anmeldefenster blockiert.', 'Tab öffnen']
 		],
 		[
 			'login-failed',

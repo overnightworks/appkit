@@ -14,6 +14,8 @@
 		signingIn: 'Signing in',
 		inOtherWindow: 'In the other window',
 		openInTab: 'Open in a tab',
+		windowBlocked: 'Window blocked',
+		windowBlockedSentence: 'Your browser blocked the sign-in window.',
 		signInUnfinished: 'Sign-in did not finish.'
 	};
 
@@ -32,6 +34,16 @@
 		<span class="fail-shape"><i></i></span>
 		<span>{text}</span>
 	</div>
+{/snippet}
+
+{#snippet tabLink(tabHref: string)}
+	<a class="plain-link" href={tabHref} target="_blank" rel="noopener">
+		<svg viewBox="0 0 24 24" aria-hidden="true"
+			><path d="M14 4h6v6M20 4l-8 8" /><path
+				d="M19 13v6a1.5 1.5 0 0 1-1.5 1.5h-12A1.5 1.5 0 0 1 4 19V7a1.5 1.5 0 0 1 1.5-1.5H11"
+			/></svg
+		>{words.openInTab}
+	</a>
 {/snippet}
 
 <svelte:head>
@@ -63,13 +75,11 @@
 				<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2" /><path d="M3.5 9.5h17" /></svg>
 				<span class="dots"><i></i><i></i><i></i></span>
 			</div>
-			<a class="plain-link" href={state.tabHref} target="_blank" rel="noopener">
-				<svg viewBox="0 0 24 24" aria-hidden="true"
-					><path d="M14 4h6v6M20 4l-8 8" /><path
-						d="M19 13v6a1.5 1.5 0 0 1-1.5 1.5h-12A1.5 1.5 0 0 1 4 19V7a1.5 1.5 0 0 1 1.5-1.5H11"
-					/></svg
-				>{words.openInTab}
-			</a>
+			{@render tabLink(state.tabHref)}
+		{:else if state.page === 'window-blocked'}
+			<h1>{words.windowBlocked}</h1>
+			<p>{words.windowBlockedSentence}</p>
+			{@render tabLink(state.tabHref)}
 		{:else if state.page === 'login-failed'}
 			<h1>{words.loginFailed}</h1>
 			{@render banner(words.loginFailedBanner)}
