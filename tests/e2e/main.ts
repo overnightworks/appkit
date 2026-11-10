@@ -78,11 +78,13 @@ if (location.search === '?typed') {
 	const state: SignInState =
 		variant === '?signing-in'
 			? { page: 'signing-in', tabHref: '/app' }
-			: variant === '?unfinished'
-				? { page: 'signed-out', signInHref: '/login', unfinished: true }
-				: variant === '?on-sign-in'
-					? { page: 'signed-out', signInHref: '/login', onSignIn: () => void window.reports.push('sign-in') }
-					: { page: 'signed-out', signInHref: '/login' };
+			: variant === '?window-blocked'
+				? { page: 'window-blocked', tabHref: '/app' }
+				: variant === '?unfinished'
+					? { page: 'signed-out', signInHref: '/login', unfinished: true }
+					: variant === '?on-sign-in'
+						? { page: 'signed-out', signInHref: '/login', onSignIn: () => void window.reports.push('sign-in') }
+						: { page: 'signed-out', signInHref: '/login' };
 	mount(SignInPage, {
 		target: document.body,
 		props: {

@@ -84,7 +84,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 
 		for (const width of [390, 1280]) {
 			for (const colorScheme of colorSchemes) {
-				for (const variant of ['signing-in', 'unfinished']) {
+				for (const variant of ['signing-in', 'window-blocked', 'unfinished']) {
 					test(`fits the ${variant} card at ${width} px in ${colorScheme}`, async ({ page }) => {
 						await page.setViewportSize({ width, height: 800 });
 						await page.emulateMedia({ colorScheme });
@@ -102,6 +102,10 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 						if (variant === 'signing-in') {
 							await expect(card.locator('svg').first()).toBeVisible();
 							await expect(card.locator('i').first()).toBeVisible();
+						} else if (variant === 'window-blocked') {
+							await expect(card.getByRole('link')).toBeVisible();
+							await expect(card.locator('i')).toHaveCount(0);
+							await expect(card.getByRole('alert')).toHaveCount(0);
 						} else {
 							await expect(card.getByRole('alert')).toBeVisible();
 						}
