@@ -22,7 +22,7 @@ def test_render_writes_the_language_the_written_out_type_the_words_and_the_key_t
     module = render(source_catalog(table_seatFree="Frei", app_name="Skat"))
 
     assert module == (
-        "// Generated from the source catalog by design-catalogs. Do not edit.\n"
+        "// Generated from the de catalog by design-catalogs. Do not edit.\n"
         "\n"
         'export const language = "de";\n'
         "// prettier-ignore\n"
@@ -46,7 +46,7 @@ def test_render_translation_imports_the_words_type_of_the_source_and_declares_th
     )
 
     assert render_translation(catalog, LanguageTag("de")) == (
-        "// Generated from the source catalog by design-catalogs. Do not edit.\n"
+        "// Generated from the pl catalog by design-catalogs. Do not edit.\n"
         "\n"
         'import type { Words } from "./de";\n'
         "// prettier-ignore\n"

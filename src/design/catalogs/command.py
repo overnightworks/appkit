@@ -1,5 +1,5 @@
 # ruff: noqa: T201 - the command is the one place that prints the findings
-"""design-catalogs: write the typed module of the source catalog, or check that it is current."""
+"""design-catalogs: write one typed module per language from the catalogs, or check that they are current."""
 
 import argparse
 import sys
@@ -56,7 +56,9 @@ def stale_modules(modules: dict[Path, str]) -> list[str]:
         if (current := read_module(path)) != module
     ]
     strays = [
-        f"{path}: no catalog produces this file; delete it" for path in list_files(MODULES) if path not in modules
+        f"{path}: no catalog produces this file; delete it"
+        for path in list_files(MODULES)
+        if path not in modules and not path.name.startswith(".")
     ]
     return [*stale, *strays]
 

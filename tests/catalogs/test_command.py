@@ -99,6 +99,14 @@ def test_main_check_fails_naming_a_file_in_the_module_directory_that_no_catalog_
     assert stray.name in capsys.readouterr().err
 
 
+@pytest.mark.parametrize("name", [".gitkeep", ".DS_Store"])
+def test_main_check_does_not_count_a_dotfile_in_the_module_directory_as_a_stray(clean_translation, module_for, name):
+    main([])
+    (module_for("xx").parent / name).write_text("", encoding="utf-8")
+
+    assert main(["--check"]) == 0
+
+
 def test_main_without_check_leaves_a_file_no_catalog_produces_alone(clean_translation, module_for):
     stray = module_for("xx")
     stray.parent.mkdir(parents=True)
@@ -204,6 +212,28 @@ def test_main_fails_naming_file_key_and_texts_of_a_broken_translation_and_writes
     assert not module_for(SOURCE_LANGUAGE).exists()
 
 
+def test_main_fails_naming_a_translation_entry_whose_msgstr_is_blank(
+    clean_source, write_catalog, catalog_text, block, module_for, capsys
+):
+    write_catalog(
+        "pl",
+        catalog_text(block("table.seatFree", "Frei", "   "), block("app.name", "Skat", "Skat"), language="pl"),
+    )
+
+    assert main([]) == 1
+
+    assert "table.seatFree has an empty msgstr" in capsys.readouterr().err
+    assert not module_for("pl").exists()
+
+
+def test_main_help_says_the_command_writes_one_module_per_language(capsys):
+    with pytest.raises(SystemExit) as stopped:
+        main(["--help"])
+
+    assert stopped.value.code == 0
+    assert "per language" in capsys.readouterr().out
+
+
 def test_main_fails_naming_a_fuzzy_translation_entry(clean_source, write_catalog, catalog_text, block, capsys):
     write_catalog(
         "pl",
@@ -235,6 +265,17 @@ def test_main_fails_naming_a_source_catalog_whose_header_names_another_language(
     assert main([]) == 1
 
     assert "de.po" in capsys.readouterr().err
+    assert not module_path.exists()
+
+
+def test_main_fails_naming_a_source_catalog_without_a_language_header(write_source, block, module_path, capsys):
+    write_source(block("table.seatFree", "Frei"))
+
+    assert main([]) == 1
+
+    error = capsys.readouterr().err
+    assert "de.po" in error
+    assert "Language header" in error
     assert not module_path.exists()
 
 
