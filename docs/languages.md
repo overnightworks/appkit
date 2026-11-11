@@ -224,8 +224,9 @@ flowchart LR
   line by key: it adds missing keys with the source text as `msgid` and an empty `msgstr`, sets
   a changed `msgid` to the source's text, keeps the old `msgstr` and marks it fuzzy, removes
   keys the source dropped, and gives a plural family exactly the categories of its language.
-  It keeps the header, the comments and the order of the entries, writes nothing for a catalog
-  that already follows its source, and writes catalogs only: the modules follow from
+  It keeps the header, the order of the entries and the comments and flags of the entries it keeps,
+  writes nothing for a catalog that already follows its source (the README names what Babel's
+  writer normalises in one it rewrites), and writes catalogs only: the modules follow from
   `design-catalogs` once the translations are written. Fuzzy means "stale,
   to be re-translated", not "awaits a human" (LANG-6). The agent that changes a source text
   runs the sync, writes the translations and clears the marks in the same change; nothing

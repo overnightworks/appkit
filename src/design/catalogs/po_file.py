@@ -242,7 +242,8 @@ def write_synced(path: Path, entries: tuple[RawEntry, ...]) -> None:
     An entry the file holds keeps its comments and flags; its text, translation and fuzzy mark are the entry's. The
     others are written new, without flags but the fuzzy mark. The body goes through Babel's writer: lines are wrapped
     at the fixed width, line endings become LF, the file ends in a blank line, and `#~` obsolete entries stay as
-    messages while their flags and extracted comments and any `#|` previous-msgid comment are not kept.
+    messages without their flags and extracted comments; a `#|` previous-msgid comment is written as a translator
+    comment (`# | msgid "..."`).
     """
     text, parsed = _parse(path, ignore_obsolete=False)
     has_header = _holds_header(parsed.entries)

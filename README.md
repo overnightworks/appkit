@@ -116,9 +116,9 @@ dev = ["overnightworks-design[catalogs] @ git+https://github.com/overnightworks/
   touched, and a second run changes no byte. A catalog the sync has to change
   keeps its header and the order of its entries and is rewritten through
   Babel's writer: its lines are wrapped at the fixed width, line endings become
-  LF, a `#|` previous-msgid comment and the flags and extracted comments of
-  obsolete (`#~`) entries are not kept, and the file ends in a blank line. It
-  needs no network.
+  LF, a `#|` previous-msgid comment turns into a translator comment
+  (`# | msgid "..."`), obsolete (`#~`) entries lose their flags and extracted
+  comments, and the file ends in a blank line. It needs no network.
 
 A change to the source texts goes in this order: change the source catalog, run
 `design-catalogs --sync`, write the translations and clear the fuzzy marks, run
