@@ -7,10 +7,9 @@ conformance. A rule is cited by its ID, such as `LANG-9`.
 This document is a requirement. Each rule becomes checkable with the owner's release that
 ships its part.
 
-Source: the operator's rulings on overnightworks/marketplace#542. A rule marked **ruled**
-quotes one; a rule marked **proposed** is this document's proposal, judged by plan review,
-and changes with it. A point marked **open with the operator** waits for his ruling (card on
-overnightworks/design#162).
+Source: the operator's rulings on overnightworks/marketplace#542 and overnightworks/design#162.
+A rule marked **ruled** quotes one; a rule marked **proposed** is this document's proposal,
+judged by plan review, and changes with it.
 
 **Done** means a further language is a new catalog file and its translations. No code changes.
 Around the app it also takes the kit's words for that language, the identity provider's
