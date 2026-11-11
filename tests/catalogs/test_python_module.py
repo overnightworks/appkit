@@ -6,34 +6,11 @@ import pytest
 from babel import Locale, localedata
 from babel.plural import to_python
 
-from design.catalogs.catalog import Entry, Key, LanguageTag, SourceCatalog, TranslationCatalog
-from design.catalogs.po_file import plural_rule
-from design.catalogs.python_module import render
+from design.catalogs.catalog import LanguageTag, SourceCatalog, TranslationCatalog
 from design.catalogs.typescript import render as render_typescript
 from design.catalogs.typescript import render_translation
 
 REPOSITORY = Path(__file__).resolve().parents[2]
-
-
-def catalog(kind, language, texts):
-    return kind(
-        language=LanguageTag(language),
-        entries=tuple(Entry(key=Key(key.replace("_", ".")), text=text) for key, text in texts.items()),
-    )
-
-
-@pytest.fixture
-def module_text():
-    """The module of a source and its translations, each given as a language and its `surface_name: text` pairs."""
-
-    def build(source, *translations):
-        return render(
-            catalog(SourceCatalog, *source),
-            tuple(catalog(TranslationCatalog, *translation) for translation in translations),
-            plural_rule,
-        )
-
-    return build
 
 
 @pytest.fixture
@@ -97,7 +74,7 @@ def test_render_writes_the_key_language_and_category_types_with_the_family_as_on
 
 def test_render_writes_the_words_of_every_language_one_entry_and_one_category_per_line(laid_out):
     assert (
-        "WORDS: Final[Mapping[Language, Mapping[Key, str | Mapping[Category, str]]]] = {\n"
+        "WORDS: Mapping[Language, Mapping[Key, str | Mapping[Category, str]]] = {\n"
         "    'de': {\n"
         "        'table.seatFree': 'Frei',\n"
         "        'table.seats': {\n"
@@ -380,7 +357,7 @@ def test_plural_category_of_a_module_of_a_language_without_a_plural_rule_needs_n
 
 
 def test_python_and_typescript_modules_of_the_same_catalogs_choose_and_fill_the_same_sentences(
-    module_text, load, evaluate
+    catalog, module_text, load, evaluate
 ):
     source = ("de", {"table_seats_one": "Ein Platz frei", "table_seats_other": "{count} Plätze frei"})
     translations = [("en", SEATS), ("pl", POLISH_SEATS)]
