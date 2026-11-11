@@ -1,8 +1,0 @@
-claim_id = "cfc97f418e264443bfa3b25468044009"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "1b5cd0305be12ede81b3b1c05dcc6e7e6b79cd62"
-branch = "claude/issue-177-optional-send-away"
-scope = ["README.md", "docs/stylesheet.md", "src/lib/AgentControl.svelte", "src/lib/AgentControl.test.ts", "src/lib/types.ts", "tests/test_npm_package.py"]
-opened_commit = "dc7e408ab27a8fbfe5fa2c8a980d3a129153831b"
-whole_reason = "One optional prop: the component, its type, its two tests and the two documents that describe it."
