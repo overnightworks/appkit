@@ -165,6 +165,12 @@ def translated(*changes):
             translated(entry("table.seatFree", "Frei", "")), "table.seatFree", "empty msgstr", id="empty msgstr"
         ),
         pytest.param(
+            translated(entry("table.seatFree", "Frei", " \t ")),
+            "table.seatFree",
+            "empty msgstr",
+            id="whitespace-only msgstr",
+        ),
+        pytest.param(
             translated(entry("table.seatFree", "Frei", "W", plural=True)),
             "table.seatFree",
             "plural forms are not used",
@@ -215,6 +221,7 @@ def test_read_translation_leaves_a_broken_entry_out_of_the_catalog(source):
         pytest.param("pt-BR", "pt-BR", "pt-BR", None, id="region tag"),
         pytest.param("pl", "en", "pl", "en", id="header names another language"),
         pytest.param("pl", None, "pl", "is missing", id="header missing"),
+        pytest.param("pt-BR", "pt_BR", "pt-BR", "pt_BR", id="header in the POSIX form"),
         pytest.param("pl_PL", "pl_PL", None, "language tag", id="stem is no language tag"),
     ],
 )

@@ -1,4 +1,4 @@
-"""The only filesystem boundary of the command: catalog files are read here, generated modules read and written."""
+"""The filesystem boundary of the catalogs: catalog files are read here, generated modules read and written."""
 
 import re
 from io import BytesIO

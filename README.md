@@ -8,7 +8,8 @@ and five Svelte components), for the engineers of those products.
 Distribution is a GitHub release. It carries:
 
 - the wheel `overnightworks_design-<version>-py3-none-any.whl` (import `design`):
-  `design/static/design.css` and `design/static/fonts/`;
+  `design/static/design.css` and `design/static/fonts/`, and the command
+  `design-catalogs` ([Catalogs](#catalogs));
 - `overnightworks-design-<version>.tgz`: the same stylesheet and fonts, plus the
   components `SignInPage`, `AccountMenu`, `AgentControl`, `LegalLinks` and `AiMark`. It is the
   only npm distribution, and `svelte` ^5.20 is its only, peer, dependency;
@@ -73,6 +74,47 @@ behaviour are documented in [`src/lib/types.ts`](src/lib/types.ts).
 ```svelte
 <AgentControl {rows} {onCall} {onSendAway} {refusal} />
 ```
+
+## Catalogs
+
+`design-catalogs` turns an app's gettext catalogs into typed modules, so that a
+further language means adding a catalog file, not changing code. It is in the
+wheel only, and it needs Babel, which only the extra `catalogs` installs: an app
+that takes the wheel for `design.css` gets no Babel. An app pins the wheel with
+the extra in its dev group, by release URL and sha256, which the release notes
+give:
+
+```toml
+[dependency-groups]
+dev = ["overnightworks-design[catalogs] @ https://github.com/overnightworks/design/releases/download/v<version>/overnightworks_design-<version>-py3-none-any.whl#sha256=<sha256>"]
+```
+
+- `design-catalogs` reads one `<tag>.po` per language and writes one TypeScript
+  module per language and, where the app declares one, a Python module.
+- `design-catalogs --check` writes nothing and fails on a broken catalog, a
+  missing, empty or outdated translation, a module that is missing or differs
+  from its catalogs, and a file in the module directory that no catalog
+  produces.
+
+Both run in the repository's root. The optional table `[tool.design-catalogs]` in
+its `pyproject.toml` overrides the defaults; paths are relative to the root and
+stay inside it, the Python module lies outside the other two directories, and an
+unknown key or a wrong type fails:
+
+```toml
+[tool.design-catalogs]
+source = "de"                           # the source language
+catalogs = "frontend/src/lib/catalogs"  # <tag>.po per language
+typescript = "frontend/src/lib/words"   # <tag>.ts per language
+python = "src/app/words.py"             # no default: without it, no Python module
+```
+
+The Python module holds `Key` and `Language`, `SOURCE_LANGUAGE`, `LANGUAGES`,
+`WORDS` and `text(language, key)`, for the app's Python tests and server. It
+keeps its own layout (`# fmt: off`), and a text longer than the line length is
+not wrapped, so an app that selects ruff's `E501` excludes the file. The shape of
+the catalogs and the rules `--check` holds are in
+[Languages](docs/languages.md).
 
 ## Documentation
 

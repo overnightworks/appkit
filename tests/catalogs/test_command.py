@@ -1,6 +1,9 @@
 import pytest
 
-from design.catalogs.command import SOURCE_LANGUAGE, main
+from design.catalogs.command import main
+from design.catalogs.declaration import DEFAULT
+
+SOURCE_LANGUAGE = DEFAULT.source.value
 
 
 @pytest.fixture
@@ -97,6 +100,14 @@ def test_main_check_fails_naming_a_file_in_the_module_directory_that_no_catalog_
     assert main(["--check"]) == 1
 
     assert stray.name in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("name", [".gitkeep", ".DS_Store"])
+def test_main_check_does_not_count_a_dotfile_in_the_module_directory_as_a_stray(clean_translation, module_for, name):
+    main([])
+    (module_for("xx").parent / name).write_text("", encoding="utf-8")
+
+    assert main(["--check"]) == 0
 
 
 def test_main_without_check_leaves_a_file_no_catalog_produces_alone(clean_translation, module_for):
@@ -204,6 +215,28 @@ def test_main_fails_naming_file_key_and_texts_of_a_broken_translation_and_writes
     assert not module_for(SOURCE_LANGUAGE).exists()
 
 
+def test_main_fails_naming_a_translation_entry_whose_msgstr_is_blank(
+    clean_source, write_catalog, catalog_text, block, module_for, capsys
+):
+    write_catalog(
+        "pl",
+        catalog_text(block("table.seatFree", "Frei", "   "), block("app.name", "Skat", "Skat"), language="pl"),
+    )
+
+    assert main([]) == 1
+
+    assert "table.seatFree has an empty msgstr" in capsys.readouterr().err
+    assert not module_for("pl").exists()
+
+
+def test_main_help_says_the_command_writes_one_module_per_language(capsys):
+    with pytest.raises(SystemExit) as stopped:
+        main(["--help"])
+
+    assert stopped.value.code == 0
+    assert "per language" in capsys.readouterr().out
+
+
 def test_main_fails_naming_a_fuzzy_translation_entry(clean_source, write_catalog, catalog_text, block, capsys):
     write_catalog(
         "pl",
@@ -238,6 +271,17 @@ def test_main_fails_naming_a_source_catalog_whose_header_names_another_language(
     assert not module_path.exists()
 
 
+def test_main_fails_naming_a_source_catalog_without_a_language_header(write_source, block, module_path, capsys):
+    write_source(block("table.seatFree", "Frei"))
+
+    assert main([]) == 1
+
+    error = capsys.readouterr().err
+    assert "de.po" in error
+    assert "Language header" in error
+    assert not module_path.exists()
+
+
 def test_main_fails_naming_a_source_entry_with_msgid_plural_and_says_plural_forms_are_not_used(
     write_source, catalog_text, capsys
 ):
@@ -262,3 +306,107 @@ def test_main_fails_naming_a_catalog_that_is_not_utf8_without_a_traceback(
 
     assert f"{language}.po" in capsys.readouterr().err
     assert not module_for(language).exists()
+
+
+@pytest.fixture
+def python_module(project, declare):
+    """The declared Python module of the clean catalogs."""
+    declare(python="src/app/words.py")
+    return project / "src/app/words.py"
+
+
+def test_main_writes_the_python_module_of_every_language_where_the_declaration_names_one(
+    clean_translation, python_module, import_module
+):
+    assert main([]) == 0
+
+    words = import_module(python_module)
+    assert words.LANGUAGES == (SOURCE_LANGUAGE, "pl")
+    assert words.text(SOURCE_LANGUAGE, "table.seatFree") == "Frei"
+    assert words.text("pl", "table.seatFree") == "Wolne"
+
+
+def test_main_run_again_gives_the_same_python_module_bytes(clean_translation, python_module):
+    main([])
+    first = python_module.read_bytes()
+
+    assert main([]) == 0
+    assert python_module.read_bytes() == first
+
+
+def test_main_writes_no_python_module_where_the_declaration_names_none(clean_translation, project):
+    assert main([]) == 0
+
+    assert not list(project.rglob("*.py"))
+
+
+def test_main_check_passes_on_a_current_python_module_and_writes_nothing(clean_translation, python_module):
+    main([])
+    before = python_module.stat().st_mtime_ns
+
+    assert main(["--check"]) == 0
+    assert python_module.stat().st_mtime_ns == before
+
+
+@pytest.mark.parametrize(
+    ("content", "sentence"),
+    [(None, "the module is missing"), ("# edited by hand\n", "the module differs from its catalog")],
+    ids=["missing", "differing"],
+)
+def test_main_check_fails_naming_a_missing_or_differing_python_module_and_writes_nothing(
+    clean_translation, python_module, capsys, content, sentence
+):
+    main([])
+    if content is None:
+        python_module.unlink()
+    else:
+        python_module.write_text(content, encoding="utf-8")
+
+    assert main(["--check"]) == 1
+
+    error = capsys.readouterr().err
+    assert f"{python_module.name}: {sentence}; run design-catalogs" in error
+    assert (python_module.read_text(encoding="utf-8") if python_module.exists() else None) == content
+
+
+def test_main_reads_and_writes_the_paths_of_the_declaration(project, declare, catalog_text, block):
+    declare(source="en", catalogs="locales", typescript="web/words")
+    (project / "locales").mkdir()
+    (project / "locales" / "en.po").write_text(catalog_text(block("app.name", "Skat"), language="en"), encoding="utf-8")
+
+    assert main([]) == 0
+    assert 'export const language = "en";' in (project / "web/words/en.ts").read_text(encoding="utf-8")
+    assert main(["--check"]) == 0
+
+
+@pytest.mark.parametrize("arguments", [[], ["--check"]])
+@pytest.mark.parametrize(
+    ("table", "named"),
+    [
+        pytest.param({"unknown": "x"}, "unknown", id="unknown key"),
+        pytest.param({"python": "../words.py"}, "python", id="path above the repository"),
+        pytest.param({"python": "frontend/src/lib/words/de.ts"}, "python", id="python over a typescript module"),
+    ],
+)
+def test_main_fails_naming_the_table_and_key_of_a_broken_declaration_and_writes_nothing(
+    clean_source, declare, project, module_path, capsys, arguments, table, named
+):
+    declare(**table)
+
+    assert main(arguments) == 1
+
+    error = capsys.readouterr().err
+    assert "tool.design-catalogs" in error
+    assert named in error
+    assert not module_path.exists()
+
+
+@pytest.mark.parametrize("arguments", [[], ["--check"]])
+def test_main_refuses_a_python_module_over_a_catalog_and_leaves_the_catalog_as_it_was(
+    clean_source, declare, project, arguments
+):
+    declare(python=clean_source.relative_to(project).as_posix())
+    before = clean_source.read_bytes()
+
+    assert main(arguments) == 1
+    assert clean_source.read_bytes() == before

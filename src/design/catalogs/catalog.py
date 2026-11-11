@@ -181,7 +181,7 @@ def read_translation(
         return [
             problem
             for found, problem in (
-                (raw.translation == "", "has an empty msgstr"),
+                (not raw.translation.strip(), "has an empty msgstr"),
                 (
                     raw.text != source_texts[key.value],
                     f"was translated from {raw.text!r}; the source now reads {source_texts[key.value]!r}",

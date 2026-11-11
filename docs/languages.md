@@ -7,7 +7,8 @@ conformance. A rule is cited by its ID, such as `LANG-9`.
 This document is a requirement. Each rule becomes checkable with the owner's release that
 ships its part.
 
-Source: the operator's rulings on overnightworks/marketplace#542 and overnightworks/design#162.
+Source: the operator's rulings on overnightworks/marketplace#542, overnightworks/design#162 and
+overnightworks/design#168.
 A rule marked **ruled** quotes one; a rule marked **proposed** is this document's proposal,
 judged by plan review, and changes with it.
 
@@ -172,11 +173,13 @@ flowchart LR
 - **LANG-22** A catalog entry is gettext's standard shape, keyed in `msgctxt`. The source
   language's file holds each key with its text in `msgid` and an empty `msgstr`. A
   translation's file holds the same `msgctxt`, the source text it was translated from as
-  `msgid`, and the translation in `msgstr`. A plural category the source lacks takes the
+  `msgid`, and the translation in `msgstr`. Every catalog, the source's included, carries a
+  `Language` header equal to its file stem, which is the BCP 47 tag (`pt-BR`), not the POSIX
+  form (`pt_BR`) that gettext tools write; the check fails on a catalog without it. A plural category the source lacks takes the
   source's `other` text as its `msgid`. Freshness is a comparison by key, never Babel's
   catalog update, which matches entries by text across keys and drops categories the source
   lacks. The check fails when a translation's key set differs from the source's (LANG-11),
-  when an entry is empty or fuzzy, or when a translation's `msgid` differs from the source's
+  when an entry is empty (a `msgstr` of whitespace only is empty) or fuzzy, or when a translation's `msgid` differs from the source's
   current text for its key. The generator's sync brings a translation in line: it adds
   missing keys with an empty `msgstr`, sets a changed `msgid` to the source's text, keeps the
   old `msgstr` and marks it fuzzy, and removes keys the source dropped. Fuzzy means "stale,
@@ -187,8 +190,10 @@ flowchart LR
   cooperative agents.
 - **LANG-23** Catalogs live at `frontend/src/lib/catalogs/<tag>.po` and
   generated modules beside the code that imports them, unless the repository's one
-  declaration, which the generator and quality's rule read, names other paths; the
-  declaration's form is the generator's.
+  declaration, which the generator and quality's rule read, names other paths. The
+  declaration is the optional table `[tool.design-catalogs]` in the root `pyproject.toml`
+  (design's README). A file in the module directory that no catalog
+  produces is a stray, which `--check` fails; a dotfile (`.gitkeep`) is no stray.
 - **LANG-24** The rule for new text: no new literal sentence in markup, no sentence from the
   server. Literal strings in script (toasts, confirm dialogs) are bound by it too, but no
   machine catches them; the scheduled audit finds them.
@@ -203,7 +208,8 @@ One question governs this section: what does a further language add that a test 
 - **One owner per check.** The generator's `--check` holds all catalog validity and runs in
   the app's own lint and in CI:
   - the key set equals the source's, except for plural families (LANG-11);
-  - no entry is empty or fuzzy (LANG-22);
+  - no entry is empty or fuzzy, and every catalog's `Language` header equals its file stem
+    (LANG-22);
   - each translation's `msgid` equals the source's text for its key (LANG-22);
   - each value's named gaps equal the source's, and no key is missing (LANG-10);
   - the generated modules are current;
@@ -240,7 +246,8 @@ once the generated key type exists, so it builds no key list by hand.
 **Ruled (design#162 line 2):** the rule for new text (LANG-24) binds an app from its first
 catalog slice; until then, new texts go into one named constants owner per app.
 
-**Proposed reading:** a new interface text goes into the app's one constants owner.
+**Ruled (design#168 line 2):** a new interface text goes into the app's frontend constants owner;
+a new server sentence is a named constant in its module until that module moves to tokens.
 
 An app's slices after the first convert the surfaces and the server's sentences into
 tokens, then add the first further language.
