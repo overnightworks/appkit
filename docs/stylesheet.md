@@ -46,6 +46,8 @@ The tarball's `SignInPage` component takes its words from the app's catalog (the
 
 The tarball's `AccountMenu` component takes its words from the app's catalog (see the [`types.ts`](../src/lib/types.ts)): "Theme", "Follow system", "Light", "Dark" and "Log out". Without `words` it renders those en words as its defaults. The de strings of the theme rows are not ruled.
 
+The tarball's `AiMark` component takes no words: its text is "AI" in every language, so a caller passes nothing.
+
 Each state has at most one way out: Signed out shows "Log in" and never redirects by itself; No access shows "Log out" (no "Back": the page is reached through the Keycloak redirect chain, so going back returns to Keycloak, which sends a live session straight back here), unless the app passes no log-out form, as inside a call's frame; Login failed shows "Try again"; Signing in shows only "Open in a tab", a link that opens the app in a tab of its own; Window blocked, shown when the browser blocked the sign-in window, shows only the same link.
 
 Which refusal shows which page, and the redirect rule, are in webauth's [Signed out and refused](https://github.com/overnightworks/webauth/blob/main/docs/host-contract.md#signed-out-and-refused).

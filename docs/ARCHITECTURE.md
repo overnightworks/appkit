@@ -33,7 +33,7 @@ get identical CSS and fonts. The components exist only in the tarball.
 flowchart TB
   subgraph source[src]
     css[design/static: design.css and fonts]
-    comp[lib: SignInPage, AccountMenu, LegalLinks and types]
+    comp[lib: SignInPage, AccountMenu, LegalLinks, AiMark and types]
   end
   css --> wheel[wheel: import design]
   css --> tgz[tarball: design.css and fonts]
@@ -44,7 +44,8 @@ flowchart TB
 - **Stylesheet and fonts** (`design.css`, [`stylesheet.md`](stylesheet.md)): the family
   tokens, the `@font-face` rules and the classes `as-typed` and `legal`.
 - **Components**: `SignInPage` and `AccountMenu` render the page and the panel,
-  and both render `LegalLinks`. Each prop's meaning is a docstring in
+  and both render `LegalLinks`. `AiMark` stands alone: the "AI" pill before an
+  agent's name, with no props. Each prop's meaning is a docstring in
   [`src/lib/types.ts`](../src/lib/types.ts).
 - **Wheel**: the stylesheet and fonts for apps without a JavaScript bundler. It
   holds no `.svelte`.
