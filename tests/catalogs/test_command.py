@@ -92,7 +92,7 @@ def test_main_writes_a_typed_module_for_every_other_catalog(clean_translation, m
 
     written = module_for("pl").read_text(encoding="utf-8")
     assert 'import type { Words } from "./de";' in written
-    assert "} satisfies Words;" in written
+    assert "export const words: Words = {" in written
     assert '    "table.seatFree": "Wolne",' in written
 
 

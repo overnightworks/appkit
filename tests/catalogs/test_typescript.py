@@ -47,9 +47,27 @@ def test_render_translation_imports_the_words_type_of_the_source_and_declares_th
         "\n"
         'import type { Words } from "./de";\n'
         "// prettier-ignore\n"
-        "const translated = {\n"
+        "export const words: Words = {\n"
         '    "table.seatFree": "Wolne",\n'
         '    "app.name": "Skat \\"pl\\"",\n'
+        "};\n"
+    )
+
+
+def test_render_translation_checks_the_gaps_of_a_translation_with_gaps_in_both_directions():
+    catalog = TranslationCatalog(
+        language=LanguageTag("pl"),
+        entries=(Entry(Key("table.seatFree"), "Wolne"), Entry(Key("chat.greeting"), "Cześć {name}")),
+    )
+
+    assert render_translation(catalog, LanguageTag("de")) == (
+        "// Generated from the pl catalog by design-catalogs. Do not edit.\n"
+        "\n"
+        'import type { Words } from "./de";\n'
+        "// prettier-ignore\n"
+        "const translated = {\n"
+        '    "table.seatFree": "Wolne",\n'
+        '    "chat.greeting": (gaps: { readonly name: string }) => "Cześć " + gaps.name,\n'
         "} satisfies Words;\n"
         "// A translation that leaves out a gap of its source fails here.\n"
         "({} as Words) satisfies typeof translated;\n"

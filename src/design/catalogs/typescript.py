@@ -84,6 +84,17 @@ def render(catalog: SourceCatalog) -> str:
     )
 
 
+def words_declaration(entries: tuple[Entry, ...]) -> str:
+    """The words typed as `Words`; where a text has gaps, also checked for a gap its source has and it leaves out."""
+    if any(gap_names(pieces_of(entry.text)) for entry in entries):
+        return (
+            f"const {TRANSLATED} = {{\n{word_lines(entries)}}} satisfies Words;\n"
+            f"{GAP_SET_CHECK}\n"
+            f"export const words: Words = {TRANSLATED};\n"
+        )
+    return f"export const words: Words = {{\n{word_lines(entries)}}};\n"
+
+
 def render_translation(catalog: TranslationCatalog, source: LanguageTag) -> str:
     """The module of a translation, typed by the source module's `Words` so a wrong key set fails the type check."""
     return (
@@ -91,7 +102,5 @@ def render_translation(catalog: TranslationCatalog, source: LanguageTag) -> str:
         f"import type {{ Words }} from {quoted(f'./{source.value}')};\n"
         f"{number_format_line(catalog.language, catalog.entries)}"
         f"{PRETTIER_IGNORE}\n"
-        f"const {TRANSLATED} = {{\n{word_lines(catalog.entries)}}} satisfies Words;\n"
-        f"{GAP_SET_CHECK}\n"
-        f"export const words: Words = {TRANSLATED};\n"
+        f"{words_declaration(catalog.entries)}"
     )
