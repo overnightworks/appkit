@@ -1,7 +1,9 @@
+import json
+
 import pytest
 
 from design.catalogs.catalog import Entry, Key, LanguageTag, SourceCatalog, TranslationCatalog
-from design.catalogs.typescript import render, render_translation
+from design.catalogs.typescript import render, render_loader, render_translation
 
 
 @pytest.fixture
@@ -343,3 +345,71 @@ def test_a_family_and_a_plain_text_of_a_translation_are_two_keys_of_its_words(ev
         ["table.seats", "app.name"],
         "Skat",
     ]
+
+
+def test_render_loader_lists_the_languages_source_first_and_loads_each_module_by_a_dynamic_import():
+    assert render_loader(LanguageTag("de"), (LanguageTag("pl"), LanguageTag("pt-BR"))) == (
+        "// Generated from the catalogs by design-catalogs. Do not edit.\n"
+        "\n"
+        'import type { Words } from "./de";\n'
+        "\n"
+        'export const languages = ["de", "pl", "pt-BR"] as const;\n'
+        "export type Language = (typeof languages)[number];\n"
+        'export const sourceLanguage: Language = "de";\n'
+        "// prettier-ignore\n"
+        "const modules: Record<Language, () => Promise<{ readonly words: Words }>> = {\n"
+        '    "de": () => import("./de"),\n'
+        '    "pl": () => import("./pl"),\n'
+        '    "pt-BR": () => import("./pt-BR"),\n'
+        "};\n"
+        "export const loadWords = async (language: Language): Promise<Words> => (await modules[language]()).words;\n"
+    )
+
+
+def test_render_loader_lists_the_source_alone_when_there_is_no_translation():
+    assert 'export const languages = ["de"] as const;\n' in render_loader(LanguageTag("de"), ())
+
+
+@pytest.fixture
+def run_loader(evaluate):
+    """Runs a probe over the loader and the modules of a source (`de`) and a translation (`pl`) in Node.
+
+    The modules import each other without an extension, as an app's bundler resolves them; the hook adds the
+    extension Node needs.
+    """
+
+    def run(probe: str):
+        source = SourceCatalog(LanguageTag("de"), (Entry(Key("table.seatFree"), "Frei"),))
+        translation = TranslationCatalog(LanguageTag("pl"), (Entry(Key("table.seatFree"), "Wolne"),))
+        hook = (
+            "export async function resolve(specifier, context, next) {"
+            " try { return await next(specifier, context); }"
+            " catch { return next(`${specifier}.ts`, context); } }"
+        )
+        return evaluate(
+            {
+                "de.ts": render(source),
+                "pl.ts": render_translation(translation, source.language),
+                "index.ts": render_loader(source.language, (translation.language,)),
+            },
+            'import { register } from "node:module";'
+            f"register({json.dumps('data:text/javascript,' + hook)});"
+            f'const loader = await import("./index.ts"); {probe}',
+        )
+
+    return run
+
+
+def test_load_words_resolves_to_the_words_of_the_language(run_loader):
+    probe = (
+        "const loaded = await Promise.all(loader.languages.map((language) => loader.loadWords(language)));"
+        "process.stdout.write(JSON.stringify(loaded));"
+    )
+
+    assert run_loader(probe) == [{"table.seatFree": "Frei"}, {"table.seatFree": "Wolne"}]
+
+
+def test_the_loader_names_the_languages_and_the_source_language(run_loader):
+    probe = "process.stdout.write(JSON.stringify([loader.languages, loader.sourceLanguage]));"
+
+    assert run_loader(probe) == [["de", "pl"], "de"]

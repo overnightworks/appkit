@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from design.catalogs.catalog import Entry, Key, LanguageTag, SourceCatalog, TranslationCatalog
-from design.catalogs.typescript import render, render_translation
+from design.catalogs.typescript import render, render_loader, render_translation
 
 REPOSITORY = Path(__file__).resolve().parent.parent.parent
 CATALOG = SourceCatalog(
@@ -22,6 +22,7 @@ def type_check(
 ) -> subprocess.CompletedProcess[str]:
     (directory / "de.ts").write_text(render(catalog), encoding="utf-8")
     (directory / "pl.ts").write_text(target, encoding="utf-8")
+    (directory / "index.ts").write_text(render_loader(catalog.language, (LanguageTag("pl"),)), encoding="utf-8")
     (directory / "consumer.ts").write_text(probe, encoding="utf-8")
     return subprocess.run(
         [
@@ -300,3 +301,26 @@ def test_a_target_module_without_the_family_fails_tsc_strict(tmp_path, family_ca
     assert result.returncode != 0
     assert "pl.ts" in result.stdout
     assert "table.seats" in result.stdout
+
+
+def test_a_consumer_reading_the_page_language_and_loading_its_words_passes_tsc_strict(tmp_path):
+    probe = (
+        'import { languages, loadWords, sourceLanguage } from "./index";\n'
+        "const tag = document.documentElement.lang;\n"
+        "const language = languages.find((candidate) => candidate === tag) ?? sourceLanguage;\n"
+        'export const seatFree: string = (await loadWords(language))["table.seatFree"];\n'
+    )
+    target = render_translation(translation("table.seatFree", "app.name"), LanguageTag("de"))
+
+    result = type_check(tmp_path, probe, target)
+
+    assert result.returncode == 0, result.stdout
+
+
+def test_a_consumer_loading_a_language_no_catalog_has_fails_tsc_strict(tmp_path):
+    probe = 'import { loadWords } from "./index";\nexport const words = loadWords("fr");\n'
+
+    result = type_check(tmp_path, probe)
+
+    assert result.returncode != 0
+    assert '"fr"' in result.stdout

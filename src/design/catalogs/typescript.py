@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from design.catalogs.catalog import COUNT, Entry, Family, PluralCategory, gap_names, pieces_of, words_of
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Sequence
 
     from design.catalogs.catalog import LanguageTag, Piece, SourceCatalog, TranslationCatalog
 
@@ -141,4 +141,24 @@ def render_translation(catalog: TranslationCatalog, source: LanguageTag) -> str:
         f"{helper_lines(catalog.language, words)}"
         f"{PRETTIER_IGNORE}\n"
         f"{words_declaration(words)}"
+    )
+
+
+def render_loader(source: LanguageTag, translations: Sequence[LanguageTag]) -> str:
+    """The module naming the languages, the source first, and loading the words of one on demand.
+
+    A dynamic import gives each language its own chunk, so a person's page loads one language only.
+    """
+    languages = [source, *translations]
+    imports = "".join(f"    {quoted(tag.value)}: () => import({quoted(f'./{tag.value}')}),\n" for tag in languages)
+    return (
+        "// Generated from the catalogs by design-catalogs. Do not edit.\n\n"
+        f"import type {{ Words }} from {quoted(f'./{source.value}')};\n\n"
+        f"export const languages = [{', '.join(quoted(tag.value) for tag in languages)}] as const;\n"
+        "export type Language = (typeof languages)[number];\n"
+        f"export const sourceLanguage: Language = {quoted(source.value)};\n"
+        f"{PRETTIER_IGNORE}\n"
+        "const modules: Record<Language, () => Promise<{ readonly words: Words }>> = {\n"
+        f"{imports}}};\n"
+        "export const loadWords = async (language: Language): Promise<Words> => (await modules[language]()).words;\n"
     )

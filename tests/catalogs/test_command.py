@@ -63,7 +63,7 @@ def test_main_check_passes_on_a_current_module_and_writes_nothing(clean_source, 
     assert module_path.stat().st_mtime_ns == before
 
 
-@pytest.mark.parametrize("language", [SOURCE_LANGUAGE, "pl"])
+@pytest.mark.parametrize("language", [SOURCE_LANGUAGE, "pl", "index"])
 @pytest.mark.parametrize(
     ("content", "sentence"),
     [(None, "the module is missing"), ("// edited by hand\n", "the module differs from its catalog")],
@@ -94,6 +94,18 @@ def test_main_writes_a_typed_module_for_every_other_catalog(clean_translation, m
     assert 'import type { Words } from "./de";' in written
     assert "export const words: Words = {" in written
     assert '    "table.seatFree": "Wolne",' in written
+
+
+def test_main_writes_the_loader_of_the_languages_the_catalog_files_name(clean_translation, module_for):
+    assert main([]) == 0
+
+    assert 'export const languages = ["de", "pl"] as const;' in module_for("index").read_text(encoding="utf-8")
+
+
+def test_main_writes_the_loader_for_a_source_alone(clean_source, module_for):
+    assert main([]) == 0
+
+    assert 'export const languages = ["de"] as const;' in module_for("index").read_text(encoding="utf-8")
 
 
 def test_main_check_passes_on_current_modules_of_every_language_and_writes_nothing(clean_translation, module_for):

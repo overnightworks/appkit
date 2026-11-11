@@ -9,11 +9,12 @@ from typing import TYPE_CHECKING
 from design.catalogs.catalog import SourceCatalog, TranslationCatalog, read_language, read_source, read_translation
 from design.catalogs.declaration import Declaration, DeclarationError, read_declaration
 from design.catalogs.python_module import render as render_python
-from design.catalogs.typescript import render, render_translation
+from design.catalogs.typescript import render, render_loader, render_translation
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+LOADER = "index.ts"
 MISSING_EXTRA = "design-catalogs needs Babel: install overnightworks-design[catalogs]."
 
 
@@ -70,11 +71,15 @@ def translation_catalogs(
 def render_modules(
     declaration: Declaration, source: SourceCatalog, translations: tuple[TranslationCatalog, ...]
 ) -> dict[Path, str]:
-    """The text of every module by its path: one TypeScript module per language and the Python module if declared."""
+    """The text of every module by its path: one TypeScript module per language, their loader and the Python module
+    if declared."""
     modules = {declaration.typescript / f"{source.language.value}.ts": render(source)}
     modules.update(
         (declaration.typescript / f"{catalog.language.value}.ts", render_translation(catalog, source.language))
         for catalog in translations
+    )
+    modules[declaration.typescript / LOADER] = render_loader(
+        source.language, tuple(catalog.language for catalog in translations)
     )
     if declaration.python is not None:
         from design.catalogs.po_file import plural_rule
