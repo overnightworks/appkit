@@ -6,8 +6,8 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from design.catalogs.catalog import LanguageTag, read_source
-from design.catalogs.typescript import render
+from design.catalogs.catalog import LanguageTag, SourceCatalog, read_language, read_source, read_translation
+from design.catalogs.typescript import render, render_translation
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -24,34 +24,73 @@ def fail(*messages: object) -> int:
     return 1
 
 
+def translation_modules(paths: tuple[Path, ...], source: SourceCatalog) -> tuple[dict[Path, str], list[object]]:
+    """The module text of every translation catalog by module path, and every problem of the catalogs."""
+    from design.catalogs.po_file import CatalogFileError, read_catalog
+
+    modules: dict[Path, str] = {}
+    problems: list[object] = []
+    for path in paths:
+        try:
+            raw = read_catalog(path)
+        except CatalogFileError as error:
+            problems.append(error)
+            continue
+        language, language_findings = read_language(str(path), path.stem, raw.language)
+        problems.extend(language_findings)
+        if language is None:
+            continue
+        catalog, findings = read_translation(str(path), language, raw.entries, source)
+        problems.extend(findings)
+        modules[MODULES / f"{language.value}.ts"] = render_translation(catalog, source.language)
+    return modules, problems
+
+
+def stale_modules(modules: dict[Path, str]) -> list[str]:
+    """A line for every module that is missing or differs from its catalog and every file no catalog produces."""
+    from design.catalogs.po_file import list_files, read_module
+
+    stale = [
+        f"{path}: the module {'is missing' if current is None else 'differs from its catalog'}; run design-catalogs"
+        for path, module in modules.items()
+        if (current := read_module(path)) != module
+    ]
+    strays = [
+        f"{path}: no catalog produces this file; delete it" for path in list_files(MODULES) if path not in modules
+    ]
+    return [*stale, *strays]
+
+
 def main(arguments: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="design-catalogs", description=__doc__)
     parser.add_argument("--check", action="store_true", help="write nothing; fail on a finding or a stale module")
     options = parser.parse_args(arguments)
     try:
-        from design.catalogs.po_file import CatalogFileError, read_entries, read_module, write_module
+        from design.catalogs.po_file import CatalogFileError, list_files, read_catalog, write_module
     except ModuleNotFoundError as error:  # pragma: no cover - run in a subprocess without Babel (tests/test_wheel.py)
         if not (error.name or "").startswith("babel"):
             raise
         return fail(MISSING_EXTRA)
 
-    catalog_path = CATALOGS / f"{SOURCE_LANGUAGE}.po"
-    module_path = MODULES / f"{SOURCE_LANGUAGE}.ts"
+    source_path = CATALOGS / f"{SOURCE_LANGUAGE}.po"
     try:
-        entries = read_entries(catalog_path)
+        raw = read_catalog(source_path)
     except CatalogFileError as error:
         return fail(error)
-    catalog, findings = read_source(str(catalog_path), LanguageTag(SOURCE_LANGUAGE), entries)
-    if findings:
-        return fail(*findings)
+    _, header_findings = read_language(str(source_path), SOURCE_LANGUAGE, raw.language)
+    source, findings = read_source(str(source_path), LanguageTag(SOURCE_LANGUAGE), raw.entries)
+    if header_findings or findings:
+        return fail(*header_findings, *findings)
 
-    module = render(catalog)
+    translation_paths = tuple(path for path in list_files(CATALOGS) if path.suffix == ".po" and path != source_path)
+    modules, problems = translation_modules(translation_paths, source)
+    if problems:
+        return fail(*problems)
+    modules[MODULES / f"{SOURCE_LANGUAGE}.ts"] = render(source)
+
     if not options.check:
-        write_module(module_path, module)
+        for path, module in modules.items():
+            write_module(path, module)
         return 0
-    current = read_module(module_path)
-    if current is None:
-        return fail(f"{module_path}: the module is missing; run design-catalogs")
-    if current != module:
-        return fail(f"{module_path}: the module differs from its catalog; run design-catalogs")
-    return 0
+    problems = stale_modules(modules)
+    return fail(*problems) if problems else 0

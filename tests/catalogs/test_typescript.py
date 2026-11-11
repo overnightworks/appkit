@@ -3,8 +3,8 @@ import subprocess
 
 import pytest
 
-from design.catalogs.catalog import Entry, Key, LanguageTag, SourceCatalog
-from design.catalogs.typescript import render
+from design.catalogs.catalog import Entry, Key, LanguageTag, SourceCatalog, TranslationCatalog
+from design.catalogs.typescript import render, render_translation
 
 
 @pytest.fixture
@@ -36,6 +36,24 @@ def test_render_writes_the_language_the_written_out_type_the_words_and_the_key_t
         '    "app.name": "Skat",\n'
         "};\n"
         "export type Key = keyof Words;\n"
+    )
+
+
+def test_render_translation_imports_the_words_type_of_the_source_and_declares_the_words_with_it():
+    catalog = TranslationCatalog(
+        language=LanguageTag("pl"),
+        entries=(Entry(Key("table.seatFree"), "Wolne"), Entry(Key("app.name"), 'Skat "pl"')),
+    )
+
+    assert render_translation(catalog, LanguageTag("de")) == (
+        "// Generated from the source catalog by design-catalogs. Do not edit.\n"
+        "\n"
+        'import type { Words } from "./de";\n'
+        "// prettier-ignore\n"
+        "export const words: Words = {\n"
+        '    "table.seatFree": "Wolne",\n'
+        '    "app.name": "Skat \\"pl\\"",\n'
+        "};\n"
     )
 
 

@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from design.catalogs.catalog import Entry, Key, LanguageTag, SourceCatalog
-from design.catalogs.typescript import render
+from design.catalogs.catalog import Entry, Key, LanguageTag, SourceCatalog, TranslationCatalog
+from design.catalogs.typescript import render, render_translation
 
 REPOSITORY = Path(__file__).resolve().parent.parent.parent
 CATALOG = SourceCatalog(
@@ -13,8 +13,13 @@ CATALOG = SourceCatalog(
 )
 
 
-def type_check(directory: Path, probe: str) -> subprocess.CompletedProcess[str]:
+def translation(*keys: str) -> TranslationCatalog:
+    return TranslationCatalog(language=LanguageTag("pl"), entries=tuple(Entry(Key(key), "Tekst") for key in keys))
+
+
+def type_check(directory: Path, probe: str, target: str = "") -> subprocess.CompletedProcess[str]:
     (directory / "de.ts").write_text(render(CATALOG), encoding="utf-8")
+    (directory / "pl.ts").write_text(target, encoding="utf-8")
     (directory / "consumer.ts").write_text(probe, encoding="utf-8")
     return subprocess.run(
         [
@@ -64,3 +69,31 @@ def test_a_consumer_using_a_wrong_key_fails_tsc_strict(tmp_path, probe):
 
     assert result.returncode != 0
     assert "table.nope" in result.stdout
+
+
+TARGET_CONSUMER = 'import { words } from "./pl";\nexport const text: string = words["table.seatFree"];\n'
+
+
+def test_a_target_module_with_every_key_of_the_source_passes_tsc_strict(tmp_path):
+    target = render_translation(translation("table.seatFree", "app.name"), LanguageTag("de"))
+
+    result = type_check(tmp_path, TARGET_CONSUMER, target)
+
+    assert result.returncode == 0, result.stdout
+
+
+@pytest.mark.parametrize(
+    ("keys", "named"),
+    [
+        pytest.param(("table.seatFree",), "app.name", id="missing key"),
+        pytest.param(("table.seatFree", "app.name", "table.nope"), "table.nope", id="extra key"),
+    ],
+)
+def test_a_target_module_whose_keys_differ_from_the_sources_fails_tsc_strict(tmp_path, keys, named):
+    target = render_translation(translation(*keys), LanguageTag("de"))
+
+    result = type_check(tmp_path, TARGET_CONSUMER, target)
+
+    assert result.returncode != 0
+    assert "pl.ts" in result.stdout
+    assert named in result.stdout
