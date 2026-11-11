@@ -8,8 +8,14 @@ license-files = ["LICENSE"]
 requires-python = ">=3.14"
 dependencies = []
 
+[project.optional-dependencies]
+catalogs = ["babel>=2.18,<3"]
+
+[project.scripts]
+design-catalogs = "design.catalogs.command:main"
+
 [dependency-groups]
-dev = ["pytest>=8", "pytest-xdist>=3", "ruff>=0.15"]
+dev = ["pytest>=8", "pytest-cov>=6", "pytest-xdist>=3", "ruff>=0.15"]
 
 [build-system]
 requires = ["uv_build>=0.10,<0.14"]
@@ -20,6 +26,9 @@ module-name = "design"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+relative_files = true
 
 [tool.ruff]
 src = [".", "src"]

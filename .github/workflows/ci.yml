@@ -57,13 +57,6 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm run check
           pnpm run test:coverage
-      - name: Upload the unit-test coverage report
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
-        with:
-          name: unit-coverage
-          path: coverage/lcov.info
-          if-no-files-found: error
-          retention-days: 1
       - name: Prove production consumers of the tarball paint the sign-in page
         run: |
           pnpm exec playwright install chromium
@@ -73,8 +66,17 @@ jobs:
         run: |
           uv run --frozen ruff check .
           uv run --frozen ruff format --check .
-          uv run --frozen pytest -q -n auto --dist loadfile tests
+          uv run --frozen --extra catalogs pytest -q -n auto --dist loadfile --cov=design --cov-branch --cov-fail-under=100 --cov-report=term --cov-report=xml:coverage/python.xml tests
           uv build --wheel
+      - name: Upload the unit-test and Python coverage reports
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: unit-coverage
+          path: |
+            coverage/lcov.info
+            coverage/python.xml
+          if-no-files-found: error
+          retention-days: 1
 
   quality:
     name: quality

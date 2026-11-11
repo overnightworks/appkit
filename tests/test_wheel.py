@@ -1,10 +1,15 @@
+import configparser
+import email
 import re
 import subprocess
 import sys
+import tomllib
 import zipfile
 from pathlib import Path
 
 import pytest
+
+from design.catalogs.command import MISSING_EXTRA
 
 REPOSITORY = Path(__file__).resolve().parent.parent
 FAMILY_TOKENS = {
@@ -173,3 +178,79 @@ def test_state_tokens_carry_the_pictures_colours_in_light_and_both_dark_branches
     for case, (body, expected) in bodies.items():
         for token, colour in expected.items():
             assert re.search(rf"^\s+--{token}: {colour};", body, re.MULTILINE), (case, token)
+
+
+def test_wheel_installs_the_declared_commands_and_offers_the_declared_extras(installed_package):
+    wheel, _ = installed_package
+    archive = zipfile.ZipFile(wheel)
+    (entry_points_name,) = [name for name in archive.namelist() if name.endswith(".dist-info/entry_points.txt")]
+    (metadata_name,) = [name for name in archive.namelist() if name.endswith(".dist-info/METADATA")]
+    entry_points = configparser.ConfigParser()
+    entry_points.read_string(archive.read(entry_points_name).decode())
+    metadata = email.message_from_string(archive.read(metadata_name).decode())
+    declared = tomllib.loads((REPOSITORY / "pyproject.toml").read_text())["project"]
+
+    assert dict(entry_points["console_scripts"]) == declared["scripts"]
+    assert metadata.get_all("Provides-Extra") == list(declared["optional-dependencies"])
+    shipped = metadata.get_all("Requires-Dist")
+    for extra, requirements in declared["optional-dependencies"].items():
+        for requirement in requirements:
+            name = re.match(r"[A-Za-z0-9_.-]+", requirement)[0].lower()
+            assert any(
+                line.lower().startswith(name) and re.search(rf"extra == ['\"]{extra}['\"]", line) for line in shipped
+            ), (extra, requirement)
+    assert len(shipped) == len(declared["dependencies"]) + sum(
+        len(requirements) for requirements in declared["optional-dependencies"].values()
+    )
+
+
+@pytest.fixture
+def run_declared_command(installed_package, tmp_path):
+    """Runs the declared console script from the unpacked wheel in an empty project; only the wheel is importable."""
+    wheel, _ = installed_package
+    module, function = tomllib.loads((REPOSITORY / "pyproject.toml").read_text())["project"]["scripts"][
+        "design-catalogs"
+    ].split(":")
+    probe = (
+        "import importlib, sys; sys.path[:0] = sys.argv[1:];"
+        f"sys.exit(getattr(importlib.import_module({module!r}), {function!r})([]))"
+    )
+
+    def run(*extra_path: Path) -> subprocess.CompletedProcess[str]:
+        # -S keeps the environment's site-packages, and so Babel, out of the import path
+        return subprocess.run(
+            [sys.executable, "-I", "-S", "-c", probe, str(wheel.parent / "site"), *map(str, extra_path)],
+            cwd=tmp_path,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+    return run
+
+
+def test_declared_command_without_babel_fails_with_a_sentence_naming_the_extra(run_declared_command):
+    result = run_declared_command()
+
+    assert result.returncode != 0
+    assert MISSING_EXTRA in result.stderr
+
+
+def test_declared_command_does_not_call_a_broken_babel_a_missing_extra(run_declared_command, tmp_path):
+    broken = tmp_path / "broken"
+    (broken / "babel").mkdir(parents=True)
+    (broken / "babel" / "__init__.py").write_text("import a_dependency_babel_needs\n")
+
+    result = run_declared_command(broken)
+
+    assert result.returncode != 0
+    assert "a_dependency_babel_needs" in result.stderr
+    assert MISSING_EXTRA not in result.stderr
+
+
+def test_wheel_holds_the_catalogs_package(installed_package):
+    wheel, _ = installed_package
+    names = set(zipfile.ZipFile(wheel).namelist())
+    assert {
+        f"design/catalogs/{name}.py" for name in ("__init__", "catalog", "po_file", "typescript", "command")
+    } <= names
