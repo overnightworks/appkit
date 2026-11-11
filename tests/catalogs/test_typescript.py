@@ -84,15 +84,23 @@ def test_render_keeps_any_catalog_text_inside_its_literal(evaluate, source_catal
     assert evaluate({"de.ts": render(source_catalog(table_text=text))}, probe) == {"table.text": text}
 
 
-GREETING = "Hallo {name}, du hast {count} Nachrichten"
-CALL_GREETING = (
-    'import { words } from "./de.ts";'
-    ' process.stdout.write(JSON.stringify(words["chat.greeting"]({ name: "Eva", count: 1234567 })));'
-)
+@pytest.fixture
+def greeting():
+    """A text with a plain and a `count` gap."""
+    return "Hallo {name}, du hast {count} Nachrichten"
 
 
-def test_render_writes_a_text_with_gaps_as_a_function_of_its_gaps_in_the_type_and_the_words(source_catalog):
-    module = render(source_catalog(chat_greeting=GREETING, app_name="Skat"))
+@pytest.fixture
+def call_greeting():
+    """The probe that prints what the greeting of a module returns for Eva and 1234567."""
+    return lambda module: (
+        f'import {{ words }} from "./{module}.ts";'
+        ' process.stdout.write(JSON.stringify(words["chat.greeting"]({ name: "Eva", count: 1234567 })));'
+    )
+
+
+def test_render_writes_a_text_with_gaps_as_a_function_of_its_gaps_in_the_type_and_the_words(source_catalog, greeting):
+    module = render(source_catalog(chat_greeting=greeting, app_name="Skat"))
 
     assert module == (
         "// Generated from the de catalog by design-catalogs. Do not edit.\n"
@@ -114,20 +122,20 @@ def test_render_writes_a_text_with_gaps_as_a_function_of_its_gaps_in_the_type_an
     )
 
 
-def test_a_gap_function_fills_its_gaps_and_formats_count_with_the_language_of_the_module(evaluate, source_catalog):
-    value = evaluate({"de.ts": render(source_catalog(chat_greeting=GREETING))}, CALL_GREETING)
+def test_a_gap_function_fills_its_gaps_and_formats_count_with_the_language_of_the_module(
+    evaluate, source_catalog, greeting, call_greeting
+):
+    value = evaluate({"de.ts": render(source_catalog(chat_greeting=greeting))}, call_greeting("de"))
 
     assert value == "Hallo Eva, du hast 1.234.567 Nachrichten"
 
 
-def test_a_translations_gap_function_formats_count_with_its_own_language(evaluate):
+def test_a_translations_gap_function_formats_count_with_its_own_language(evaluate, call_greeting):
     translation = TranslationCatalog(
         language=LanguageTag("en"), entries=(Entry(Key("chat.greeting"), "{name} has {count} messages"),)
     )
 
-    value = evaluate(
-        {"en.ts": render_translation(translation, LanguageTag("de"))}, CALL_GREETING.replace("de.ts", "en.ts")
-    )
+    value = evaluate({"en.ts": render_translation(translation, LanguageTag("de"))}, call_greeting("en"))
 
     assert value == "Eva has 1,234,567 messages"
 

@@ -17,12 +17,6 @@ def translation(*keys: str) -> TranslationCatalog:
     return TranslationCatalog(language=LanguageTag("pl"), entries=tuple(Entry(Key(key), "Tekst") for key in keys))
 
 
-GAP_CATALOG = SourceCatalog(
-    language=LanguageTag("de"),
-    entries=(Entry(key=Key("chat.greeting"), text="Hallo {name}, du hast {count} Nachrichten"),),
-)
-
-
 def type_check(
     directory: Path, probe: str, target: str = "", catalog: SourceCatalog = CATALOG
 ) -> subprocess.CompletedProcess[str]:
@@ -107,9 +101,17 @@ def test_a_target_module_whose_keys_differ_from_the_sources_fails_tsc_strict(tmp
     assert named in result.stdout
 
 
-TARGET_GREETING = (
-    'import { words } from "./pl";\nexport const text: string = words["chat.greeting"]({ name: "Eva", count: 3 });\n'
-)
+@pytest.fixture
+def gap_catalog():
+    return SourceCatalog(
+        language=LanguageTag("de"),
+        entries=(Entry(key=Key("chat.greeting"), text="Hallo {name}, du hast {count} Nachrichten"),),
+    )
+
+
+@pytest.fixture
+def target_greeting():
+    return greet_from("pl", '{ name: "Eva", count: 3 }')
 
 
 def gap_translation(text: str) -> str:
@@ -117,12 +119,16 @@ def gap_translation(text: str) -> str:
     return render_translation(catalog, LanguageTag("de"))
 
 
+def greet_from(module: str, gaps: str) -> str:
+    return f'import {{ words }} from "./{module}";\nexport const text: string = words["chat.greeting"]({gaps});\n'
+
+
 def greet(gaps: str) -> str:
-    return f'import {{ words }} from "./de";\nexport const text: string = words["chat.greeting"]({gaps});\n'
+    return greet_from("de", gaps)
 
 
-def test_a_consumer_passing_every_gap_of_a_text_passes_tsc_strict(tmp_path):
-    result = type_check(tmp_path, greet('{ name: "Eva", count: 3 }'), catalog=GAP_CATALOG)
+def test_a_consumer_passing_every_gap_of_a_text_passes_tsc_strict(tmp_path, gap_catalog):
+    result = type_check(tmp_path, greet('{ name: "Eva", count: 3 }'), catalog=gap_catalog)
 
     assert result.returncode == 0, result.stdout
 
@@ -142,36 +148,36 @@ def test_a_consumer_passing_every_gap_of_a_text_passes_tsc_strict(tmp_path):
         ),
     ],
 )
-def test_a_consumer_passing_the_wrong_gaps_fails_tsc_strict(tmp_path, gaps, named):
-    result = type_check(tmp_path, greet(gaps), catalog=GAP_CATALOG)
+def test_a_consumer_passing_the_wrong_gaps_fails_tsc_strict(tmp_path, gaps, named, gap_catalog):
+    result = type_check(tmp_path, greet(gaps), catalog=gap_catalog)
 
     assert result.returncode != 0
     assert "consumer.ts" in result.stdout
     assert named in result.stdout
 
 
-def test_a_target_module_with_the_gaps_of_the_source_passes_tsc_strict(tmp_path):
+def test_a_target_module_with_the_gaps_of_the_source_passes_tsc_strict(tmp_path, gap_catalog, target_greeting):
     target = gap_translation("{count} wiadomosci dla {name}")
 
-    result = type_check(tmp_path, TARGET_GREETING, target, GAP_CATALOG)
+    result = type_check(tmp_path, target_greeting, target, gap_catalog)
 
     assert result.returncode == 0, result.stdout
 
 
-def test_a_target_module_using_a_gap_the_source_lacks_fails_tsc_strict(tmp_path):
+def test_a_target_module_using_a_gap_the_source_lacks_fails_tsc_strict(tmp_path, gap_catalog, target_greeting):
     target = gap_translation("{count} wiadomosci dla {name} {other}")
 
-    result = type_check(tmp_path, TARGET_GREETING, target, GAP_CATALOG)
+    result = type_check(tmp_path, target_greeting, target, gap_catalog)
 
     assert result.returncode != 0
     assert "pl.ts" in result.stdout
     assert "other" in result.stdout
 
 
-def test_a_target_module_dropping_a_gap_of_the_source_fails_tsc_strict(tmp_path):
+def test_a_target_module_dropping_a_gap_of_the_source_fails_tsc_strict(tmp_path, gap_catalog, target_greeting):
     target = gap_translation("wiadomosci dla {name}")
 
-    result = type_check(tmp_path, TARGET_GREETING, target, GAP_CATALOG)
+    result = type_check(tmp_path, target_greeting, target, gap_catalog)
 
     assert result.returncode != 0
     assert "pl.ts" in result.stdout
