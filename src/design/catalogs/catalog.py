@@ -167,7 +167,10 @@ def _gap_problems(text: str, source_text: str | None = None, *, family: bool = F
         names = gap_names(pieces_of(text))
     except ValueError as error:
         return [f"is malformed: {error}"]
-    if source_text is None or _same_gaps(source_names := gap_names(pieces_of(source_text)), names, family=family):
+    if source_text is None:
+        return []
+    source_names = gap_names(pieces_of(source_text))
+    if _same_gaps(source_names, names, family=family):
         return []
     return [f"has {_gaps_text(names)}; the source has {_gaps_text(source_names)}"]
 
