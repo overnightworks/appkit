@@ -128,7 +128,9 @@ flowchart LR
   `select(count)`; a category the family lacks falls to `other`. The token and the TypeScript key
   of a family are its key. A module that adds, renames or drops a gap, or
   lacks a key, fails the type check against the source's module; the generator's check refuses
-  the same before it writes one. Until the Python module's own slice ships the plural
+  the same before it writes one. The count is the exception: a family's `count` is its argument,
+  not a gap of the type, so a module that drops `{count}` from a family keeps the type and passes
+  the type check; the catalog check refuses it instead. Until the Python module's own slice ships the plural
   function, that module holds each entry's raw text under its own key, with `{{` and `}}`
   unreplaced and no gap filled.
 - **LANG-12** The server sends tokens (a catalog key and named values) and data, never a
