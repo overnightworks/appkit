@@ -335,6 +335,7 @@ def test_a_consumer_imports_the_agent_control_with_its_types_from_the_package_ro
         "  { key: 'k3', name: 'Leonardo', state: 'here' },\n"
         "];\n"
         "export const plain: AgentControlProps = { ...common, rows };\n"
+        "export const withoutSendAway: AgentControlProps = { onCall: (key: string) => void key, rows };\n"
         "export const refused: AgentControlProps = { ...common, rows, refusal: 'place-full' };\n"
         "export const reasons: AgentControlRefusal[] = [\n"
         "  'not-allowed', 'owner-absent', 'place-full', 'agent-unavailable', 'try-again',\n"

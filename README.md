@@ -69,7 +69,9 @@ components render.
 
 The panel of rows with which a person calls an agent into a place and asks it
 to leave again. The trigger and the popover stay with the app. Props and
-behaviour are documented in [`src/lib/types.ts`](src/lib/types.ts).
+behaviour are documented in [`src/lib/types.ts`](src/lib/types.ts). Without
+`onSendAway` a row of an agent that is here shows its mark and name and no
+action; an app that lets people send agents away passes the handler.
 
 ```svelte
 <AgentControl {rows} {onCall} {onSendAway} {refusal} />
