@@ -91,6 +91,14 @@ give:
 dev = ["overnightworks-design[catalogs] @ https://github.com/overnightworks/design/releases/download/v<version>/overnightworks_design-<version>-py3-none-any.whl#sha256=<sha256>"]
 ```
 
+Pinning by git tag is an equal form of taking the generator; `uv lock` records
+the commit of the tag:
+
+```toml
+[dependency-groups]
+dev = ["overnightworks-design[catalogs] @ git+https://github.com/overnightworks/design@v<version>"]
+```
+
 - `design-catalogs` reads one `<tag>.po` per language and writes one TypeScript
   module per language and, where the app declares one, a Python module.
 - `design-catalogs --check` writes nothing and fails on a broken catalog, a
@@ -112,10 +120,32 @@ python = "src/app/words.py"             # no default: without it, no Python modu
 ```
 
 The Python module holds `Key` and `Language`, `SOURCE_LANGUAGE`, `LANGUAGES`,
-`WORDS` and `text(language, key)`, for the app's Python tests and server. It
-keeps its own layout (`# fmt: off`), and a text longer than the line length is
-not wrapped, so an app that selects ruff's `E501` excludes the file. The shape of
-the catalogs and the rules `--check` holds are in
+`WORDS`, `plural_category(language, count)` and `text`, for the app's Python
+tests and server. It needs no Babel at run time. A text names its gaps as
+`{name}`; a plural family is one key whose entries are the CLDR categories of
+each language. `text("de", "chat.greeting", name="Eva")` fills the gaps and
+raises on a missing or an unknown one; `text("de", "table.seats", count=3,
+name="Eva")` names a family by its key, chooses the sentence by the count and
+fills `count` as plain digits. The page gets the same from the TypeScript
+module, a family as `words["table.seats"](3, { name })`.
+
+The Python module is `# fmt: off`, with single-quoted texts and lines longer
+than the line length. An app whose ruff selects the line length (`E501`) or the
+quote rules (`Q`) ignores them for that file:
+
+```toml
+[tool.ruff.lint.per-file-ignores]
+"src/app/words.py" = ["E501", "Q"]
+```
+
+The TypeScript modules use four spaces and double quotes; an app whose prettier
+settings differ adds the words directory to `.prettierignore`:
+
+```
+frontend/src/lib/words/
+```
+
+The shape of the catalogs and the rules `--check` holds are in
 [Languages](docs/languages.md).
 
 ## Documentation
