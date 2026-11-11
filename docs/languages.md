@@ -240,8 +240,7 @@ once the generated key type exists, so it builds no key list by hand.
 **Ruled (design#162 line 2):** the rule for new text (LANG-24) binds an app from its first
 catalog slice; until then, new texts go into one named constants owner per app.
 
-**Proposed reading:** a new interface text goes into the app's frontend constants owner; a
-new server sentence is a named constant in its module until that module moves to tokens.
+**Proposed reading:** a new interface text goes into the app's one constants owner.
 
 An app's slices after the first convert the surfaces and the server's sentences into
 tokens, then add the first further language.
