@@ -222,11 +222,17 @@ def write_module(path: Path, text: str) -> None:
 
 
 def _header_text(text: str) -> str:
-    """The header of a catalog as the file wrote it: its first line to the last string of its `msgstr`."""
+    """The header of a catalog as the file wrote it: its first line to the last string of its `msgstr`.
+
+    Babel's parser skips blank lines, so a string may follow its `msgstr` after some.
+    """
     lines = text.splitlines()
     end = next(number for number, line in enumerate(lines) if line.lstrip().startswith("msgstr")) + 1
-    while end < len(lines) and lines[end].lstrip().startswith('"'):
-        end += 1
+    following = end
+    while following < len(lines) and (not lines[following].strip() or lines[following].lstrip().startswith('"')):
+        following += 1
+        if lines[following - 1].lstrip().startswith('"'):
+            end = following
     return "\n".join(lines[:end]) + "\n\n"
 
 

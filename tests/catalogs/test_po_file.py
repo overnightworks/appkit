@@ -186,6 +186,16 @@ def test_write_synced_gives_the_catalog_the_entries_in_their_order_and_keeps_the
     assert [entry.context for entry in read_catalog(annotated_translation).entries] == ["app.name", "chat.greeting"]
 
 
+def test_write_synced_keeps_a_header_string_that_follows_a_blank_line_after_msgstr(write_catalog):
+    header = 'msgid ""\nmsgstr ""\n\n"Language: pl\\n"\n"X-Custom: kept\\n"\n'
+    path = write_catalog("pl", header)
+
+    write_synced(path, (RawEntry("app.name", "Skat", "", fuzzy=False, plural=False),))
+
+    assert path.read_text(encoding="utf-8").startswith(header + "\n")
+    assert read_catalog(path).language == "pl"
+
+
 def test_write_synced_keeps_the_comments_and_flags_of_an_entry_it_changes_and_marks_it_fuzzy(annotated_translation):
     write_synced(
         annotated_translation,
