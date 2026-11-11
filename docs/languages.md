@@ -58,8 +58,9 @@ flowchart LR
 - **LANG-4** (line 5) The German version of a legal text binds. Each further language gets a
   reading version that says so. To be checked legally before the first one ships.
 
-  Open with the operator: whether LANG-6 also covers the reading versions, and whether the
-  legal check applies to the approach or to each reading version.
+  **Ruled (design#162 line 1):** the approach (the German version binds, reading versions say
+  so) is checked legally once before the first reading version ships. The reading versions are
+  translated by a model like every other text (LANG-6), with no human review as a condition.
 - **LANG-5** (line 6) An agent answers and speaks in the language the person wrote or asked
   in. No app fixes a language for its agents.
 - **LANG-6** (added requirement, with a newer word) A model writes each translation once from
@@ -90,8 +91,9 @@ flowchart LR
   adds a runtime edge to every app server and a webauth-to-design direction, while every app
   server already depends on webauth.
 
-  Open with the operator: the generator's home, in the kit, a small package of its own or a
-  copy per app. Proposed: in the kit.
+  **Ruled (design#162 line 3):** the generator with its catalog checks ships from design; the
+  language resolver lives in webauth; the markup scan and the rule that requires the checks live
+  in quality. The libraries and the rejected alternatives stay proposed.
 - **LANG-9** A catalog key is a neutral identifier that names what the text is for, never
   the sentence: one namespace level, the surface, then a camelCase name (`table.seatFree`).
   A text on two surfaces gets two keys. The kit's words never enter an app catalog. Renaming
@@ -182,7 +184,7 @@ flowchart LR
   language ships: a language whose plural categories differ from the source's (LANG-11) must
   survive the update. If it does not, the fallback is a recorded source hash per entry, a
   translator comment `# source: sha256:<hex>` over the source text normalised to NFC UTF-8.
-- **LANG-23** Catalogs live at `frontend/src/lib/catalogs/<tag>.po` (skat's layout) and
+- **LANG-23** Catalogs live at `frontend/src/lib/catalogs/<tag>.po` and
   generated modules beside the code that imports them, unless the repository's one
   declaration, which the generator and quality's rule read, names other paths; the
   declaration's form is the generator's.
@@ -231,11 +233,10 @@ songmaker starts too.
 and widened to LANG-9 to LANG-11). An app's first catalog slice follows that release, and no
 app extends a generator of its own meanwhile. An app may start these slices before that
 release: server sentences to tokens against a typed key list, one owner for the date and
-sort locale. The rule for new text (LANG-24) binds from an app's first catalog slice; new
-texts are collected in one named constants owner until then.
+sort locale.
 
-Open with the operator: whether the rule for new text binds at once, or from an app's first
-catalog slice as proposed.
+**Ruled (design#162 line 2):** the rule for new text (LANG-24) binds an app from its first
+catalog slice; until then, new texts go into one named constants owner per app.
 
 An app's slices after the first convert the surfaces and the server's sentences into
 tokens, then add the first further language.
