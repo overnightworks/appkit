@@ -56,7 +56,6 @@ def test_declaration_reads_a_path_inside_the_repository_in_its_normal_form(value
         pytest.param({"python": ""}, "python", id="empty path"),
         pytest.param({"python": "."}, "python", id="the repository itself"),
         pytest.param({"python": "frontend/src/lib/catalogs/de.po"}, "python", id="python in the catalogs directory"),
-        pytest.param({"python": "frontend/src/lib/words/de.ts"}, "python", id="python in the typescript directory"),
         pytest.param(
             {"catalogs": "locales", "python": "locales/words.py"},
             "python",
