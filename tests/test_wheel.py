@@ -173,3 +173,26 @@ def test_state_tokens_carry_the_pictures_colours_in_light_and_both_dark_branches
     for case, (body, expected) in bodies.items():
         for token, colour in expected.items():
             assert re.search(rf"^\s+--{token}: {colour};", body, re.MULTILINE), (case, token)
+
+
+def test_wheel_installs_the_design_catalogs_command_and_offers_babel_only_as_the_catalogs_extra(installed_package):
+    wheel, _ = installed_package
+    archive = zipfile.ZipFile(wheel)
+    (entry_points,) = [name for name in archive.namelist() if name.endswith(".dist-info/entry_points.txt")]
+    (metadata_name,) = [name for name in archive.namelist() if name.endswith(".dist-info/METADATA")]
+    metadata = archive.read(metadata_name).decode()
+
+    assert "design-catalogs = design.catalogs.command:main" in archive.read(entry_points).decode()
+    assert "Provides-Extra: catalogs" in metadata
+    requirements = [line for line in metadata.splitlines() if line.startswith("Requires-Dist:")]
+    assert len(requirements) == 1
+    assert re.search(r"extra == ['\"]catalogs['\"]", requirements[0])
+    assert "babel" in requirements[0].lower()
+
+
+def test_wheel_holds_the_catalogs_package(installed_package):
+    wheel, _ = installed_package
+    names = set(zipfile.ZipFile(wheel).namelist())
+    assert {
+        f"design/catalogs/{name}.py" for name in ("__init__", "catalog", "po_file", "typescript", "command")
+    } <= names

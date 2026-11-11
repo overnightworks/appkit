@@ -5,7 +5,7 @@
 - `pnpm run` lists the package scripts. design has no other task runner.
 - `pnpm exec vitest run <file>`: one Vitest file of `src/lib`. Needs `pnpm install --frozen-lockfile`.
 - `pnpm run check`: the Svelte and TypeScript type check. Needs `pnpm install --frozen-lockfile`.
-- `uv run --frozen pytest -q tests/<module>.py -k <behaviour>`: one Python module. `tests/test_npm_package.py` needs `pnpm install --frozen-lockfile` first.
+- `uv run --frozen --extra catalogs pytest -q tests/<module>.py -k <behaviour>`: one Python module; `--extra catalogs` installs Babel for `tests/catalogs`. `tests/test_npm_package.py` and `tests/catalogs/test_typescript_type_check.py` need `pnpm install --frozen-lockfile` first. CI adds `--cov=design --cov-branch --cov-fail-under=100`.
 - `uv run --frozen ruff check .` and `uv run --frozen ruff format --check .`: Python lint; both must pass.
 - `quality check`: the shared static check. Run it at the release `.github/workflows/ci.yml` pins.
 - `pnpm run test:consumer`: the Playwright consumers, a probe stack. Run it only under the `flock` rule in the global contract's section "Machine load and local runs".
