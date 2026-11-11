@@ -1,0 +1,8 @@
+claim_id = "5f2653601fd445e1bde1c60ec3155045"
+agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
+role = "builder"
+base = "c5d5cdef4ce48e836aa6768ea1c4c8dfa607875f"
+branch = "claude/issue-166-catalogs-source"
+scope = [".github/workflows/ci.yml", "AGENTS.md", "pyproject.toml", "src/design/catalogs", "tests/catalogs", "tests/test_wheel.py", "uv.lock"]
+opened_commit = "7a83540b0bd6c77a36ff7c5a9010a37afff2cfca"
+whole_reason = "One new package with its tests, its console script and extra in the project file, and the coverage flag in CI."
