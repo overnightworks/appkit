@@ -27,6 +27,9 @@ module-name = "design"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
+[tool.coverage.run]
+relative_files = true
+
 [tool.ruff]
 src = [".", "src"]
 target-version = "py314"
