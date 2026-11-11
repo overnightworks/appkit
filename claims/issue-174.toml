@@ -1,8 +1,0 @@
-claim_id = "a3772ea0c62343fe8eb26d4dddbdfcce"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "1b5cd0305be12ede81b3b1c05dcc6e7e6b79cd62"
-branch = "claude/issue-174-catalogs-gaps"
-scope = ["src/design/catalogs", "tests/catalogs"]
-opened_commit = "4fbcdb4a0379da0e50e114be51cbc71168642c35"
-whole_reason = "The reader, the checks and the renderer each change once for gaps, with their tests."
