@@ -48,29 +48,20 @@ def load(tmp_path, import_module):
     return import_text
 
 
-def test_render_writes_the_key_and_language_types_and_the_words_of_every_language_one_entry_per_line(module_text):
-    module = module_text(
-        (
-            "de",
-            {
-                "table_seatFree": "Frei",
-                "app_name": "Skat",
-                "table_seats_one": "{count} Platz",
-                "table_seats_other": "{count} Plätze",
-            },
-        ),
+@pytest.fixture
+def laid_out(module_text):
+    """The module of a source and a translation, each with plain texts and one plural family."""
+    return module_text(
+        ("de", {"table_seatFree": "Frei", "table_seats_one": "{count} Platz", "table_seats_other": "{count} Plätze"}),
         (
             "pl",
-            {
-                "table_seatFree": "Wolne",
-                "app_name": "Skat (pl)",
-                "table_seats_one": "{count} miejsce",
-                "table_seats_other": "{count} miejsc",
-            },
+            {"table_seatFree": "Wolne", "table_seats_one": "{count} miejsce", "table_seats_other": "{count} miejsc"},
         ),
     )
 
-    assert module.startswith(
+
+def test_render_writes_the_key_language_and_category_types_with_the_family_as_one_key(laid_out):
+    assert laid_out.startswith(
         "# Generated from the catalogs by design-catalogs. Do not edit.\n"
         "# fmt: off\n"
         "from string import Formatter\n"
@@ -81,7 +72,6 @@ def test_render_writes_the_key_and_language_types_and_the_words_of_every_languag
         "\n"
         "type Key = Literal[\n"
         "    'table.seatFree',\n"
-        "    'app.name',\n"
         "    'table.seats',\n"
         "]\n"
         "type Language = Literal[\n"
@@ -102,10 +92,14 @@ def test_render_writes_the_key_and_language_types_and_the_words_of_every_languag
         "    'de',\n"
         "    'pl',\n"
         ")\n"
+    )
+
+
+def test_render_writes_the_words_of_every_language_one_entry_and_one_category_per_line(laid_out):
+    assert (
         "WORDS: Final[Mapping[Language, Mapping[Key, str | Mapping[Category, str]]]] = {\n"
         "    'de': {\n"
         "        'table.seatFree': 'Frei',\n"
-        "        'app.name': 'Skat',\n"
         "        'table.seats': {\n"
         "            'one': '{count} Platz',\n"
         "            'other': '{count} Plätze',\n"
@@ -113,14 +107,13 @@ def test_render_writes_the_key_and_language_types_and_the_words_of_every_languag
         "    },\n"
         "    'pl': {\n"
         "        'table.seatFree': 'Wolne',\n"
-        "        'app.name': 'Skat (pl)',\n"
         "        'table.seats': {\n"
         "            'one': '{count} miejsce',\n"
         "            'other': '{count} miejsc',\n"
         "        },\n"
         "    },\n"
         "}\n"
-    )
+    ) in laid_out
 
 
 def test_the_module_answers_every_language_and_key_by_text(module_text, load):
