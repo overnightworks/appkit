@@ -572,3 +572,182 @@ def test_main_writes_a_python_module_that_chooses_the_family_sentence_by_the_cou
     assert [module.text("pl", "table.seats", count=count) for count in (1, 2, 5)] == ["one 1", "few 2", "many 5"]
     assert module.text("de", "table.seats", count=1) == "1 Platz"
     assert capsys.readouterr().err == ""
+
+
+@pytest.fixture
+def stale_translation(write_source, write_catalog, catalog_text, block):
+    """A source whose `table.seatFree` changed and that gained `chat.new` and dropped `table.gone`, and the Polish
+    translation from before."""
+    write_source(
+        catalog_text(block("table.seatFree", "Frei und mehr"), block("app.name", "Skat"), block("chat.new", "Neu"))
+    )
+    return write_catalog(
+        "pl",
+        catalog_text(
+            block("table.seatFree", "Frei", "Wolne"),
+            block("app.name", "Skat", "Skat (pl)"),
+            block("table.gone", "Weg", "Zniknęło"),
+            language="pl",
+        ),
+    )
+
+
+def test_main_sync_brings_a_translation_in_line_with_its_source_by_key(stale_translation, capsys):
+    assert main(["--sync"]) == 0
+
+    written = stale_translation.read_text(encoding="utf-8")
+    assert '#, fuzzy\nmsgctxt "table.seatFree"\nmsgid "Frei und mehr"\nmsgstr "Wolne"\n' in written
+    assert 'msgctxt "app.name"\nmsgid "Skat"\nmsgstr "Skat (pl)"\n' in written
+    assert 'msgctxt "chat.new"\nmsgid "Neu"\nmsgstr ""\n' in written
+    assert "table.gone" not in written
+    assert capsys.readouterr().err == ""
+
+
+def test_main_sync_run_again_changes_no_byte(stale_translation):
+    main(["--sync"])
+    first = stale_translation.read_bytes()
+    before = stale_translation.stat().st_mtime_ns
+
+    assert main(["--sync"]) == 0
+    assert stale_translation.read_bytes() == first
+    assert stale_translation.stat().st_mtime_ns == before
+
+
+def test_main_sync_writes_no_byte_of_a_catalog_that_already_follows_its_source(clean_translation):
+    clean_translation.write_text(
+        clean_translation.read_text(encoding="utf-8").replace("\n\n", "\n\n\n# kept as the translator wrote it\n"),
+        encoding="utf-8",
+    )
+    before = clean_translation.read_bytes()
+
+    assert main(["--sync"]) == 0
+    assert clean_translation.read_bytes() == before
+
+
+def test_main_sync_keeps_the_header_the_comments_and_the_order_of_the_entries(
+    write_source, write_catalog, catalog_text, block
+):
+    write_source(catalog_text(block("app.name", "Skat"), block("chat.new", "Neu"), block("table.title", "Tisch neu")))
+    header = catalog_text(language="pl").replace('"Content-Type', '"X-Custom: kept\\n"\n"Content-Type')
+    entries = (
+        "# translator note\n" + block("table.title", "Tisch", "Stół") + "\n" + block("app.name", "Skat", "Skat (pl)")
+    )
+    path = write_catalog("pl", header + "\n" + entries)
+
+    assert main(["--sync"]) == 0
+
+    written = path.read_text(encoding="utf-8")
+    assert written.startswith(header)
+    assert written.index("table.title") < written.index("app.name") < written.index("chat.new")
+    assert "# translator note\n#, fuzzy\nmsgctxt" in written
+
+
+def test_main_sync_writes_catalogs_only(stale_translation, module_for):
+    assert main(["--sync"]) == 0
+
+    assert not module_for(SOURCE_LANGUAGE).exists()
+    assert not module_for("pl").exists()
+
+
+def test_main_check_fails_on_a_synced_catalog_until_the_translations_are_written_and_the_marks_cleared(
+    stale_translation, write_catalog, catalog_text, block, capsys
+):
+    main(["--sync"])
+
+    assert main(["--check"]) == 1
+
+    error = capsys.readouterr().err
+    assert "table.seatFree is fuzzy" in error
+    assert "chat.new has an empty msgstr" in error
+    write_catalog(
+        "pl",
+        catalog_text(
+            block("table.seatFree", "Frei und mehr", "Wolne i wiecej"),
+            block("app.name", "Skat", "Skat (pl)"),
+            block("chat.new", "Neu", "Nowe"),
+            language="pl",
+        ),
+    )
+    assert main([]) == 0
+    assert main(["--check"]) == 0
+
+
+def test_main_sync_gives_a_family_the_categories_of_its_language(
+    seats_source, write_catalog, catalog_text, block, capsys
+):
+    path = write_catalog("pl", catalog_text(*(block(*entry) for entry in polish_seats("one", "other")), language="pl"))
+
+    assert main(["--sync"]) == 0
+
+    written = path.read_text(encoding="utf-8")
+    assert 'msgctxt "table.seats.few"\nmsgid "{count} Plätze"\nmsgstr ""\n' in written
+    assert 'msgctxt "table.seats.many"\nmsgid "{count} Plätze"\nmsgstr ""\n' in written
+    assert written.index("seats.one") < written.index("seats.few") < written.index("seats.many")
+    assert written.index("seats.many") < written.index("seats.other")
+
+
+def test_main_sync_refuses_to_run_with_check_and_writes_nothing(stale_translation):
+    before = stale_translation.read_bytes()
+
+    with pytest.raises(SystemExit) as stopped:
+        main(["--sync", "--check"])
+
+    assert stopped.value.code == 2
+    assert stale_translation.read_bytes() == before
+
+
+@pytest.mark.parametrize(
+    ("damage", "named"),
+    [
+        pytest.param('msgctxt "app.name"\nmsgid "Skat\nmsgstr ""\n', "de.po:", id="broken source entry"),
+        pytest.param("", "de.po", id="missing source"),
+    ],
+)
+def test_main_sync_refuses_a_broken_source_and_writes_nothing(stale_translation, source_path, capsys, damage, named):
+    before = stale_translation.read_bytes()
+    if damage:
+        source_path.write_text(source_path.read_text(encoding="utf-8") + damage, encoding="utf-8")
+    else:
+        source_path.unlink()
+
+    assert main(["--sync"]) == 1
+
+    assert named in capsys.readouterr().err
+    assert stale_translation.read_bytes() == before
+
+
+def test_main_sync_refuses_a_translation_it_cannot_follow_and_writes_no_catalog(
+    stale_translation, write_catalog, catalog_text, block, capsys
+):
+    broken = write_catalog(
+        "en", catalog_text(block("app.name", "Skat", "a"), block("app.name", "Skat", "b"), language="en")
+    )
+    before = (stale_translation.read_bytes(), broken.read_bytes())
+
+    assert main(["--sync"]) == 1
+
+    error = capsys.readouterr().err
+    assert "en.po" in error
+    assert "app.name is a duplicate" in error
+    assert (stale_translation.read_bytes(), broken.read_bytes()) == before
+
+
+def test_main_sync_refuses_a_translation_whose_language_header_is_wrong_and_writes_no_catalog(
+    stale_translation, write_catalog, catalog_text, block, capsys
+):
+    wrong = write_catalog("en", catalog_text(block("app.name", "Skat", "a"), language="de"))
+    before = (stale_translation.read_bytes(), wrong.read_bytes())
+
+    assert main(["--sync"]) == 1
+
+    assert "en.po" in capsys.readouterr().err
+    assert (stale_translation.read_bytes(), wrong.read_bytes()) == before
+
+
+def test_main_help_says_the_command_runs_after_the_translations_are_written(capsys):
+    with pytest.raises(SystemExit):
+        main(["--help"])
+
+    help_text = " ".join(capsys.readouterr().out.split())
+    assert "--sync" in help_text
+    assert "after the translations are written" in help_text

@@ -3,12 +3,23 @@
 
 import argparse
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from design.catalogs.catalog import SourceCatalog, TranslationCatalog, read_language, read_source, read_translation
+from design.catalogs.catalog import (
+    LanguageTag,
+    PluralCategories,
+    RawEntry,
+    SourceCatalog,
+    TranslationCatalog,
+    read_language,
+    read_source,
+    read_translation,
+)
 from design.catalogs.declaration import Declaration, DeclarationError, read_declaration
 from design.catalogs.python_module import render as render_python
+from design.catalogs.sync import structural_findings, sync_translation
 from design.catalogs.typescript import render, render_loader, render_translation
 
 if TYPE_CHECKING:
@@ -43,13 +54,23 @@ def source_catalog(declaration: Declaration) -> tuple[SourceCatalog | None, list
     return source, [*header_findings, *findings]
 
 
-def translation_catalogs(
+@dataclass(frozen=True)
+class TranslationFile:
+    """A translation catalog file as read: its language, the plural categories that language needs and its entries."""
+
+    path: Path
+    language: LanguageTag
+    categories: PluralCategories
+    entries: tuple[RawEntry, ...]
+
+
+def translation_files(
     paths: tuple[Path, ...], source: SourceCatalog
-) -> tuple[tuple[TranslationCatalog, ...], list[object]]:
-    """The translation of every catalog file, and every problem of the files."""
+) -> tuple[tuple[TranslationFile, ...], list[object]]:
+    """The translation catalog files, and every problem of the files themselves."""
     from design.catalogs.po_file import CatalogFileError, plural_categories, read_catalog
 
-    catalogs: list[TranslationCatalog] = []
+    files: list[TranslationFile] = []
     problems: list[object] = []
     for path in paths:
         try:
@@ -62,10 +83,35 @@ def translation_catalogs(
         except CatalogFileError as error:
             problems.append(error)
             continue
-        catalog, findings = read_translation(str(path), language, categories, raw.entries, source)
+        files.append(TranslationFile(path, language, categories, raw.entries))
+    return tuple(files), problems
+
+
+def translation_catalogs(
+    files: tuple[TranslationFile, ...], source: SourceCatalog
+) -> tuple[tuple[TranslationCatalog, ...], list[object]]:
+    """The translation of every catalog file, and every problem of the entries."""
+    catalogs: list[TranslationCatalog] = []
+    problems: list[object] = []
+    for file in files:
+        catalog, findings = read_translation(str(file.path), file.language, file.categories, file.entries, source)
         problems.extend(findings)
         catalogs.append(catalog)
     return tuple(catalogs), problems
+
+
+def sync_catalogs(files: tuple[TranslationFile, ...], source: SourceCatalog) -> int:
+    """Brings every translation in line with the source and writes the catalogs that changed; none if one is refused."""
+    from design.catalogs.po_file import write_synced
+
+    problems = [finding for file in files for finding in structural_findings(str(file.path), file.entries)]
+    if problems:
+        return fail(*problems)
+    for file in files:
+        synced = sync_translation(source, file.categories, file.entries)
+        if synced != file.entries:
+            write_synced(file.path, synced)
+    return 0
 
 
 def render_modules(
@@ -107,7 +153,14 @@ def stale_modules(modules: dict[Path, str], directory: Path) -> list[str]:
 
 def main(arguments: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="design-catalogs", description=__doc__)
-    parser.add_argument("--check", action="store_true", help="write nothing; fail on a finding or a stale module")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--check", action="store_true", help="write nothing; fail on a finding or a stale module")
+    mode.add_argument(
+        "--sync",
+        action="store_true",
+        help="bring every translation catalog in line with the source by key and write the catalogs only;"
+        " run design-catalogs after the translations are written",
+    )
     options = parser.parse_args(arguments)
     try:
         from design.catalogs.po_file import list_files, write_module
@@ -127,9 +180,12 @@ def main(arguments: Sequence[str] | None = None) -> int:
     translation_paths = tuple(
         path for path in list_files(declaration.catalogs) if path.suffix == ".po" and path != source_path(declaration)
     )
-    translations, problems = translation_catalogs(translation_paths, source)
-    if problems:
-        return fail(*problems)
+    files, problems = translation_files(translation_paths, source)
+    if options.sync:
+        return fail(*problems) if problems else sync_catalogs(files, source)
+    translations, entry_problems = translation_catalogs(files, source)
+    if problems or entry_problems:
+        return fail(*problems, *entry_problems)
     modules = render_modules(declaration, source, translations)
 
     if not options.check:
