@@ -25,3 +25,4 @@
 - `docs/VISION.md`: read when you need to know what design is for and whom it serves.
 - `docs/ARCHITECTURE.md`: read when you change the parts, the build or the release path.
 - `docs/stylesheet.md`: read when writing markup against `design.css` or the components.
+- `docs/languages.md`: read when you build or judge an app's languages, or the kit's words.
