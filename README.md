@@ -80,6 +80,7 @@ behaviour are documented in [`src/lib/types.ts`](src/lib/types.ts).
 - [Stylesheet reference](docs/stylesheet.md): the classes, tokens, wording and
   legal-row markup.
 - [Architecture](docs/ARCHITECTURE.md): the parts, the trust and the proof.
+- [Languages](docs/languages.md): the fleet standard for building apps so that a further language needs no code change.
 
 ## Release
 
