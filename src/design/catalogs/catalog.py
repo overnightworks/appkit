@@ -8,10 +8,10 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 KEY_PATTERN = re.compile(r"[a-z][a-zA-Z0-9]*\.[a-z][a-zA-Z0-9]*")
-# BCP 47 as far as a file name needs it: a two or three letter language, then script, region and variants.
-LANGUAGE_TAG_PATTERN = re.compile(
-    r"[a-z]{2,3}(-[A-Z][a-z]{3})?(-([A-Z]{2}|[0-9]{3}))?(-([a-z0-9]{5,8}|[0-9][a-z0-9]{3}))*"
-)
+LANGUAGE_SUBTAG = re.compile(r"[a-z]{2,3}", re.ASCII)
+SCRIPT_SUBTAG = re.compile(r"[A-Z][a-z]{3}", re.ASCII)
+REGION_SUBTAG = re.compile(r"[A-Z]{2}|\d{3}", re.ASCII)
+VARIANT_SUBTAG = re.compile(r"[a-z0-9]{5,8}|\d[a-z0-9]{3}", re.ASCII)
 PLURAL_PROBLEM = "uses msgid_plural; gettext plural forms are not used"
 
 
@@ -26,6 +26,18 @@ class Key:
             raise ValueError(f"{self.value!r} is not a key of the form surface.camelCase")
 
 
+def _is_language_tag(value: str) -> bool:
+    """BCP 47 as far as a file name needs it: a two or three letter language, then script, region and variants."""
+    language, *subtags = value.split("-")
+    if not LANGUAGE_SUBTAG.fullmatch(language):
+        return False
+    if subtags and SCRIPT_SUBTAG.fullmatch(subtags[0]):
+        subtags = subtags[1:]
+    if subtags and REGION_SUBTAG.fullmatch(subtags[0]):
+        subtags = subtags[1:]
+    return all(VARIANT_SUBTAG.fullmatch(subtag) for subtag in subtags)
+
+
 @dataclass(frozen=True)
 class LanguageTag:
     """A language tag such as de or pt-BR; a catalog's file stem, its Language header and its module name."""
@@ -33,7 +45,7 @@ class LanguageTag:
     value: str
 
     def __post_init__(self) -> None:
-        if not LANGUAGE_TAG_PATTERN.fullmatch(self.value):
+        if not _is_language_tag(self.value):
             raise ValueError(f"{self.value!r} is not a language tag such as de or pt-BR")
 
 
