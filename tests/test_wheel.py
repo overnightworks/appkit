@@ -199,7 +199,9 @@ def test_wheel_installs_the_declared_commands_and_offers_the_declared_extras(ins
             assert any(
                 line.lower().startswith(name) and re.search(rf"extra == ['\"]{extra}['\"]", line) for line in shipped
             ), (extra, requirement)
-    assert len(shipped) == sum(len(requirements) for requirements in declared["optional-dependencies"].values())
+    assert len(shipped) == len(declared["dependencies"]) + sum(
+        len(requirements) for requirements in declared["optional-dependencies"].values()
+    )
 
 
 @pytest.fixture
