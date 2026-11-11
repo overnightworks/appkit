@@ -26,7 +26,8 @@ def text(language: Language, key: Key, /, *, count: int | None = None, **gaps: s
         raise KeyError(f'unknown language {language!r}; the languages are {list(WORDS)}')
     if key not in WORDS[language]:
         family = key.rpartition('.')[0]
-        hint = f'; a plural family is named by its family key {family!r}' if family in WORDS[language] else ''
+        is_family = family in WORDS[language] and not isinstance(WORDS[language][family], str)
+        hint = f'; a plural family is named by its family key {family!r}' if is_family else ''
         raise KeyError(f'unknown key {key!r}{hint}')
     words = WORDS[language][key]
     if isinstance(words, str):

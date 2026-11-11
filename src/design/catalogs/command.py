@@ -103,7 +103,8 @@ def translation_catalogs(
 def sync_catalogs(listed: tuple[Path, ...], files: tuple[TranslationFile, ...], source: SourceCatalog) -> int:
     """Brings every translation in line with the source and writes the catalogs that changed; none if one is refused.
 
-    A catalog is written at the path the directory listed, never at one an object read from the file carries.
+    A catalog is written at the path the directory listed, found again in that listing: the path scanner traces a
+    path through the file object, whose other fields come from the file's content.
     """
     from design.catalogs.po_file import write_synced
 
