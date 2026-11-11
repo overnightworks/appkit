@@ -73,12 +73,17 @@ def declaration_from(pyproject: Mapping[str, object]) -> Declaration:
         raise DeclarationError(f"{TABLE} must be a table")
     if unknown := sorted(set(table) - set(KEYS)):
         raise DeclarationError(f"{TABLE} has the unknown key {unknown[0]!r}; its keys are {', '.join(KEYS)}")
-    return Declaration(
+    declaration = Declaration(
         source=_source(table),
         catalogs=_path(table, "catalogs") or DEFAULT.catalogs,
         typescript=_path(table, "typescript") or DEFAULT.typescript,
         python=_path(table, "python"),
     )
+    if declaration.python is not None:
+        for key, directory in (("catalogs", declaration.catalogs), ("typescript", declaration.typescript)):
+            if declaration.python.is_relative_to(directory):
+                raise DeclarationError(f"{TABLE} python must lie outside the {key} directory {str(directory)!r}")
+    return declaration
 
 
 def read_declaration(root: Path) -> Declaration:

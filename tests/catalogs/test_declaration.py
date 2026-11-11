@@ -55,6 +55,11 @@ def test_declaration_reads_a_path_inside_the_repository_in_its_normal_form(value
         pytest.param({"typescript": "a/../../words"}, "typescript", id="path leaving the repository by a detour"),
         pytest.param({"python": ""}, "python", id="empty path"),
         pytest.param({"python": "."}, "python", id="the repository itself"),
+        pytest.param({"python": "frontend/src/lib/catalogs/de.po"}, "python", id="python in the catalogs directory"),
+        pytest.param({"python": "frontend/src/lib/words/de.ts"}, "python", id="python in the typescript directory"),
+        pytest.param(
+            {"catalogs": "locales", "python": "locales/words.py"}, "python", id="python in a declared catalogs directory"
+        ),
     ],
 )
 def test_declaration_fails_in_one_sentence_naming_the_table_and_the_key(table, named):

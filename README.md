@@ -98,7 +98,8 @@ dev = ["overnightworks-design[catalogs] @ https://github.com/overnightworks/desi
 
 Both run in the repository's root. The optional table `[tool.design-catalogs]` in
 its `pyproject.toml` overrides the defaults; paths are relative to the root and
-stay inside it, and an unknown key or a wrong type fails:
+stay inside it, the Python module lies outside the other two directories, and an
+unknown key or a wrong type fails:
 
 ```toml
 [tool.design-catalogs]

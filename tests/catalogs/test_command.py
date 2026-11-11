@@ -385,6 +385,7 @@ def test_main_reads_and_writes_the_paths_of_the_declaration(project, declare, ca
     [
         pytest.param({"unknown": "x"}, "unknown", id="unknown key"),
         pytest.param({"python": "../words.py"}, "python", id="path above the repository"),
+        pytest.param({"python": "frontend/src/lib/words/de.ts"}, "python", id="python over a typescript module"),
     ],
 )
 def test_main_fails_naming_the_table_and_key_of_a_broken_declaration_and_writes_nothing(
@@ -398,3 +399,14 @@ def test_main_fails_naming_the_table_and_key_of_a_broken_declaration_and_writes_
     assert "tool.design-catalogs" in error
     assert named in error
     assert not module_path.exists()
+
+
+@pytest.mark.parametrize("arguments", [[], ["--check"]])
+def test_main_refuses_a_python_module_over_a_catalog_and_leaves_the_catalog_as_it_was(
+    clean_source, declare, project, arguments
+):
+    declare(python=clean_source.relative_to(project).as_posix())
+    before = clean_source.read_bytes()
+
+    assert main(arguments) == 1
+    assert clean_source.read_bytes() == before
