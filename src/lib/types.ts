@@ -173,8 +173,11 @@ export interface AgentControlProps {
 	rows: readonly AgentRow[];
 	/** Called with the row's key by the button of an `available` row. */
 	onCall: (key: string) => void;
-	/** Called with the row's key by the button of a `here` row. */
-	onSendAway: (key: string) => void;
+	/**
+	 * Called with the row's key by the button of a `here` row. Absent, a `here` row shows the mark and the
+	 * name and no action, as an `inviting` row shows no button.
+	 */
+	onSendAway?: (key: string) => void;
 	/** Its sentence shows above the rows as an alert until the app clears it. */
 	refusal?: AgentControlRefusal;
 	/** Absent renders the en words. */

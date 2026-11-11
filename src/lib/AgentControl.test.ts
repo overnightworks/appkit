@@ -81,6 +81,14 @@ describe('rows', () => {
 		expect(buttons[0].getAttribute('aria-label')).toBe('Ask Mozart to leave');
 	});
 
+	it('shows a here row without the send-away handler as the mark and the name, with no action', async () => {
+		const control = await render({ rows: [{ key: 'k1', name: 'Mozart', state: 'here' }], onSendAway: undefined });
+		expect(buttonsOf(control)).toHaveLength(0);
+		const row = rowsOf(control)[0];
+		expect(row.firstElementChild?.textContent).toBe('AI');
+		expect(row.children[1].textContent).toBe('Mozart');
+	});
+
 	it('shows the rows in the given order', async () => {
 		const control = await render({
 			rows: [
