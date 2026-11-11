@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 STRING_LINE = re.compile(rb'^(?:msg\w+(?:\[\d+\])?\s+)?"(?:[^"\\]|\\.)*"')
-LANGUAGE_HEADER = re.compile(r"^Language: *(.*)$", re.MULTILINE)
+LANGUAGE_FIELD = "Language:"
 
 
 class CatalogFileError(Exception):
@@ -48,6 +48,17 @@ def _first_form(value: str | tuple[str, ...]) -> str:
     return value if isinstance(value, str) else value[0]
 
 
+def _header_language(header: str) -> str | None:
+    return next(
+        (
+            line.removeprefix(LANGUAGE_FIELD).strip(" ")
+            for line in header.split("\n")
+            if line.startswith(LANGUAGE_FIELD)
+        ),
+        None,
+    )
+
+
 def read_catalog(path: Path) -> RawCatalog:
     catalog = _EveryEntry()
     try:
@@ -65,8 +76,7 @@ def read_catalog(path: Path) -> RawCatalog:
     entries = catalog.entries
     language = None
     if entries and entries[0].context is None and not entries[0].id:
-        header = LANGUAGE_HEADER.search(str(entries[0].string))
-        language = header.group(1).rstrip(" ") if header else None
+        language = _header_language(str(entries[0].string))
         entries = entries[1:]
     return RawCatalog(
         language,
