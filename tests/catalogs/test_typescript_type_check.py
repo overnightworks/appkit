@@ -17,8 +17,10 @@ def translation(*keys: str) -> TranslationCatalog:
     return TranslationCatalog(language=LanguageTag("pl"), entries=tuple(Entry(Key(key), "Tekst") for key in keys))
 
 
-def type_check(directory: Path, probe: str, target: str = "") -> subprocess.CompletedProcess[str]:
-    (directory / "de.ts").write_text(render(CATALOG), encoding="utf-8")
+def type_check(
+    directory: Path, probe: str, target: str = "", catalog: SourceCatalog = CATALOG
+) -> subprocess.CompletedProcess[str]:
+    (directory / "de.ts").write_text(render(catalog), encoding="utf-8")
     (directory / "pl.ts").write_text(target, encoding="utf-8")
     (directory / "consumer.ts").write_text(probe, encoding="utf-8")
     return subprocess.run(
@@ -97,3 +99,95 @@ def test_a_target_module_whose_keys_differ_from_the_sources_fails_tsc_strict(tmp
     assert result.returncode != 0
     assert "pl.ts" in result.stdout
     assert named in result.stdout
+
+
+@pytest.fixture
+def gap_catalog():
+    return SourceCatalog(
+        language=LanguageTag("de"),
+        entries=(Entry(key=Key("chat.greeting"), text="Hallo {name}, du hast {count} Nachrichten"),),
+    )
+
+
+@pytest.fixture
+def target_greeting():
+    return greet_from("pl", '{ name: "Eva", count: 3 }')
+
+
+def gap_translation(text: str) -> str:
+    catalog = TranslationCatalog(language=LanguageTag("pl"), entries=(Entry(Key("chat.greeting"), text),))
+    return render_translation(catalog, LanguageTag("de"))
+
+
+def greet_from(module: str, gaps: str) -> str:
+    return f'import {{ words }} from "./{module}";\nexport const text: string = words["chat.greeting"]({gaps});\n'
+
+
+def greet(gaps: str) -> str:
+    return greet_from("de", gaps)
+
+
+def test_a_consumer_passing_every_gap_of_a_text_passes_tsc_strict(tmp_path, gap_catalog):
+    result = type_check(tmp_path, greet('{ name: "Eva", count: 3 }'), catalog=gap_catalog)
+
+    assert result.returncode == 0, result.stdout
+
+
+@pytest.mark.parametrize(
+    ("gaps", "named"),
+    [
+        pytest.param('{ name: "Eva" }', "count", id="missing gap"),
+        pytest.param('{ name: "Eva", count: 3, other: "x" }', "other", id="extra gap"),
+        pytest.param(
+            "{ name: 1, count: 3 }", "'number' is not assignable to type 'string'", id="wrong type of a plain gap"
+        ),
+        pytest.param(
+            '{ name: "Eva", count: "3" }',
+            "'string' is not assignable to type 'number'",
+            id="wrong type of the count gap",
+        ),
+    ],
+)
+def test_a_consumer_passing_the_wrong_gaps_fails_tsc_strict(tmp_path, gaps, named, gap_catalog):
+    result = type_check(tmp_path, greet(gaps), catalog=gap_catalog)
+
+    assert result.returncode != 0
+    assert "consumer.ts" in result.stdout
+    assert named in result.stdout
+
+
+def test_a_target_module_with_the_gaps_of_the_source_passes_tsc_strict(tmp_path, gap_catalog, target_greeting):
+    target = gap_translation("{count} wiadomosci dla {name}")
+
+    result = type_check(tmp_path, target_greeting, target, gap_catalog)
+
+    assert result.returncode == 0, result.stdout
+
+
+@pytest.mark.parametrize(
+    ("text", "named"),
+    [
+        pytest.param("{count} wiadomosci dla {name} {other}", "other", id="gap the source lacks"),
+        pytest.param("wiadomosci dla {name}", "count", id="dropped gap of the source"),
+    ],
+)
+def test_a_target_module_whose_gaps_differ_from_the_sources_fails_tsc_strict(
+    tmp_path, gap_catalog, target_greeting, text, named
+):
+    result = type_check(tmp_path, target_greeting, gap_translation(text), gap_catalog)
+
+    assert result.returncode != 0
+    assert "pl.ts" in result.stdout
+    assert named in result.stdout
+
+
+@pytest.mark.parametrize("module", [pytest.param("de", id="source"), pytest.param("pl", id="target")])
+def test_a_consumer_assigning_to_the_words_of_a_module_fails_tsc_strict(tmp_path, module):
+    target = render_translation(translation("table.seatFree", "app.name"), LanguageTag("de"))
+    probe = f'import {{ words }} from "./{module}";\nwords["app.name"] = "replacement";\n'
+
+    result = type_check(tmp_path, probe, target)
+
+    assert result.returncode != 0
+    assert "consumer.ts" in result.stdout
+    assert "read-only" in result.stdout

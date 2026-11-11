@@ -2,6 +2,7 @@
 
 import re
 from dataclasses import dataclass
+from string import Formatter
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -47,6 +48,67 @@ class LanguageTag:
     def __post_init__(self) -> None:
         if not _is_language_tag(self.value):
             raise ValueError(f"{self.value!r} is not a language tag such as de or pt-BR")
+
+
+@dataclass(frozen=True)
+class Gap:
+    """A `{name}` in a text: the place a value is filled in."""
+
+    name: str
+
+
+Piece = str | Gap
+
+
+def pieces_of(text: str) -> tuple[Piece, ...]:
+    """A text as its literals and gaps in order; `{{` and `}}` are literal braces, as in `str.format`.
+
+    Only `{name}` with a plain identifier is a gap: a format spec, a conversion, a number, an attribute or an
+    item is refused, naming the piece.
+    """
+    try:
+        parsed = tuple(Formatter().parse(text))
+    except ValueError as error:
+        raise ValueError(f"unbalanced brace: {error}") from error
+    pieces: list[Piece] = []
+    literal = ""
+    position = 0
+    for text_before, field, _spec, _conversion in parsed:
+        literal += text_before
+        position += len(text_before.replace("{", "{{").replace("}", "}}"))
+        if field is None:
+            continue
+        # The parser reports an empty format spec like none, so the written piece itself is compared.
+        piece = text[position : text.index("}", position) + 1]
+        if not field.isidentifier() or piece != "{" + field + "}":
+            raise ValueError(f"gap {piece} is not a plain name")
+        position += len(piece)
+        if literal:
+            pieces.append(literal)
+            literal = ""
+        pieces.append(Gap(field))
+    if literal:
+        pieces.append(literal)
+    return tuple(pieces)
+
+
+def gap_names(pieces: tuple[Piece, ...]) -> frozenset[str]:
+    return frozenset(piece.name for piece in pieces if isinstance(piece, Gap))
+
+
+def _gaps_text(names: frozenset[str]) -> str:
+    return f"{{{', '.join(sorted(names))}}}" if names else "none"
+
+
+def _gap_problems(text: str, source_text: str | None = None) -> list[str]:
+    """What is wrong with the gaps of `text`: a malformed gap and, given the source's text, a gap set that differs."""
+    try:
+        names = gap_names(pieces_of(text))
+    except ValueError as error:
+        return [f"is malformed: {error}"]
+    if source_text is None or (source_names := gap_names(pieces_of(source_text))) == names:
+        return []
+    return [f"has the gaps {_gaps_text(names)}; the source has {_gaps_text(source_names)}"]
 
 
 @dataclass(frozen=True)
@@ -162,7 +224,7 @@ def read_source(
                 (raw.text == "", "has an empty msgid"),
             )
             if found
-        ]
+        ] + _gap_problems(raw.text)
 
     valid, findings = _checked_entries(file, raw_entries, source_problems)
     return SourceCatalog(language, tuple(Entry(key, raw.text) for key, raw in valid)), findings
@@ -178,7 +240,7 @@ def read_translation(
     def translation_problems(key: Key, raw: RawEntry) -> list[str]:
         if key.value not in source_texts:
             return ["is not a key of the source"]
-        return [
+        problems = [
             problem
             for found, problem in (
                 (not raw.translation.strip(), "has an empty msgstr"),
@@ -189,6 +251,9 @@ def read_translation(
             )
             if found
         ]
+        if raw.translation.strip():
+            problems.extend(_gap_problems(raw.translation, source_texts[key.value]))
+        return problems
 
     valid, findings = _checked_entries(file, raw_entries, translation_problems)
     translated = {key.value: Entry(key, raw.translation) for key, raw in valid}
