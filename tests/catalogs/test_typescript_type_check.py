@@ -166,3 +166,13 @@ def test_a_target_module_using_a_gap_the_source_lacks_fails_tsc_strict(tmp_path)
     assert result.returncode != 0
     assert "pl.ts" in result.stdout
     assert "other" in result.stdout
+
+
+def test_a_target_module_dropping_a_gap_of_the_source_fails_tsc_strict(tmp_path):
+    target = gap_translation("wiadomosci dla {name}")
+
+    result = type_check(tmp_path, TARGET_GREETING, target, GAP_CATALOG)
+
+    assert result.returncode != 0
+    assert "pl.ts" in result.stdout
+    assert "count" in result.stdout

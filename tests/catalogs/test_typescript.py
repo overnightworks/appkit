@@ -47,10 +47,12 @@ def test_render_translation_imports_the_words_type_of_the_source_and_declares_th
         "\n"
         'import type { Words } from "./de";\n'
         "// prettier-ignore\n"
-        "export const words: Words = {\n"
+        "export const words = {\n"
         '    "table.seatFree": "Wolne",\n'
         '    "app.name": "Skat \\"pl\\"",\n'
-        "};\n"
+        "} satisfies Words;\n"
+        "// A translation that leaves out a gap of its source fails here.\n"
+        "({} as Words) satisfies typeof words;\n"
     )
 
 
@@ -104,8 +106,8 @@ def test_render_writes_a_text_with_gaps_as_a_function_of_its_gaps_in_the_type_an
         "};\n"
         "// prettier-ignore\n"
         "export const words: Words = {\n"
-        '    "chat.greeting": (gaps) => "Hallo " + gaps.name + ", du hast " + numberFormat.format(gaps.count)'
-        ' + " Nachrichten",\n'
+        '    "chat.greeting": (gaps: { readonly count: number; readonly name: string }) =>'
+        ' "Hallo " + gaps.name + ", du hast " + numberFormat.format(gaps.count) + " Nachrichten",\n'
         '    "app.name": "Skat",\n'
         "};\n"
         "export type Key = keyof Words;\n"
