@@ -152,9 +152,13 @@ def _gaps_text(names: frozenset[str]) -> str:
     return f"the gaps {{{', '.join(sorted(names))}}}" if names else "no gaps"
 
 
+def _family_gaps(names: frozenset[str]) -> frozenset[str]:
+    """The gaps of a plural family's entry that must agree across its entries and languages: all but `count`."""
+    return names - {COUNT}
+
+
 def _same_gaps(left: frozenset[str], right: frozenset[str], *, family: bool) -> bool:
-    """Whether two gap sets are equal; in a plural family's entry `count` may be in one and not the other."""
-    return left - {COUNT} == right - {COUNT} if family else left == right
+    return _family_gaps(left) == _family_gaps(right) if family else left == right
 
 
 def _gap_problems(text: str, source_text: str | None = None, *, family: bool = False) -> list[str]:
@@ -408,7 +412,7 @@ def _gap_set_findings(file: str, entries: tuple[Entry, ...]) -> list[Finding]:
         if isinstance(word, Entry):
             continue
         by_category = {entry.key.category: gap_names(pieces_of(entry.text)) for entry in word.entries}
-        if len({names - {COUNT} for names in by_category.values()}) > 1:
+        if len({_family_gaps(names) for names in by_category.values()}) > 1:
             named = ", ".join(f"{category} has {_gaps_text(names)}" for category, names in by_category.items())
             findings.append(Finding(file, word.key.value, f"has different gaps in its entries: {named}"))
     return findings
