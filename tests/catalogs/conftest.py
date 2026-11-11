@@ -5,7 +5,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from design.catalogs.catalog import Entry, Key, LanguageTag, SourceCatalog, TranslationCatalog
 from design.catalogs.declaration import DEFAULT
+from design.catalogs.po_file import plural_rule
+from design.catalogs.python_module import render
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -17,6 +20,33 @@ SOURCE_LANGUAGE = DEFAULT.source.value
 
 def header(language: str) -> str:
     return f'msgid ""\nmsgstr ""\n"Language: {language}\\n"\n"Content-Type: text/plain; charset=UTF-8\\n"\n'
+
+
+@pytest.fixture
+def catalog():
+    """A catalog of the given kind, from a language and its `surface_name: text` pairs."""
+
+    def build(kind, language, texts):
+        return kind(
+            language=LanguageTag(language),
+            entries=tuple(Entry(key=Key(key.replace("_", ".")), text=text) for key, text in texts.items()),
+        )
+
+    return build
+
+
+@pytest.fixture
+def module_text(catalog):
+    """The module of a source and its translations, each given as a language and its `surface_name: text` pairs."""
+
+    def build(source, *translations):
+        return render(
+            catalog(SourceCatalog, *source),
+            tuple(catalog(TranslationCatalog, *translation) for translation in translations),
+            plural_rule,
+        )
+
+    return build
 
 
 @pytest.fixture

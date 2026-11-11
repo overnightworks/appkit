@@ -26,7 +26,7 @@ def text(language: Language, key: Key, /, *, count: int | None = None, **gaps: s
         raise KeyError(f'unknown language {language!r}; the languages are {list(WORDS)}')
     if key not in WORDS[language]:
         family = key.rpartition('.')[0]
-        is_family = family in WORDS[language] and not isinstance(WORDS[language][family], str)
+        is_family = any(name == family and not isinstance(entry, str) for name, entry in WORDS[language].items())
         hint = f'; a plural family is named by its family key {family!r}' if is_family else ''
         raise KeyError(f'unknown key {key!r}{hint}')
     words = WORDS[language][key]
@@ -91,6 +91,8 @@ def render(
     keys = tuple(word.key.value for word in words_of(source.entries))
     key_type = f"Literal[\n{_lines(map(repr, keys))}]" if keys else "Never"
     categories = _lines(repr(category.value) for category in PluralCategory)
+    # `Final` on WORDS would narrow its type to the literal below, and a catalog without a plural family or without a
+    # gap then makes a branch of `text` unnecessary for a strict type checker.
     return (
         f"{HEADER}\n{KEEP_LAYOUT}\n"
         "from string import Formatter\n"
@@ -102,7 +104,7 @@ def render(
         f"type Category = Literal[\n{categories}]\n\n"
         f"SOURCE_LANGUAGE: Final[Language] = {source.language.value!r}\n"
         f"LANGUAGES: Final[tuple[Language, ...]] = (\n{languages})\n"
-        "WORDS: Final[Mapping[Language, Mapping[Key, str | Mapping[Category, str]]]] = {\n"
+        "WORDS: Mapping[Language, Mapping[Key, str | Mapping[Category, str]]] = {\n"
         f"{''.join(map(_words, catalogs))}}}\n\n\n"
         f"{_plural_category(catalogs, rule_of)}{LOOKUP}"
     )
