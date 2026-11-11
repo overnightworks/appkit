@@ -7,13 +7,14 @@ from typing import TYPE_CHECKING
 from babel.messages.catalog import Catalog, Message
 from babel.messages.pofile import PoFileError, PoFileParser
 
-from design.catalogs.catalog import RawEntry
+from design.catalogs.catalog import RawCatalog, RawEntry
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
 STRING_LINE = re.compile(rb'(msg\w+(\[\d+\])?\s+)?"(?:[^"\\]|\\.)*"\s*')
+LANGUAGE_HEADER = re.compile(r"^Language: *(.*?) *$", re.MULTILINE)
 
 
 class CatalogFileError(Exception):
@@ -43,21 +44,48 @@ def _require_closed_strings(path: Path, content: bytes) -> None:
             raise CatalogFileError(f"{path}:{number}: the string is not closed by a quote")
 
 
-def read_entries(path: Path) -> tuple[RawEntry, ...]:
+def _first_form(value: str | tuple[str, ...]) -> str:
+    return value if isinstance(value, str) else value[0]
+
+
+def read_catalog(path: Path) -> RawCatalog:
     catalog = _EveryEntry()
     try:
         content = path.read_bytes()
+        content.decode("utf-8")
         _require_closed_strings(path, content)
         PoFileParser(catalog, ignore_obsolete=True, abort_invalid=True).parse(BytesIO(content))
     except FileNotFoundError:
         raise CatalogFileError(f"{path}: the source catalog is missing") from None
+    except UnicodeDecodeError:
+        raise CatalogFileError(f"{path}: the catalog is not valid UTF-8") from None
     except PoFileError as error:
         problem = error.args[0].removesuffix(f" on {error.lineno}")
         raise CatalogFileError(f"{path}:{error.lineno + 1}: {problem}") from error
     entries = catalog.entries
+    language = None
     if entries and entries[0].context is None and not entries[0].id:
+        header = LANGUAGE_HEADER.search(str(entries[0].string))
+        language = header.group(1) if header else None
         entries = entries[1:]
-    return tuple(RawEntry(message.context, str(message.id), str(message.string), message.fuzzy) for message in entries)
+    return RawCatalog(
+        language,
+        tuple(
+            RawEntry(
+                message.context,
+                _first_form(message.id),
+                _first_form(message.string),
+                message.fuzzy,
+                plural=not isinstance(message.id, str),
+            )
+            for message in entries
+        ),
+    )
+
+
+def list_files(directory: Path) -> tuple[Path, ...]:
+    """The files of a directory by name; none when it does not exist."""
+    return tuple(sorted(path for path in directory.iterdir() if path.is_file())) if directory.is_dir() else ()
 
 
 def read_module(path: Path) -> str | None:
