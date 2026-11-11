@@ -151,6 +151,29 @@ def stale_modules(modules: dict[Path, str], directory: Path) -> list[str]:
     return [*stale, *strays]
 
 
+def generate(
+    declaration: Declaration,
+    source: SourceCatalog,
+    files: tuple[TranslationFile, ...],
+    problems: list[object],
+    *,
+    check: bool,
+) -> int:
+    """Writes the modules of the catalogs, or with `check` finds the modules that are not current."""
+    from design.catalogs.po_file import write_module
+
+    translations, entry_problems = translation_catalogs(files, source)
+    if problems or entry_problems:
+        return fail(*problems, *entry_problems)
+    modules = render_modules(declaration, source, translations)
+    if not check:
+        for path, module in modules.items():
+            write_module(path, module)
+        return 0
+    stale = stale_modules(modules, declaration.typescript)
+    return fail(*stale) if stale else 0
+
+
 def main(arguments: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="design-catalogs", description=__doc__)
     mode = parser.add_mutually_exclusive_group()
@@ -163,7 +186,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
     )
     options = parser.parse_args(arguments)
     try:
-        from design.catalogs.po_file import list_files, write_module
+        from design.catalogs.po_file import list_files
     except ModuleNotFoundError as error:  # pragma: no cover - run in a subprocess without Babel (tests/test_wheel.py)
         if not (error.name or "").startswith("babel"):
             raise
@@ -183,14 +206,4 @@ def main(arguments: Sequence[str] | None = None) -> int:
     files, problems = translation_files(translation_paths, source)
     if options.sync:
         return fail(*problems) if problems else sync_catalogs(files, source)
-    translations, entry_problems = translation_catalogs(files, source)
-    if problems or entry_problems:
-        return fail(*problems, *entry_problems)
-    modules = render_modules(declaration, source, translations)
-
-    if not options.check:
-        for path, module in modules.items():
-            write_module(path, module)
-        return 0
-    problems = stale_modules(modules, declaration.typescript)
-    return fail(*problems) if problems else 0
+    return generate(declaration, source, files, problems, check=options.check)
