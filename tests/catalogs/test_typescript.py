@@ -286,6 +286,14 @@ def test_a_family_function_falls_back_to_other_for_a_category_the_family_lacks(e
     assert evaluate({"fr.ts": module}, call_seats((1, 1000000), "fr")) == ["eins", "viele"]
 
 
+def test_a_family_function_returns_a_category_sentence_that_leaves_out_the_count_without_it(evaluate):
+    module = render_translation(
+        family_catalog("de", one="Ein Platz frei", other="{count} Plätze frei"), LanguageTag("de")
+    )
+
+    assert evaluate({"de.ts": module}, call_seats((1, 3), "de")) == ["Ein Platz frei", "3 Plätze frei"]
+
+
 def test_a_family_function_fills_the_gaps_beside_the_count(evaluate):
     module = render_translation(
         family_catalog("en", one="{name} has {count} seat", other="{name} has {count} seats"), LanguageTag("de")

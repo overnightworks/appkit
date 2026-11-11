@@ -23,6 +23,25 @@ def fail(*messages: object) -> int:
     return 1
 
 
+def source_path(declaration: Declaration) -> Path:
+    return declaration.catalogs / f"{declaration.source.value}.po"
+
+
+def source_catalog(declaration: Declaration) -> tuple[SourceCatalog | None, list[object]]:
+    """The source catalog of the declaration, none when its file cannot be read, and every problem of the file."""
+    from design.catalogs.po_file import CatalogFileError, plural_categories, read_catalog
+
+    path = source_path(declaration)
+    try:
+        raw = read_catalog(path)
+        categories = plural_categories(declaration.source, path) if raw.holds_family else frozenset()
+    except CatalogFileError as error:
+        return None, [error]
+    _, header_findings = read_language(str(path), declaration.source.value, raw.language)
+    source, findings = read_source(str(path), declaration.source, categories, raw.entries)
+    return source, [*header_findings, *findings]
+
+
 def translation_catalogs(
     paths: tuple[Path, ...], source: SourceCatalog
 ) -> tuple[tuple[TranslationCatalog, ...], list[object]]:
@@ -38,7 +57,7 @@ def translation_catalogs(
             problems.extend(language_findings)
             if language is None:
                 continue
-            categories = plural_categories(language)
+            categories = plural_categories(language, path) if source.holds_family else frozenset()
         except CatalogFileError as error:
             problems.append(error)
             continue
@@ -58,7 +77,9 @@ def render_modules(
         for catalog in translations
     )
     if declaration.python is not None:
-        modules[declaration.python] = render_python(source, translations)
+        from design.catalogs.po_file import plural_rule
+
+        modules[declaration.python] = render_python(source, translations, plural_rule)
     return modules
 
 
@@ -84,7 +105,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
     parser.add_argument("--check", action="store_true", help="write nothing; fail on a finding or a stale module")
     options = parser.parse_args(arguments)
     try:
-        from design.catalogs.po_file import CatalogFileError, list_files, plural_categories, read_catalog, write_module
+        from design.catalogs.po_file import list_files, write_module
     except ModuleNotFoundError as error:  # pragma: no cover - run in a subprocess without Babel (tests/test_wheel.py)
         if not (error.name or "").startswith("babel"):
             raise
@@ -94,19 +115,12 @@ def main(arguments: Sequence[str] | None = None) -> int:
         declaration = read_declaration(Path())
     except DeclarationError as error:
         return fail(error)
-    source_path = declaration.catalogs / f"{declaration.source.value}.po"
-    try:
-        raw = read_catalog(source_path)
-        source_categories = plural_categories(declaration.source)
-    except CatalogFileError as error:
-        return fail(error)
-    _, header_findings = read_language(str(source_path), declaration.source.value, raw.language)
-    source, findings = read_source(str(source_path), declaration.source, source_categories, raw.entries)
-    if header_findings or findings:
-        return fail(*header_findings, *findings)
+    source, problems = source_catalog(declaration)
+    if source is None or problems:
+        return fail(*problems)
 
     translation_paths = tuple(
-        path for path in list_files(declaration.catalogs) if path.suffix == ".po" and path != source_path
+        path for path in list_files(declaration.catalogs) if path.suffix == ".po" and path != source_path(declaration)
     )
     translations, problems = translation_catalogs(translation_paths, source)
     if problems:

@@ -3,7 +3,7 @@
 import json
 from typing import TYPE_CHECKING
 
-from design.catalogs.catalog import Entry, Family, PluralCategory, gap_names, pieces_of, words_of
+from design.catalogs.catalog import COUNT, Entry, Family, PluralCategory, gap_names, pieces_of, words_of
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -12,8 +12,7 @@ if TYPE_CHECKING:
 
 # The module is laid out by this renderer; prettier would reflow its objects.
 PRETTIER_IGNORE = "// prettier-ignore"
-# A gap with this name is a number; the module formats it with `Intl.NumberFormat` of its own language.
-COUNT = "count"
+# The count is a number; the module formats it with `Intl.NumberFormat` of its own language.
 NUMBER_FORMAT = "numberFormat"
 # A family's function takes the count as its own argument, so the sentence is chosen by the number it shows.
 PLURAL_RULES = "pluralRules"

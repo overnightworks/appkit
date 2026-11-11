@@ -113,8 +113,10 @@ flowchart LR
   already holds; ICU MessageFormat, a second syntax inside gettext with no maintained Python
   parser for the generator. A catalog's key set equals the source's, except that a plural
   family holds exactly the categories its own language needs (CLDR plural categories, read
-  through Babel, and `other`); a language Babel has no rules for fails the check. Every
-  entry of a family carries the same gaps.
+  through Babel, and `other`); a catalog in a language Babel has no rules for fails the check
+  only where a plural family needs the categories, and the message names the catalog file.
+  Every entry of a family carries the same gaps, except that a category's sentence may leave
+  out `{count}` (`Ein Platz frei` beside `{count} Plätze frei`).
 
   A gap is a plain identifier in braces, `{name}`; `__proto__` is refused, because in an
   object literal it sets the prototype instead of a value. A literal brace is written `{{` or
@@ -129,15 +131,31 @@ flowchart LR
   of a family are its key. A module that adds, renames or drops a gap, or
   lacks a key, fails the type check against the source's module; the generator's check refuses
   the same before it writes one. The count is the exception: a family's `count` is its argument,
-  not a gap of the type, so a module that drops `{count}` from a family keeps the type and passes
-  the type check; the catalog check refuses it instead. Until the Python module's own slice ships the plural
-  function, that module holds each entry's raw text under its own key, with `{{` and `}}`
-  unreplaced and no gap filled.
+  not a gap of the type, so a category's sentence may leave out `{count}`, in the source and in a
+  translation, and both the type check and the catalog check accept it; the catalog check
+  refuses any other gap that is dropped or added.
+
+  In the Python module `text(language, key, /, **gaps)` fills the gaps of a plain key, reads
+  `{{` and `}}` as single braces and raises on a missing or an unknown gap. A family is named
+  by its family key, `text(language, "table.seats", count=3, **gaps)`:
+  `plural_category(language, count)` chooses the sentence, a category the family lacks falls
+  to `other`, and `count` fills the gap of that name, so the number that chooses is the
+  number shown. The categories are no keys of the module. `plural_category` is written into
+  the module at build time from Babel's CLDR rules, for whole counts, and equals
+  `babel.plural.to_python` for every locale Babel ships; no server needs Babel at runtime.
+  The Python module writes `count` as plain digits, because the grouping and the digit shapes
+  of `Intl.NumberFormat` need the CLDR data of the language at run time, so a count of 1000
+  or more reads differently there than on the page where the language groups digits. Babel's
+  CLDR release and the browser's differ for some smaller languages, so a family is checked
+  against Babel's categories; where the page's `Intl.PluralRules` gives such a language a
+  category the family lacks, the sentence falls to `other`.
 - **LANG-12** The server sends tokens (a catalog key and named values) and data, never a
   sentence for a person. A response may carry a sentence for agents beside the token; the
   page never shows it. The token has one shape in every app: a field `message` holding `key`
   and `values`, beside the field that carries the sentence for agents where the response has
-  one. Tool descriptions for agents and log lines are not interface text.
+  one. The shape holds where a response carries a text for the person; a domain token that
+  the page maps to its own key (a refusal's reason, a game's ending) is data and needs no
+  `message` field. Tool descriptions for agents and log lines are not interface text.
 - **LANG-13** A text that is stored, such as a failure message in a database, stores its
   token and data, never the sentence; the page renders it in the reader's language.
 - **LANG-14** An app has one catalog per language, read by both sides. The generator emits
@@ -228,7 +246,7 @@ One question governs this section: what does a further language add that a test 
 - **One owner per check.** The generator's `--check` holds all catalog validity and runs in
   the app's own lint and in CI:
   - the key set equals the source's, except that a plural family holds exactly the categories
-    of its own language and the same gaps in every entry (LANG-11);
+    of its own language and the same gaps in every entry but the count (LANG-11);
   - no entry is empty or fuzzy, and every catalog's `Language` header equals its file stem
     (LANG-22);
   - each translation's `msgid` equals the source's text for its key (LANG-22);

@@ -7,6 +7,7 @@ from design.catalogs.catalog import (
     Key,
     LanguageTag,
     PluralCategory,
+    RawCatalog,
     RawEntry,
     SourceCatalog,
     gap_names,
@@ -451,17 +452,49 @@ def test_read_source_refuses_a_plain_key_equal_to_the_key_of_a_family():
 
 def test_read_source_refuses_a_family_whose_entries_carry_different_gaps_and_names_each_gap_set():
     _, findings = read_source(
-        FILE, LanguageTag("de"), GERMAN, family("table.seats", one="Ein Platz", other="{count} Plätze")
+        FILE, LanguageTag("de"), GERMAN, family("table.seats", one="{name}: ein Platz", other="{count} Plätze")
     )
 
     assert [(finding.file, finding.key) for finding in findings] == [(FILE, "table.seats")]
-    assert "one has no gaps" in findings[0].problem
+    assert "one has the gaps {name}" in findings[0].problem
     assert "other has the gaps {count}" in findings[0].problem
+
+
+@pytest.mark.parametrize(
+    "texts",
+    [
+        pytest.param({"one": "Ein Platz frei", "other": "{count} Plätze frei"}, id="one leaves out the count"),
+        pytest.param({"one": "{name}: ein Platz", "other": "{name}: {count} Plätze"}, id="a further gap in both"),
+        pytest.param({"one": "{count} Platz", "other": "Plätze"}, id="other leaves out the count"),
+    ],
+)
+def test_read_source_takes_a_family_whose_entries_differ_only_in_leaving_out_the_count(texts):
+    _, findings = read_source(FILE, LanguageTag("de"), GERMAN, family("table.seats", **texts))
+
+    assert findings == ()
+
+
+def test_read_source_names_the_plural_categories_for_a_three_part_key_whose_last_part_is_none():
+    _, findings = read_source(FILE, LanguageTag("de"), GERMAN, (entry("table.seats.ones", "Platz"),))
+
+    assert [(finding.file, finding.key) for finding in findings] == [(FILE, "table.seats.ones")]
+    assert "'ones'" in findings[0].problem
+    assert "zero, one, two, few, many, other" in findings[0].problem
+
+
+@pytest.mark.parametrize("context", ["seats", "table.seats.one.other", "Table.seats.ones"])
+def test_read_source_gives_no_category_hint_for_a_key_that_is_no_surface_name_category(context):
+    _, findings = read_source(FILE, LanguageTag("de"), GERMAN, (entry(context, "Platz"),))
+
+    assert "categories" not in findings[0].problem
 
 
 def test_read_source_reports_the_same_family_once_however_many_entries_it_has():
     _, findings = read_source(
-        FILE, LanguageTag("de"), POLISH, family("table.seats", one="a", few="{count}", many="{count}", other="{count}")
+        FILE,
+        LanguageTag("de"),
+        POLISH,
+        family("table.seats", one="{name}", few="{count}", many="{count}", other="{count}"),
     )
 
     assert len(findings) == 1
@@ -597,3 +630,54 @@ def test_read_translation_names_the_missing_plain_key_beside_a_family(family_sou
     )
 
     assert [finding.key for finding in findings] == ["app.name"]
+
+
+@pytest.mark.parametrize(
+    ("category", "translation"),
+    [
+        pytest.param("one", "Jedno miejsce", id="a category leaves out the count"),
+        pytest.param("few", "{count} miejsca", id="a category keeps it"),
+    ],
+)
+def test_read_translation_takes_a_family_entry_that_leaves_out_the_count_or_keeps_it(
+    family_source, category, translation
+):
+    texts = {**POLISH_SEATS, category: translation}
+
+    _, findings = read_translation(
+        TRANSLATION_FILE, LanguageTag("pl"), POLISH, seats_translation(**texts), family_source
+    )
+
+    assert findings == ()
+
+
+def test_read_translation_takes_a_family_entry_with_the_count_where_the_source_text_has_none():
+    source = SourceCatalog(
+        language=LanguageTag("de"),
+        entries=(Entry(Key("table.seats.one"), "Ein Platz"), Entry(Key("table.seats.other"), "{count} Plätze")),
+    )
+    raw = (
+        entry("table.seats.one", "Ein Platz", "{count} Platz"),
+        entry("table.seats.other", "{count} Plätze", "Plätze"),
+    )
+
+    _, findings = read_translation(TRANSLATION_FILE, LanguageTag("en"), GERMAN, raw, source)
+
+    assert findings == ()
+
+
+@pytest.mark.parametrize(
+    ("contexts", "holds"),
+    [
+        pytest.param(("table.seats.one", "app.name"), True, id="a family entry"),
+        pytest.param(("table.seats.ones", "table.seats", "app.name", None), False, id="no family entry"),
+        pytest.param((), False, id="no entry"),
+    ],
+)
+def test_a_catalog_says_whether_it_holds_a_plural_family(contexts, holds):
+    raw = RawCatalog(None, tuple(entry(context, "x") for context in contexts))
+    source = SourceCatalog(
+        LanguageTag("de"), tuple(Entry(Key(context), "x") for context in contexts if context and "ones" not in context)
+    )
+
+    assert (raw.holds_family, source.holds_family) == (holds, holds)
