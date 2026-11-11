@@ -47,12 +47,13 @@ def test_render_translation_imports_the_words_type_of_the_source_and_declares_th
         "\n"
         'import type { Words } from "./de";\n'
         "// prettier-ignore\n"
-        "export const words = {\n"
+        "const translated = {\n"
         '    "table.seatFree": "Wolne",\n'
         '    "app.name": "Skat \\"pl\\"",\n'
         "} satisfies Words;\n"
         "// A translation that leaves out a gap of its source fails here.\n"
-        "({} as Words) satisfies typeof words;\n"
+        "({} as Words) satisfies typeof translated;\n"
+        "export const words: Words = translated;\n"
     )
 
 

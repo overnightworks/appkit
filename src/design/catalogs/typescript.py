@@ -15,9 +15,10 @@ PRETTIER_IGNORE = "// prettier-ignore"
 # A gap with this name is a number; the module formats it with `Intl.NumberFormat` of its own language.
 COUNT = "count"
 NUMBER_FORMAT = "numberFormat"
+TRANSLATED = "translated"
 # A function taking fewer gaps than the source's still satisfies `Words`; this checks the other direction.
 GAP_SET_CHECK = (
-    "// A translation that leaves out a gap of its source fails here.\n({} as Words) satisfies typeof words;"
+    f"// A translation that leaves out a gap of its source fails here.\n({{}} as Words) satisfies typeof {TRANSLATED};"
 )
 
 
@@ -90,6 +91,7 @@ def render_translation(catalog: TranslationCatalog, source: LanguageTag) -> str:
         f"import type {{ Words }} from {quoted(f'./{source.value}')};\n"
         f"{number_format_line(catalog.language, catalog.entries)}"
         f"{PRETTIER_IGNORE}\n"
-        f"export const words = {{\n{word_lines(catalog.entries)}}} satisfies Words;\n"
+        f"const {TRANSLATED} = {{\n{word_lines(catalog.entries)}}} satisfies Words;\n"
         f"{GAP_SET_CHECK}\n"
+        f"export const words: Words = {TRANSLATED};\n"
     )

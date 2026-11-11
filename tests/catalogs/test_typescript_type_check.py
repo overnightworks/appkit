@@ -164,21 +164,30 @@ def test_a_target_module_with_the_gaps_of_the_source_passes_tsc_strict(tmp_path,
     assert result.returncode == 0, result.stdout
 
 
-def test_a_target_module_using_a_gap_the_source_lacks_fails_tsc_strict(tmp_path, gap_catalog, target_greeting):
-    target = gap_translation("{count} wiadomosci dla {name} {other}")
-
-    result = type_check(tmp_path, target_greeting, target, gap_catalog)
-
-    assert result.returncode != 0
-    assert "pl.ts" in result.stdout
-    assert "other" in result.stdout
-
-
-def test_a_target_module_dropping_a_gap_of_the_source_fails_tsc_strict(tmp_path, gap_catalog, target_greeting):
-    target = gap_translation("wiadomosci dla {name}")
-
-    result = type_check(tmp_path, target_greeting, target, gap_catalog)
+@pytest.mark.parametrize(
+    ("text", "named"),
+    [
+        pytest.param("{count} wiadomosci dla {name} {other}", "other", id="gap the source lacks"),
+        pytest.param("wiadomosci dla {name}", "count", id="dropped gap of the source"),
+    ],
+)
+def test_a_target_module_whose_gaps_differ_from_the_sources_fails_tsc_strict(
+    tmp_path, gap_catalog, target_greeting, text, named
+):
+    result = type_check(tmp_path, target_greeting, gap_translation(text), gap_catalog)
 
     assert result.returncode != 0
     assert "pl.ts" in result.stdout
-    assert "count" in result.stdout
+    assert named in result.stdout
+
+
+@pytest.mark.parametrize("module", [pytest.param("de", id="source"), pytest.param("pl", id="target")])
+def test_a_consumer_assigning_to_the_words_of_a_module_fails_tsc_strict(tmp_path, module):
+    target = render_translation(translation("table.seatFree", "app.name"), LanguageTag("de"))
+    probe = f'import {{ words }} from "./{module}";\nwords["app.name"] = "replacement";\n'
+
+    result = type_check(tmp_path, probe, target)
+
+    assert result.returncode != 0
+    assert "consumer.ts" in result.stdout
+    assert "read-only" in result.stdout
