@@ -257,4 +257,5 @@ def write_synced(path: Path, entries: tuple[RawEntry, ...]) -> None:
         catalog[raw.text] = message
     catalog.obsolete.update(parsed.obsolete)
     body = "".join(generate_po(catalog, omit_header=True, width=LINE_WIDTH))
-    path.write_text((_header_text(text) if has_header else "") + body, encoding="utf-8")
+    with path.open("w", encoding="utf-8") as catalog_file:
+        catalog_file.write((_header_text(text) if has_header else "") + body)
