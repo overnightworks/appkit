@@ -85,6 +85,7 @@ def test_main_fails_naming_the_source_catalog_when_it_is_missing(project, source
     ("damage", "line"),
     [
         pytest.param('msgctxt "app.name"\nmsgid "Skat\nmsgstr ""\n', 11, id="unterminated msgid"),
+        pytest.param('msgctxt "app.name"\n  msgid "Skat\nmsgstr ""\n', 11, id="indented unterminated msgid"),
         pytest.param('msgctxt "app.name"\nmsgid "Skat"\nmsgstr ""\nthis is garbage\n', 13, id="garbage line"),
         pytest.param('msgctxt "table.title"\nmsgid "Tisch"\n', 11, id="missing msgstr"),
     ],

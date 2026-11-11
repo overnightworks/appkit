@@ -38,7 +38,8 @@ class _EveryEntry(Catalog):
 def _require_closed_strings(path: Path, content: bytes) -> None:
     """Babel cuts the last character off a string whose closing quote is missing, so no error would show."""
     for number, line in enumerate(content.splitlines(), start=1):
-        if line.startswith((b"msg", b'"')) and not STRING_LINE.fullmatch(line):
+        stripped = line.strip()
+        if stripped.startswith((b"msg", b'"')) and not STRING_LINE.fullmatch(stripped):
             raise CatalogFileError(f"{path}:{number}: the string is not closed by a quote")
 
 
