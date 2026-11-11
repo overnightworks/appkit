@@ -82,6 +82,7 @@ def test_gap_names_are_the_set_of_names_in_a_text():
     ("text", "piece"),
     [
         pytest.param("Hallo {name:>5}", "{name:>5}", id="format spec"),
+        pytest.param("Hallo {name:}", "{name:}", id="empty format spec"),
         pytest.param("Hallo {name!r}", "{name!r}", id="conversion"),
         pytest.param("Hallo {name!r:>5}", "{name!r:>5}", id="conversion and format spec"),
         pytest.param("Hallo {0}", "{0}", id="positional"),

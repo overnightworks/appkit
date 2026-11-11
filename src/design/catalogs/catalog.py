@@ -72,13 +72,17 @@ def pieces_of(text: str) -> tuple[Piece, ...]:
         raise ValueError(f"unbalanced brace: {error}") from error
     pieces: list[Piece] = []
     literal = ""
-    for text_before, field, spec, conversion in parsed:
+    position = 0
+    for text_before, field, _spec, _conversion in parsed:
         literal += text_before
+        position += len(text_before.replace("{", "{{").replace("}", "}}"))
         if field is None:
             continue
-        if not field.isidentifier() or spec or conversion:
-            piece = "{" + field + (f"!{conversion}" if conversion else "") + (f":{spec}" if spec else "") + "}"
+        # The parser reports an empty format spec like none, so the written piece itself is compared.
+        piece = text[position : text.index("}", position) + 1]
+        if not field.isidentifier() or piece != "{" + field + "}":
             raise ValueError(f"gap {piece} is not a plain name")
+        position += len(piece)
         if literal:
             pieces.append(literal)
             literal = ""
