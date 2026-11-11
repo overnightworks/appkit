@@ -80,10 +80,33 @@ def declaration_from(pyproject: Mapping[str, object]) -> Declaration:
         python=_path(table, "python"),
     )
     if declaration.python is not None:
+        if declaration.python == Path(PYPROJECT):
+            raise DeclarationError(f"{TABLE} python must not be {PYPROJECT}, the file that holds the declaration")
         for key, directory in (("catalogs", declaration.catalogs), ("typescript", declaration.typescript)):
             if declaration.python.is_relative_to(directory):
                 raise DeclarationError(f"{TABLE} python must lie outside the {key} directory {str(directory)!r}")
     return declaration
+
+
+def _filesystem_problem(root: Path, path: Path, *, file: bool) -> str | None:
+    """Why a path inside `root` cannot hold a file (or a directory): a file on the way or a thing of the wrong kind."""
+    if blocking := next((parent for parent in path.parents if (root / parent).is_file()), None):
+        return f"{blocking.as_posix()!r} is a file, so nothing can lie below it"
+    if file and (root / path).is_dir():
+        return f"{path.as_posix()!r} is a directory, not a file"
+    if not file and (root / path).is_file():
+        return f"{path.as_posix()!r} is a file, not a directory"
+    return None
+
+
+def _check_filesystem(root: Path, declaration: Declaration) -> None:
+    for key, path, file in (
+        ("catalogs", declaration.catalogs, False),
+        ("typescript", declaration.typescript, False),
+        ("python", declaration.python, True),
+    ):
+        if path is not None and (problem := _filesystem_problem(root, path, file=file)):
+            raise DeclarationError(f"{TABLE} {key}: {problem}")
 
 
 def read_declaration(root: Path) -> Declaration:
@@ -92,6 +115,8 @@ def read_declaration(root: Path) -> Declaration:
     if not path.is_file():
         return DEFAULT
     try:
-        return declaration_from(tomllib.loads(path.read_text(encoding="utf-8")))
+        declaration = declaration_from(tomllib.loads(path.read_text(encoding="utf-8")))
     except tomllib.TOMLDecodeError as error:
         raise DeclarationError(f"{path} is not valid TOML: {error}") from error
+    _check_filesystem(root, declaration)
+    return declaration

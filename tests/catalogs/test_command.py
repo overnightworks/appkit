@@ -157,10 +157,12 @@ def test_main_fails_naming_file_and_key_of_a_broken_entry_and_writes_nothing(
     assert not module_path.exists()
 
 
-def test_main_fails_naming_the_source_catalog_when_it_is_missing(project, source_path, capsys):
+def test_main_fails_naming_the_source_catalog_and_the_declaration_key_when_it_is_missing(project, source_path, capsys):
     assert main([]) == 1
 
-    assert "de.po" in capsys.readouterr().err
+    error = capsys.readouterr().err
+    assert "de.po" in error
+    assert "tool.design-catalogs source" in error
 
 
 @pytest.mark.parametrize("arguments", [[], ["--check"]])
@@ -413,6 +415,7 @@ def test_main_reads_and_writes_the_paths_of_the_declaration(project, declare, ca
         pytest.param({"unknown": "x"}, "unknown", id="unknown key"),
         pytest.param({"python": "../words.py"}, "python", id="path above the repository"),
         pytest.param({"python": "frontend/src/lib/words/de.ts"}, "python", id="python over a typescript module"),
+        pytest.param({"python": "pyproject.toml"}, "python", id="python over the declaration itself"),
     ],
 )
 def test_main_fails_naming_the_table_and_key_of_a_broken_declaration_and_writes_nothing(
@@ -510,20 +513,34 @@ def test_main_fails_naming_a_plain_key_equal_to_the_key_of_a_family(write_source
     assert "table.seats is a plain key and a plural family" in capsys.readouterr().err
 
 
-def test_main_fails_naming_a_language_babel_has_no_plural_rules_for(clean_source, write_catalog, catalog_text, capsys):
+def test_main_fails_naming_the_file_of_a_translation_without_babel_rules_when_the_source_has_a_family(
+    seats_source, write_catalog, catalog_text, capsys
+):
     write_catalog("tlh", catalog_text(language="tlh"))
 
     assert main([]) == 1
 
-    assert "tlh" in capsys.readouterr().err
+    assert "tlh.po" in capsys.readouterr().err
 
 
-def test_main_fails_naming_a_source_language_babel_has_no_plural_rules_for(
+def test_main_fails_naming_the_file_of_a_source_without_babel_rules_when_it_has_a_family(
     write_catalog, declare, catalog_text, block, capsys
 ):
     declare(source="tlh")
-    write_catalog("tlh", catalog_text(block("table.seatFree", "Frei"), language="tlh"))
+    write_catalog("tlh", catalog_text(*(block(key, text) for key, text in SEATS_SOURCE), language="tlh"))
 
     assert main([]) == 1
 
-    assert "tlh" in capsys.readouterr().err
+    assert "tlh.po" in capsys.readouterr().err
+
+
+def test_main_takes_catalogs_without_babel_rules_where_no_family_needs_them(
+    write_catalog, catalog_text, block, declare, module_for
+):
+    declare(source="tlh")
+    write_catalog("tlh", catalog_text(block("table.seatFree", "Frei"), language="tlh"))
+    write_catalog("xx", catalog_text(block("table.seatFree", "Frei", "Wolne"), language="xx"))
+
+    assert main([]) == 0
+    assert main(["--check"]) == 0
+    assert module_for("xx").is_file()

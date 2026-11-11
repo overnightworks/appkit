@@ -22,7 +22,11 @@ class PluralCategory(StrEnum):
 
 
 PluralCategories = frozenset[PluralCategory]
-KEY_PATTERN = re.compile(rf"[a-z][a-zA-Z0-9]*\.[a-z][a-zA-Z0-9]*(?:\.(?:{'|'.join(PluralCategory)}))?")
+PLAIN_KEY = r"[a-z][a-zA-Z0-9]*\.[a-z][a-zA-Z0-9]*"
+CATEGORY_PATTERN = rf"\.(?:{'|'.join(PluralCategory)})"
+KEY_PATTERN = re.compile(rf"{PLAIN_KEY}(?:{CATEGORY_PATTERN})?")
+FAMILY_ENTRY_PATTERN = re.compile(rf"{PLAIN_KEY}{CATEGORY_PATTERN}")
+PLAIN_KEY_PATTERN = re.compile(PLAIN_KEY)
 LANGUAGE_SUBTAG = re.compile(r"[a-z]{2,3}", re.ASCII)
 SCRIPT_SUBTAG = re.compile(r"[A-Z][a-z]{3}", re.ASCII)
 REGION_SUBTAG = re.compile(r"[A-Z]{2}|\d{3}", re.ASCII)
@@ -30,6 +34,8 @@ VARIANT_SUBTAG = re.compile(r"[a-z0-9]{5,8}|\d[a-z0-9]{3}", re.ASCII)
 PLURAL_PROBLEM = "uses msgid_plural; gettext plural forms are not used"
 # In an object literal a property of this name sets the prototype, so a consumer's value would not stay data.
 PROTOTYPE_GAP = "__proto__"
+# A gap with this name is a number. A plural family's sentence may leave it out ("Ein Platz" beside "{count} Plätze").
+COUNT = "count"
 
 
 @dataclass(frozen=True)
@@ -132,13 +138,18 @@ def _gaps_text(names: frozenset[str]) -> str:
     return f"the gaps {{{', '.join(sorted(names))}}}" if names else "no gaps"
 
 
-def _gap_problems(text: str, source_text: str | None = None) -> list[str]:
+def _same_gaps(left: frozenset[str], right: frozenset[str], *, family: bool) -> bool:
+    """Whether two gap sets are equal; in a plural family's entry `count` may be in one and not the other."""
+    return left - {COUNT} == right - {COUNT} if family else left == right
+
+
+def _gap_problems(text: str, source_text: str | None = None, *, family: bool = False) -> list[str]:
     """What is wrong with the gaps of `text`: a malformed gap and, given the source's text, a gap set that differs."""
     try:
         names = gap_names(pieces_of(text))
     except ValueError as error:
         return [f"is malformed: {error}"]
-    if source_text is None or (source_names := gap_names(pieces_of(source_text))) == names:
+    if source_text is None or _same_gaps(source_names := gap_names(pieces_of(source_text)), names, family=family):
         return []
     return [f"has {_gaps_text(names)}; the source has {_gaps_text(source_names)}"]
 
@@ -160,6 +171,12 @@ class RawCatalog:
 
     language: str | None
     entries: tuple[RawEntry, ...]
+
+    @property
+    def holds_family(self) -> bool:
+        return any(
+            entry.context is not None and FAMILY_ENTRY_PATTERN.fullmatch(entry.context) for entry in self.entries
+        )
 
 
 @dataclass(frozen=True)
@@ -204,6 +221,10 @@ class SourceCatalog:
     language: LanguageTag
     entries: tuple[Entry, ...]
 
+    @property
+    def holds_family(self) -> bool:
+        return any(entry.key.category for entry in self.entries)
+
 
 @dataclass(frozen=True)
 class TranslationCatalog:
@@ -225,6 +246,15 @@ class Finding:
         return f"{self.file}: {self.key} {self.problem}"
 
 
+def _key_problem(context: str) -> str:
+    """Why a `msgctxt` is no key; for a surface.name with a third part, the plural categories there are."""
+    surface_name, _, last = context.rpartition(".")
+    problem = "is not a key of the form surface.camelCase"
+    if PLAIN_KEY_PATTERN.fullmatch(surface_name):
+        return f"{problem}; {last!r} is no plural category, the categories are {', '.join(PluralCategory)}"
+    return problem
+
+
 def _checked_entries(
     file: str, raw_entries: tuple[RawEntry, ...], entry_problems: Callable[[Key, RawEntry], list[str]]
 ) -> tuple[tuple[tuple[Key, RawEntry], ...], tuple[Finding, ...], frozenset[Key]]:
@@ -243,7 +273,7 @@ def _checked_entries(
         try:
             key = Key(raw.context)
         except ValueError:
-            findings.append(Finding(file, raw.context, "is not a key of the form surface.camelCase"))
+            findings.append(Finding(file, raw.context, _key_problem(raw.context)))
             continue
         present.add(key)
         problems = [
@@ -358,13 +388,13 @@ def read_source(
 
 
 def _gap_set_findings(file: str, entries: tuple[Entry, ...]) -> list[Finding]:
-    """A finding for every family whose entries do not all carry the same gaps, naming the gaps of each."""
+    """A finding for every family whose entries differ in a gap besides `count`, naming the gaps of each."""
     findings: list[Finding] = []
     for word in words_of(entries):
         if isinstance(word, Entry):
             continue
         by_category = {entry.key.category: gap_names(pieces_of(entry.text)) for entry in word.entries}
-        if len(set(by_category.values())) > 1:
+        if len({names - {COUNT} for names in by_category.values()}) > 1:
             named = ", ".join(f"{category} has {_gaps_text(names)}" for category, names in by_category.items())
             findings.append(Finding(file, word.key.value, f"has different gaps in its entries: {named}"))
     return findings
@@ -409,7 +439,7 @@ def read_translation(
             if found
         ]
         if raw.translation.strip():
-            problems.extend(_gap_problems(raw.translation, expected))
+            problems.extend(_gap_problems(raw.translation, expected, family=key.category is not None))
         return problems
 
     valid, findings, present = _checked_entries(file, raw_entries, translation_problems)

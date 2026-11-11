@@ -9,6 +9,7 @@ from babel.messages.catalog import Catalog, Message
 from babel.messages.pofile import PoFileError, PoFileParser
 
 from design.catalogs.catalog import LanguageTag, PluralCategories, PluralCategory, RawCatalog, RawEntry
+from design.catalogs.declaration import TABLE
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -68,7 +69,7 @@ def read_catalog(path: Path) -> RawCatalog:
         _require_closed_strings(path, content)
         PoFileParser(catalog, ignore_obsolete=True, abort_invalid=True).parse(BytesIO(content))
     except FileNotFoundError:
-        raise CatalogFileError(f"{path}: the source catalog is missing") from None
+        raise CatalogFileError(f"{path}: the source catalog is missing; {TABLE} source names its language") from None
     except UnicodeDecodeError:
         raise CatalogFileError(f"{path}: the catalog is not valid UTF-8") from None
     except PoFileError as error:
@@ -94,12 +95,12 @@ def read_catalog(path: Path) -> RawCatalog:
     )
 
 
-def plural_categories(language: LanguageTag) -> PluralCategories:
-    """The CLDR plural categories a language needs, as Babel holds them, and `other`."""
+def plural_categories(language: LanguageTag, catalog: Path) -> PluralCategories:
+    """The CLDR plural categories a language needs, as Babel holds them, and `other`; `catalog` is its file."""
     try:
         locale = Locale.parse(language.value, sep="-")
     except UnknownLocaleError:
-        raise CatalogFileError(f"{language.value}: Babel has no CLDR plural rules for this language") from None
+        raise CatalogFileError(f"{catalog}: Babel has no CLDR plural rules for {language.value}") from None
     return frozenset({PluralCategory.OTHER, *map(PluralCategory, locale.plural_form.tags)})
 
 

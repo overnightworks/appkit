@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from design.catalogs.catalog import LanguageTag, PluralCategory, RawEntry
@@ -112,9 +114,9 @@ def test_list_files_gives_the_files_of_a_directory_by_name_and_nothing_of_a_miss
     ],
 )
 def test_plural_categories_are_the_cldr_categories_of_the_language_and_other(tag, names):
-    assert plural_categories(LanguageTag(tag)) == {PluralCategory(name) for name in names}
+    assert plural_categories(LanguageTag(tag), Path(f"{tag}.po")) == {PluralCategory(name) for name in names}
 
 
-def test_plural_categories_refuse_a_language_babel_has_no_rules_for_naming_it():
-    with pytest.raises(CatalogFileError, match="tlh"):
-        plural_categories(LanguageTag("tlh"))
+def test_plural_categories_refuse_a_language_babel_has_no_rules_for_naming_the_catalog_file():
+    with pytest.raises(CatalogFileError, match=r"locales/tlh\.po: .*tlh"):
+        plural_categories(LanguageTag("tlh"), Path("locales/tlh.po"))

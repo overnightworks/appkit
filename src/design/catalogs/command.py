@@ -38,7 +38,7 @@ def translation_catalogs(
             problems.extend(language_findings)
             if language is None:
                 continue
-            categories = plural_categories(language)
+            categories = plural_categories(language, path) if source.holds_family else frozenset()
         except CatalogFileError as error:
             problems.append(error)
             continue
@@ -97,7 +97,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
     source_path = declaration.catalogs / f"{declaration.source.value}.po"
     try:
         raw = read_catalog(source_path)
-        source_categories = plural_categories(declaration.source)
+        source_categories = plural_categories(declaration.source, source_path) if raw.holds_family else frozenset()
     except CatalogFileError as error:
         return fail(error)
     _, header_findings = read_language(str(source_path), declaration.source.value, raw.language)
