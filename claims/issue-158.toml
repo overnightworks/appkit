@@ -1,8 +1,0 @@
-claim_id = "27cd8307e9844922a35a547f05717c2d"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "96791f95749fc69f563b0d0d312577300f16dfc9"
-branch = "claude/issue-158-agent-control"
-scope = ["README.md", "docs/ARCHITECTURE.md", "docs/stylesheet.md", "package.json", "pyproject.toml", "src/lib/AgentControl.ssr.test.ts", "src/lib/AgentControl.svelte", "src/lib/AgentControl.test.ts", "src/lib/AiMark.svelte", "src/lib/AiMark.test.ts", "src/lib/index.ts", "src/lib/types.ts", "tests", "uv.lock"]
-opened_commit = "76b8ec662353c45c7f5861a68c04dd1ce56a7e73"
-whole_reason = "One component with its types, its export, the package and consumer tests, the documents that name the components and the version bump of its release."
