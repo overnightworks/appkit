@@ -93,27 +93,30 @@ flowchart LR
   **Ruled (design#162 line 3):** the generator with its catalog checks ships from design; the
   language resolver lives in webauth; the markup scan and the rule that requires the checks live
   in quality. The libraries and the rejected alternatives stay proposed.
-- **LANG-9** A catalog key is a neutral identifier that names what the text is for, never
-  the sentence: one namespace level, the surface, then a camelCase name (`table.seatFree`).
-  A text on two surfaces gets two keys. The kit's words never enter an app catalog. Renaming
-  a key changes every catalog. Rejected: flat keys, which collide at a thousand texts. A
-  value is a whole sentence, never assembled from fragments: where it varies, it names its
-  gaps (`{name}`), and the typed module types each gap.
+- **LANG-9** A catalog key is a neutral identifier that names what the text is for, never the
+  sentence: one namespace level, the surface, then a camelCase name (`table.seatFree`). A
+  text on two surfaces gets two keys. The kit's words never enter an app catalog. Renaming a
+  key changes every catalog. Rejected: flat keys, which collide at a thousand texts. A value
+  is a whole sentence, never assembled from fragments: where it varies, it names its gaps
+  (`{name}`), and the typed module types each gap. A plural family's key is its entries'
+  `msgctxt` without the category, and a plain key equal to a family's key fails the check.
 - **LANG-10** A language is whole or absent. A key missing from a catalog fails the check;
   no text falls back to another language one by one.
 - **LANG-11** Numbers, dates, lists and plural forms go through the browser's `Intl` with the
   page's language. A page without script holds no number, date or list. Its plural families
-  are chosen by a plural function the generator writes into the Python module from Babel's
-  CLDR rules at build time (`babel.plural.to_python`), so no server needs Babel at runtime. A
-  plural is a family of whole sentences, one per CLDR plural category (`.one`, `.other`). One
-  form for the fleet. Rejected: gettext plural forms, which restate rules the CLDR data
+  are chosen by a plural function that the generator writes into the Python module at build
+  time from Babel's CLDR rules, for whole-number counts, so no server needs Babel at runtime.
+  A plural is a family of whole sentences, one per CLDR plural category (`.one`, `.other`).
+  One form for the fleet. Rejected: gettext plural forms, which restate rules the CLDR data
   already holds; ICU MessageFormat, a second syntax inside gettext with no maintained Python
   parser for the generator. A catalog's key set equals the source's, except that a plural
   family holds exactly the categories its own language needs (CLDR plural categories, read
   through Babel).
 - **LANG-12** The server sends tokens (a catalog key and named values) and data, never a
   sentence for a person. A response may carry a sentence for agents beside the token; the
-  page never shows it. Tool descriptions for agents and log lines are not interface text.
+  page never shows it. The token has one shape in every app: a field `message` holding `key`
+  and `values`, beside the field that carries the sentence for agents where the response has
+  one. Tool descriptions for agents and log lines are not interface text.
 - **LANG-13** A text that is stored, such as a failure message in a database, stores its
   token and data, never the sentence; the page renders it in the reader's language.
 - **LANG-14** An app has one catalog per language, read by both sides. The generator emits
@@ -166,23 +169,22 @@ flowchart LR
   converts to a German source or asks for a deviation (see Deviations). Wherever this
   document says "the German catalog" or "the source", an app with a ruled deviation reads its
   own source catalog.
-- **LANG-22** A catalog entry is gettext's standard shape: the neutral key in `msgctxt`, the
-  source text in `msgid`, the translation in `msgstr`. The source language's file holds the
-  key and the text once, in the form Babel's catalog update handles; the generator's first
-  slice records the source file's shape here. Freshness is gettext's own: the update marks an
-  entry fuzzy when its source text changes. The check is no fuzzy and no empty entry, and
-  every translation's `msgid` equals the source's current text for the same key, so a source
-  change whose update was not run fails too. Here fuzzy means "stale, to be re-translated",
-  not "awaits a human" (LANG-6). The agent that changes a source text writes the translation
-  and clears the mark in the same change; nothing needs a network, key or provider, and the
-  committed catalog is the build's input. The remaining risk: clearing the mark without
-  translating defeats the check, which is an aid for cooperative agents. Standard gettext
-  tools read the catalogs.
-
-  Open point, settled by the generator's first slice with a small trial before a second
-  language ships: a language whose plural categories differ from the source's (LANG-11) must
-  survive the update. If it does not, the fallback is a recorded source hash per entry, a
-  translator comment `# source: sha256:<hex>` over the source text normalised to NFC UTF-8.
+- **LANG-22** A catalog entry is gettext's standard shape, keyed in `msgctxt`. The source
+  language's file holds each key with its text in `msgid` and an empty `msgstr`. A
+  translation's file holds the same `msgctxt`, the source text it was translated from as
+  `msgid`, and the translation in `msgstr`. A plural category the source lacks takes the
+  source's `other` text as its `msgid`. Freshness is a comparison by key, never Babel's
+  catalog update, which matches entries by text across keys and drops categories the source
+  lacks. The check fails when a translation's key set differs from the source's (LANG-11),
+  when an entry is empty or fuzzy, or when a translation's `msgid` differs from the source's
+  current text for its key. The generator's sync brings a translation in line: it adds
+  missing keys with an empty `msgstr`, sets a changed `msgid` to the source's text, keeps the
+  old `msgstr` and marks it fuzzy, and removes keys the source dropped. Fuzzy means "stale,
+  to be re-translated", not "awaits a human" (LANG-6). The agent that changes a source text
+  runs the sync, writes the translations and clears the marks in the same change; nothing
+  needs a network, key or provider, and the committed catalog is the build's input. The
+  remaining risk: clearing a mark without translating defeats the check, which is an aid for
+  cooperative agents.
 - **LANG-23** Catalogs live at `frontend/src/lib/catalogs/<tag>.po` and
   generated modules beside the code that imports them, unless the repository's one
   declaration, which the generator and quality's rule read, names other paths; the
@@ -201,9 +203,9 @@ One question governs this section: what does a further language add that a test 
 - **One owner per check.** The generator's `--check` holds all catalog validity and runs in
   the app's own lint and in CI:
   - the key set equals the source's, except for plural families (LANG-11);
-  - each value's named gaps equal the source's, and no key is missing (LANG-10);
-  - no entry is fuzzy or empty (LANG-22);
+  - no entry is empty or fuzzy (LANG-22);
   - each translation's `msgid` equals the source's text for its key (LANG-22);
+  - each value's named gaps equal the source's, and no key is missing (LANG-10);
   - the generated modules are current;
   - the kit ships every language the app offers (LANG-19).
 
@@ -228,14 +230,18 @@ One question governs this section: what does a further language add that a test 
 **Ruled (line 4):** every covered app holds an epic. Apps that can convert quickly do so now.
 songmaker starts too.
 
-**Proposed:** design ships the shared generator first (skat's generator moved into design
-and widened to LANG-9 to LANG-11). An app's first catalog slice follows that release, and no
-app extends a generator of its own meanwhile. An app may start these slices before that
-release: server sentences to tokens against a typed key list, one owner for the date and
-sort locale.
+**Proposed:** design ships the shared generator first (skat's generator moved into design and
+widened to LANG-9 to LANG-11). An app's first catalog slice follows that release, and no app
+extends a generator of its own meanwhile. An app may start these slices before that release:
+server sentences to tokens against a typed key list, one owner for the date and sort locale.
+An app whose responses must keep a sentence for agents moves its server sentences to tokens
+once the generated key type exists, so it builds no key list by hand.
 
 **Ruled (design#162 line 2):** the rule for new text (LANG-24) binds an app from its first
 catalog slice; until then, new texts go into one named constants owner per app.
+
+**Proposed reading:** a new interface text goes into the app's frontend constants owner; a
+new server sentence is a named constant in its module until that module moves to tokens.
 
 An app's slices after the first convert the surfaces and the server's sentences into
 tokens, then add the first further language.
