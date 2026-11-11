@@ -12,7 +12,7 @@
 		padding: 0 5px;
 		border: 1.5px solid currentColor;
 		border-radius: 999px;
-		font-size: 0.6em;
+		font-size: 0.6rem;
 		font-weight: 750;
 		letter-spacing: 0.04em;
 		line-height: 1.5;

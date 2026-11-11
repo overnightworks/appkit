@@ -128,3 +128,55 @@ export interface SignInPageProps {
 	/** Absent renders the en words. */
 	words?: SignInPageWords;
 }
+
+/** One row of the agent control. */
+export interface AgentRow {
+	/** Opaque and minted by the app; the kit hands it back to `onCall` and `onSendAway`. */
+	key: string;
+	/** Shown as given. */
+	name: string;
+	/** `inviting` is a call under way, `here` an agent in the place. */
+	state: 'available' | 'inviting' | 'here';
+}
+
+/** Why a call or a send-away was refused; the same five reasons serve both actions. */
+export type AgentControlRefusal =
+	| 'not-allowed'
+	| 'owner-absent'
+	| 'place-full'
+	| 'agent-unavailable'
+	| 'try-again';
+
+/**
+ * The control's own words, in the app's language. Whole or absent: an app cannot pass half a language.
+ * The two labels are the accessible names of the action buttons, which include the agent's name.
+ */
+export interface AgentControlWords {
+	call: string;
+	calling: string;
+	askToLeave: string;
+	callLabel: (name: string) => string;
+	askToLeaveLabel: (name: string) => string;
+	/** The sentence shown when no agent is listed. */
+	empty: string;
+	refusals: Record<AgentControlRefusal, string>;
+}
+
+/**
+ * The panel of rows with which a person calls an agent into a place and asks it to leave again:
+ * each row leads with `AiMark`, then the name, then one action or the waiting text.
+ * Trigger and popover stay with the app. The control holds no state of the call: the app sets
+ * `rows` and `refusal` and clears them. Asking to leave takes effect at once, with no confirm step.
+ */
+export interface AgentControlProps {
+	/** An empty list draws only the `words.empty` sentence, and the refusal when one is set. */
+	rows: readonly AgentRow[];
+	/** Called with the row's key by the button of an `available` row. */
+	onCall: (key: string) => void;
+	/** Called with the row's key by the button of a `here` row. */
+	onSendAway: (key: string) => void;
+	/** Its sentence shows above the rows as an alert until the app clears it. */
+	refusal?: AgentControlRefusal;
+	/** Absent renders the en words. */
+	words?: AgentControlWords;
+}
