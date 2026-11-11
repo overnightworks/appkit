@@ -237,6 +237,13 @@ def test_text_does_not_read_a_gap_value_as_a_gap(module_text, load):
     assert module.text("de", "chat.greeting", name="{name}") == "Hallo {name}"
 
 
+@pytest.mark.parametrize("gap", ["language", "key"])
+def test_text_fills_a_gap_named_like_a_lookup_argument(module_text, load, gap):
+    module = load(module_text(("de", {"app_label": f"Name: {{{gap}}}"})))
+
+    assert module.text("de", "app.label", **{gap: "Deutsch"}) == "Name: Deutsch"
+
+
 def test_text_formats_the_count_of_a_plain_text_that_has_a_count_gap(module_text, load):
     module = load(module_text(("de", {"chat_unread": "{count} ungelesen"})))
 

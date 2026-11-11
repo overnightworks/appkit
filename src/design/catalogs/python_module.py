@@ -17,10 +17,11 @@ HEADER = "# Generated from the catalogs by design-catalogs. Do not edit."
 KEEP_LAYOUT = "# fmt: off"
 # The lookup fills the gaps with `str.format`, which reads `{{` and `}}` as the catalog does. The count is written
 # as plain digits: the grouping and digits of `Intl.NumberFormat` need the CLDR data of the language at run time.
+# `language` and `key` are positional-only, so a gap may carry either name.
 LOOKUP = """\
 
 
-def text(language: Language, key: Key, *, count: int | None = None, **gaps: str) -> str:
+def text(language: Language, key: Key, /, *, count: int | None = None, **gaps: str) -> str:
     words = WORDS[language][key]
     if isinstance(words, str):
         sentence, counted = words, False
