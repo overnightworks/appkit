@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 STRING_LINE = re.compile(rb'^(?:msg\w+(?:\[\d+\])?\s+)?"(?:[^"\\]|\\.)*"')
-LANGUAGE_HEADER = re.compile(r"^Language: *(.*?) *$", re.MULTILINE)
+LANGUAGE_HEADER = re.compile(r"^Language: *(.*)$", re.MULTILINE)
 
 
 class CatalogFileError(Exception):
@@ -66,7 +66,7 @@ def read_catalog(path: Path) -> RawCatalog:
     language = None
     if entries and entries[0].context is None and not entries[0].id:
         header = LANGUAGE_HEADER.search(str(entries[0].string))
-        language = header.group(1) if header else None
+        language = header.group(1).rstrip(" ") if header else None
         entries = entries[1:]
     return RawCatalog(
         language,
