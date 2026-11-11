@@ -178,10 +178,12 @@ cover them.
   matches entries by text across keys and drops plural categories the source lacks,
   and a hash records what a translation's `msgid` already holds, readably. A
   translation is current when its `msgid` equals the source's text for its key.
-- Git pins (`github:overnightworks/design#vX.Y.Z`) instead of release assets: a
-  git pin loses the content hash a consumer's lock checks, sha256 in the wheel
-  URL and sha512 in pnpm's lock. Reopens if a git pin can carry a checked content
-  hash.
+- Git pins (`github:overnightworks/design#vX.Y.Z`) instead of release assets for
+  the npm package and the wheel as a runtime dependency: a git pin loses the
+  content hash a consumer's lock checks, sha256 in the wheel URL and sha512 in
+  pnpm's lock. Reopens if a git pin can carry a checked content hash. The
+  generator, a dev dependency, may be taken by git tag, which `uv lock` records
+  as a commit.
 
 ## 8. Risks and Technical Debt
 
