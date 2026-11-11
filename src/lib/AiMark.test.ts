@@ -20,15 +20,13 @@ afterEach(async () => {
 });
 
 describe('AiMark', () => {
-	it('renders the text AI and nothing else', async () => {
-		const page = await render();
-		expect(page.textContent).toBe('AI');
-	});
-
-	it('keeps the text AI when a caller passes a text', async () => {
-		const page = await render({ text: 'Agent', label: 'KI' });
-		expect(page.textContent).toBe('AI');
-	});
+	it.each<Record<string, string>>([{}, { text: 'Agent', label: 'KI' }])(
+		'renders the text AI and nothing else, whatever props a caller passes (%o)',
+		async (props) => {
+			const page = await render(props);
+			expect(page.textContent).toBe('AI');
+		},
+	);
 
 	it('leaves its text visible to assistive technology', async () => {
 		const page = await render();
