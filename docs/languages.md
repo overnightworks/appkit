@@ -99,8 +99,9 @@ flowchart LR
   text on two surfaces gets two keys. The kit's words never enter an app catalog. Renaming a
   key changes every catalog. Rejected: flat keys, which collide at a thousand texts. A value
   is a whole sentence, never assembled from fragments: where it varies, it names its gaps
-  (`{name}`), and the typed module types each gap. A plural family's key is its entries'
-  `msgctxt` without the category, and a plain key equal to a family's key fails the check.
+  (`{name}`), and the typed module types each gap. An entry of a plural family adds a dot and
+  its CLDR plural category (`table.seats.one`); a family's key is its entries' `msgctxt`
+  without the category, and a plain key equal to a family's key fails the check.
 - **LANG-10** A language is whole or absent. A key missing from a catalog fails the check;
   no text falls back to another language one by one.
 - **LANG-11** Numbers, dates, lists and plural forms go through the browser's `Intl` with the
@@ -112,7 +113,26 @@ flowchart LR
   already holds; ICU MessageFormat, a second syntax inside gettext with no maintained Python
   parser for the generator. A catalog's key set equals the source's, except that a plural
   family holds exactly the categories its own language needs (CLDR plural categories, read
-  through Babel).
+  through Babel, and `other`); a language Babel has no rules for fails the check. Every
+  entry of a family carries the same gaps.
+
+  A gap is a plain identifier in braces, `{name}`; `__proto__` is refused, because in an
+  object literal it sets the prototype instead of a value. A literal brace is written `{{` or
+  `}}`, and the module holds the single brace. A gap named `count` takes a number and is
+  formatted with `Intl.NumberFormat` of the module's language; every other gap takes a string.
+  A text with gaps is a function of one gaps object, `words["chat.greeting"]({ name, count })`.
+  A family is one function `(count: number, gaps) => string`, called `words["table.seats"](3,
+  { name })`: the count is its own argument, so the number that chooses the sentence is the
+  number it shows, and the gaps object stands only where the family has a gap besides
+  `count`. The module holds one `Intl.PluralRules` of its language and chooses the sentence by
+  `select(count)`; a category the family lacks falls to `other`. The token and the TypeScript key
+  of a family are its key. A module that adds, renames or drops a gap, or
+  lacks a key, fails the type check against the source's module; the generator's check refuses
+  the same before it writes one. The count is the exception: a family's `count` is its argument,
+  not a gap of the type, so a module that drops `{count}` from a family keeps the type and passes
+  the type check; the catalog check refuses it instead. Until the Python module's own slice ships the plural
+  function, that module holds each entry's raw text under its own key, with `{{` and `}}`
+  unreplaced and no gap filled.
 - **LANG-12** The server sends tokens (a catalog key and named values) and data, never a
   sentence for a person. A response may carry a sentence for agents beside the token; the
   page never shows it. The token has one shape in every app: a field `message` holding `key`
@@ -207,7 +227,8 @@ One question governs this section: what does a further language add that a test 
   key. No app parses a catalog in a test, and no test helper ships.
 - **One owner per check.** The generator's `--check` holds all catalog validity and runs in
   the app's own lint and in CI:
-  - the key set equals the source's, except for plural families (LANG-11);
+  - the key set equals the source's, except that a plural family holds exactly the categories
+    of its own language and the same gaps in every entry (LANG-11);
   - no entry is empty or fuzzy, and every catalog's `Language` header equals its file stem
     (LANG-22);
   - each translation's `msgid` equals the source's text for its key (LANG-22);

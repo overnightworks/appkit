@@ -202,3 +202,136 @@ def test_a_text_without_gaps_but_with_doubled_braces_is_a_string_with_single_bra
     probe = 'import { words } from "./de.ts"; process.stdout.write(JSON.stringify(words["chat.text"]));'
 
     assert evaluate({"de.ts": render(source_catalog(chat_text="Nutze {{Klammern}}"))}, probe) == "Nutze {Klammern}"
+
+
+def family_catalog(language, **texts):
+    """A translation catalog holding one plural family `table.seats`, by category."""
+    return TranslationCatalog(
+        language=LanguageTag(language),
+        entries=tuple(Entry(Key(f"table.seats.{category}"), text) for category, text in texts.items()),
+    )
+
+
+def sentences(*categories):
+    """One sentence per category that names the category and the count, so a result says which one was chosen."""
+    return {category: f"{category} {{count}}" for category in categories}
+
+
+def call_seats(counts, module="de"):
+    """The probe that prints what the seats family of a module returns for each count."""
+    return (
+        f'import {{ words }} from "./{module}.ts";'
+        f' process.stdout.write(JSON.stringify({list(counts)}.map((count) => words["table.seats"](count))));'
+    )
+
+
+def test_render_writes_a_family_as_one_function_of_the_count_choosing_by_one_hoisted_plural_rules(source_catalog):
+    module = render(
+        source_catalog(table_seats_one="{count} Platz", table_seats_other="{count} Plätze", app_name="Skat")
+    )
+
+    assert module == (
+        "// Generated from the de catalog by design-catalogs. Do not edit.\n"
+        "\n"
+        'export const language = "de";\n'
+        'const numberFormat = new Intl.NumberFormat("de");\n'
+        'const pluralRules = new Intl.PluralRules("de");\n'
+        "// prettier-ignore\n"
+        "export type Words = {\n"
+        '    readonly "table.seats": (count: number) => string;\n'
+        '    readonly "app.name": string;\n'
+        "};\n"
+        "// prettier-ignore\n"
+        "export const words: Words = {\n"
+        '    "table.seats": (count: number) => ({\n'
+        '        zero: numberFormat.format(count) + " Plätze",\n'
+        '        one: numberFormat.format(count) + " Platz",\n'
+        '        two: numberFormat.format(count) + " Plätze",\n'
+        '        few: numberFormat.format(count) + " Plätze",\n'
+        '        many: numberFormat.format(count) + " Plätze",\n'
+        '        other: numberFormat.format(count) + " Plätze",\n'
+        "    })[pluralRules.select(count)],\n"
+        '    "app.name": "Skat",\n'
+        "};\n"
+        "export type Key = keyof Words;\n"
+    )
+
+
+@pytest.mark.parametrize(
+    ("language", "categories", "counts", "expected"),
+    [
+        pytest.param("de", ("one", "other"), (0, 1, 2), ["other 0", "one 1", "other 2"], id="de"),
+        pytest.param("en", ("one", "other"), (0, 1, 2), ["other 0", "one 1", "other 2"], id="en"),
+        pytest.param(
+            "pl",
+            ("one", "few", "many", "other"),
+            (0, 1, 2, 5, 22, 1.5),
+            ["many 0", "one 1", "few 2", "many 5", "few 22", "other 1,5"],
+            id="pl",
+        ),
+    ],
+)
+def test_a_family_function_chooses_the_sentence_of_the_category_its_language_gives_the_count(
+    evaluate, language, categories, counts, expected
+):
+    catalog = family_catalog(language, **sentences(*categories))
+    module = render_translation(catalog, LanguageTag("de"))
+
+    assert evaluate({f"{language}.ts": module}, call_seats(counts, language)) == expected
+
+
+def test_a_family_function_falls_back_to_other_for_a_category_the_family_lacks(evaluate):
+    module = render_translation(family_catalog("fr", one="eins", other="viele"), LanguageTag("de"))
+
+    assert evaluate({"fr.ts": module}, call_seats((1, 1000000), "fr")) == ["eins", "viele"]
+
+
+def test_a_family_function_fills_the_gaps_beside_the_count(evaluate):
+    module = render_translation(
+        family_catalog("en", one="{name} has {count} seat", other="{name} has {count} seats"), LanguageTag("de")
+    )
+    probe = (
+        'import { words } from "./en.ts";'
+        ' process.stdout.write(JSON.stringify(words["table.seats"](1234, { name: "Eva" })));'
+    )
+
+    assert evaluate({"en.ts": module}, probe) == "Eva has 1,234 seats"
+
+
+def test_a_family_function_takes_the_gaps_object_only_where_the_family_has_a_further_gap(source_catalog):
+    module = render(source_catalog(table_seats_one="{count} Platz", table_seats_other="{name}: {count} Plätze"))
+
+    assert "(count: number, gaps: { readonly name: string }) => string;" in module
+
+
+def test_a_module_hoists_one_plural_rules_however_many_families_it_holds(source_catalog):
+    module = render(
+        source_catalog(
+            table_seats_one="a", table_seats_other="b", table_chairs_one="c", table_chairs_other="d", app_name="Skat"
+        )
+    )
+
+    assert module.count("new Intl.PluralRules(") == 1
+
+
+def test_a_module_without_a_family_holds_no_plural_rules(source_catalog):
+    assert "PluralRules" not in render(source_catalog(chat_greeting="Hallo {name} {count}", app_name="Skat"))
+
+
+def test_a_family_and_a_plain_text_of_a_translation_are_two_keys_of_its_words(evaluate):
+    catalog = TranslationCatalog(
+        language=LanguageTag("pl"),
+        entries=(
+            *family_catalog("pl", **sentences("one", "few", "many", "other")).entries,
+            Entry(Key("app.name"), "Skat"),
+        ),
+    )
+    probe = (
+        'import { words } from "./pl.ts";'
+        ' process.stdout.write(JSON.stringify([Object.keys(words), words["app.name"]]));'
+    )
+
+    assert evaluate({"pl.ts": render_translation(catalog, LanguageTag("de"))}, probe) == [
+        ["table.seats", "app.name"],
+        "Skat",
+    ]

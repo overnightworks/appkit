@@ -1,7 +1,7 @@
 import pytest
 
-from design.catalogs.catalog import RawEntry
-from design.catalogs.po_file import CatalogFileError, list_files, read_catalog
+from design.catalogs.catalog import LanguageTag, PluralCategory, RawEntry
+from design.catalogs.po_file import CatalogFileError, list_files, plural_categories, read_catalog
 
 
 def test_read_catalog_returns_each_entry_with_its_context_text_and_flag(write_source, catalog_text, block):
@@ -100,3 +100,21 @@ def test_list_files_gives_the_files_of_a_directory_by_name_and_nothing_of_a_miss
 
     assert list_files(tmp_path) == (tmp_path / "a.po", tmp_path / "b.ts")
     assert list_files(tmp_path / "absent") == ()
+
+
+@pytest.mark.parametrize(
+    ("tag", "names"),
+    [
+        pytest.param("de", {"one", "other"}, id="german"),
+        pytest.param("pl", {"one", "few", "many", "other"}, id="polish"),
+        pytest.param("ja", {"other"}, id="japanese without a plural"),
+        pytest.param("pt-BR", {"one", "many", "other"}, id="a tag with a region"),
+    ],
+)
+def test_plural_categories_are_the_cldr_categories_of_the_language_and_other(tag, names):
+    assert plural_categories(LanguageTag(tag)) == {PluralCategory(name) for name in names}
+
+
+def test_plural_categories_refuse_a_language_babel_has_no_rules_for_naming_it():
+    with pytest.raises(CatalogFileError, match="tlh"):
+        plural_categories(LanguageTag("tlh"))

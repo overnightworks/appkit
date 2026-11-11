@@ -191,3 +191,112 @@ def test_a_consumer_assigning_to_the_words_of_a_module_fails_tsc_strict(tmp_path
     assert result.returncode != 0
     assert "consumer.ts" in result.stdout
     assert "read-only" in result.stdout
+
+
+@pytest.fixture
+def family_catalog():
+    return SourceCatalog(
+        language=LanguageTag("de"),
+        entries=(
+            Entry(key=Key("table.seats.one"), text="{name} hat {count} Platz"),
+            Entry(key=Key("table.seats.other"), text="{name} hat {count} Plätze"),
+        ),
+    )
+
+
+def seats(arguments: str, module: str = "de") -> str:
+    return f'import {{ words }} from "./{module}";\nexport const text: string = words["table.seats"]({arguments});\n'
+
+
+def test_a_consumer_passing_the_count_and_the_gaps_of_a_family_passes_tsc_strict(tmp_path, family_catalog):
+    result = type_check(tmp_path, seats('3, { name: "Eva" }'), catalog=family_catalog)
+
+    assert result.returncode == 0, result.stdout
+
+
+@pytest.mark.parametrize(
+    ("arguments", "named"),
+    [
+        pytest.param("", "Expected 2 arguments, but got 0", id="missing count"),
+        pytest.param('{ name: "Eva" }', "Expected 2 arguments, but got 1", id="gaps without a count"),
+        pytest.param(
+            '"3", { name: "Eva" }',
+            "Argument of type 'string' is not assignable to parameter of type 'number'",
+            id="count as a string",
+        ),
+        pytest.param("3", "Expected 2 arguments, but got 1", id="missing gaps"),
+        pytest.param("3, {}", "'name' is missing", id="missing gap"),
+        pytest.param('3, { name: "Eva", count: 3 }', "'count' does not exist", id="a second count in the gaps"),
+    ],
+)
+def test_a_consumer_passing_the_wrong_arguments_to_a_family_fails_tsc_strict(
+    tmp_path, family_catalog, arguments, named
+):
+    result = type_check(tmp_path, seats(arguments), catalog=family_catalog)
+
+    assert result.returncode != 0
+    assert "consumer.ts" in result.stdout
+    assert named in result.stdout
+
+
+def test_a_consumer_passing_gaps_to_a_family_without_further_gaps_fails_tsc_strict(tmp_path):
+    catalog = SourceCatalog(
+        language=LanguageTag("de"),
+        entries=(Entry(Key("table.seats.one"), "{count} Platz"), Entry(Key("table.seats.other"), "{count} Plätze")),
+    )
+
+    result = type_check(tmp_path, seats("3, {}"), catalog=catalog)
+
+    assert result.returncode != 0
+    assert "Expected 1 arguments, but got 2" in result.stdout
+
+
+def family_translation(*texts: str) -> str:
+    """The Polish module of the seats family, one text per category in the order one, few, many, other."""
+    categories = ("one", "few", "many", "other")
+    catalog = TranslationCatalog(
+        language=LanguageTag("pl"),
+        entries=tuple(
+            Entry(Key(f"table.seats.{category}"), text) for category, text in zip(categories, texts, strict=True)
+        ),
+    )
+    return render_translation(catalog, LanguageTag("de"))
+
+
+def test_a_target_module_with_the_family_in_the_categories_of_its_language_passes_tsc_strict(tmp_path, family_catalog):
+    target = family_translation(*("{name}: {count}",) * 4)
+
+    result = type_check(tmp_path, seats('3, { name: "Eva" }', "pl"), target, family_catalog)
+
+    assert result.returncode == 0, result.stdout
+
+
+@pytest.mark.parametrize(
+    ("texts", "named"),
+    [
+        pytest.param(("{count}",) * 4, "name", id="dropped gap of the source"),
+        pytest.param(("{name}: {count} {other}",) * 4, "other", id="gap the source lacks"),
+    ],
+)
+def test_a_target_module_whose_family_gaps_differ_from_the_sources_fails_tsc_strict(
+    tmp_path, family_catalog, texts, named
+):
+    result = type_check(tmp_path, seats('3, { name: "Eva" }', "pl"), family_translation(*texts), family_catalog)
+
+    assert result.returncode != 0
+    assert "pl.ts" in result.stdout
+    assert named in result.stdout
+
+
+def test_a_target_module_without_the_family_fails_tsc_strict(tmp_path, family_catalog):
+    catalog = SourceCatalog(
+        language=LanguageTag("de"),
+        entries=(*family_catalog.entries, Entry(Key("app.name"), "Skat")),
+    )
+    target = render_translation(translation("app.name"), LanguageTag("de"))
+
+    result = type_check(tmp_path, seats('3, { name: "Eva" }', "pl"), target, catalog)
+
+    assert result.returncode != 0
+    assert "pl.ts" in result.stdout
+    assert "table.seats" in result.stdout

@@ -212,7 +212,7 @@ def test_main_fails_naming_file_and_line_of_a_malformed_catalog_and_writes_nothi
         pytest.param(
             [("table.seatFree", "Frei", "Wolne {name}"), ("app.name", "Skat", "Skat")],
             "pl",
-            ["pl.po", "table.seatFree", "{name}", "none"],
+            ["pl.po", "table.seatFree", "{name}", "the source has no gaps"],
             id="gaps the source lacks",
         ),
         pytest.param(
@@ -437,3 +437,93 @@ def test_main_refuses_a_python_module_over_a_catalog_and_leaves_the_catalog_as_i
 
     assert main(arguments) == 1
     assert clean_source.read_bytes() == before
+
+
+SEATS_SOURCE = (("table.seats.one", "{count} Platz"), ("table.seats.other", "{count} Plätze"))
+
+
+@pytest.fixture
+def seats_source(write_source, catalog_text, block):
+    """A source catalog holding the plural family `table.seats` in the categories of German."""
+    return write_source(catalog_text(*(block(key, text) for key, text in SEATS_SOURCE)))
+
+
+def polish_seats(*categories):
+    """The blocks of the Polish family: each category in `categories` translated from the source text it falls to."""
+    return [
+        (
+            f"table.seats.{category}",
+            SEATS_SOURCE[0][1] if category == "one" else SEATS_SOURCE[1][1],
+            f"{category} {{count}}",
+        )
+        for category in categories
+    ]
+
+
+def test_main_writes_and_checks_the_family_of_a_language_with_more_categories_than_the_source(
+    seats_source, write_catalog, catalog_text, block, module_for, evaluate, capsys
+):
+    write_catalog(
+        "pl", catalog_text(*(block(*entry) for entry in polish_seats("one", "few", "many", "other")), language="pl")
+    )
+    probe = (
+        'import { words } from "./pl.ts";'
+        ' process.stdout.write(JSON.stringify([1, 2, 5, 1.5].map((count) => words["table.seats"](count))));'
+    )
+
+    assert main([]) == 0
+
+    assert evaluate({"pl.ts": module_for("pl").read_text(encoding="utf-8")}, probe) == [
+        "one 1",
+        "few 2",
+        "many 5",
+        "other 1,5",
+    ]
+    assert main(["--check"]) == 0
+    assert capsys.readouterr().err == ""
+
+
+@pytest.mark.parametrize(
+    ("categories", "named"),
+    [
+        pytest.param(("one", "few", "other"), ["table.seats.many", "is missing"], id="missing category"),
+        pytest.param(("one", "few", "many", "other", "two"), ["table.seats.two", "not a plural category"], id="extra"),
+    ],
+)
+def test_main_fails_naming_the_key_of_a_family_category_the_language_lacks_or_has_too_many_of(
+    seats_source, write_catalog, catalog_text, block, module_for, capsys, categories, named
+):
+    write_catalog("pl", catalog_text(*(block(*entry) for entry in polish_seats(*categories)), language="pl"))
+
+    assert main([]) == 1
+
+    error = capsys.readouterr().err
+    assert all(name in error for name in ["pl.po", *named])
+    assert not module_for("pl").exists()
+
+
+def test_main_fails_naming_a_plain_key_equal_to_the_key_of_a_family(write_source, catalog_text, block, capsys):
+    write_source(catalog_text(block("table.seats", "Plätze"), *(block(key, text) for key, text in SEATS_SOURCE)))
+
+    assert main([]) == 1
+
+    assert "table.seats is a plain key and a plural family" in capsys.readouterr().err
+
+
+def test_main_fails_naming_a_language_babel_has_no_plural_rules_for(clean_source, write_catalog, catalog_text, capsys):
+    write_catalog("tlh", catalog_text(language="tlh"))
+
+    assert main([]) == 1
+
+    assert "tlh" in capsys.readouterr().err
+
+
+def test_main_fails_naming_a_source_language_babel_has_no_plural_rules_for(
+    write_catalog, declare, catalog_text, block, capsys
+):
+    declare(source="tlh")
+    write_catalog("tlh", catalog_text(block("table.seatFree", "Frei"), language="tlh"))
+
+    assert main([]) == 1
+
+    assert "tlh" in capsys.readouterr().err
