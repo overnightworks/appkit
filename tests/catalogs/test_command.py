@@ -428,6 +428,7 @@ def test_main_reads_and_writes_the_paths_of_the_declaration(project, declare, ca
         pytest.param({"python": "../words.py"}, "python", id="path above the repository"),
         pytest.param({"python": "frontend/src/lib/words/de.ts"}, "python", id="python over a typescript module"),
         pytest.param({"python": "pyproject.toml"}, "python", id="python over the declaration itself"),
+        pytest.param({"typescript": "frontend/src/lib/catalogs"}, "typescript", id="typescript naming the catalogs"),
     ],
 )
 def test_main_fails_naming_the_table_and_key_of_a_broken_declaration_and_writes_nothing(
@@ -751,3 +752,15 @@ def test_main_help_says_the_command_runs_after_the_translations_are_written(caps
     help_text = " ".join(capsys.readouterr().out.split())
     assert "--sync" in help_text
     assert "after the translations are written" in help_text
+
+
+@pytest.mark.parametrize("arguments", [[], ["--check"]])
+def test_main_gives_the_same_sentence_in_every_mode_when_a_declared_path_lies_below_a_file(
+    clean_source, declare, project, capsys, arguments
+):
+    (project / "afile").write_text("", encoding="utf-8")
+    declare(python="afile/nested/words.py")
+
+    assert main(arguments) == 1
+
+    assert capsys.readouterr().err == "tool.design-catalogs python: 'afile' is a file, so nothing can lie below it\n"

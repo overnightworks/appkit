@@ -58,6 +58,10 @@ def test_declaration_reads_a_path_inside_the_repository_in_its_normal_form(value
         pytest.param({"python": "pyproject.toml"}, "python", id="the declaration's own file"),
         pytest.param({"python": "./pyproject.toml"}, "python", id="the declaration's own file by a detour"),
         pytest.param({"python": "frontend/src/lib/catalogs/de.po"}, "python", id="python in the catalogs directory"),
+        pytest.param({"typescript": "frontend/src/lib/catalogs"}, "typescript", id="typescript naming the catalogs"),
+        pytest.param(
+            {"catalogs": "locales", "typescript": "./locales/"}, "typescript", id="typescript naming declared catalogs"
+        ),
         pytest.param(
             {"catalogs": "locales", "python": "locales/words.py"},
             "python",
