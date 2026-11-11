@@ -1,0 +1,153 @@
+import { expect, test, type Page } from '@playwright/test';
+import { buildConsumer, origin, routeTo, type ConsumerName } from './build-consumer.ts';
+import { resolveStyle } from './probe.ts';
+
+const colorSchemes = ['light', 'dark'] as const;
+const widths = [390, 1280] as const;
+const touchRowFloor = 44;
+
+const reportsOf = (page: Page) => page.evaluate(() => window.reports);
+
+for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[]) {
+	test.describe(`the agent control in a production consumer that ${consumer === 'imported' ? 'imports' : 'statically links'} design.css`, () => {
+		let outDir: string;
+		test.beforeAll(async () => {
+			outDir = await buildConsumer(consumer);
+		});
+
+		async function open(page: Page, variant = ''): Promise<void> {
+			await routeTo(page.context(), outDir);
+			await page.goto(`${origin}/?agents=${variant}`);
+			await expect(page.getByRole('button', { name: 'Call Mozart' })).toBeVisible();
+		}
+
+		for (const colorScheme of colorSchemes) {
+			for (const width of widths) {
+				test(`paints the refusal, the marks, the actions and the waiting dots in ${colorScheme} at ${width} px`, async ({
+					page
+				}) => {
+					await page.emulateMedia({ colorScheme });
+					await page.setViewportSize({ width, height: 800 });
+					await open(page, 'refusal');
+
+					const tokens = await resolveStyle(
+						page,
+						{
+							'border-top-color': 'var(--fail)',
+							'background-color': 'var(--fail-soft)',
+							color: 'var(--text-muted)'
+						},
+						['border-top-color', 'background-color', 'color']
+					);
+					const alert = page.getByRole('alert');
+					await expect(alert).toHaveText('Its owner is not here.');
+					await expect(alert).toHaveCSS('border-top-color', tokens['border-top-color']);
+					await expect(alert).toHaveCSS('background-color', tokens['background-color']);
+
+					const marks = page.getByText('AI', { exact: true });
+					await expect(marks).toHaveCount(3);
+					for (const mark of await marks.all()) {
+						await expect(mark).toHaveCSS('color', tokens.color);
+						await expect(mark).toHaveCSS('border-top-style', 'solid');
+					}
+					await expect(page.getByRole('status').locator('i').first()).toBeVisible();
+					await expect(page.getByRole('button', { name: 'Call Mozart' })).toHaveCSS(
+						'border-top-style',
+						'solid'
+					);
+				});
+			}
+		}
+
+		for (const width of widths) {
+			test(`keeps every action inside the viewport with a long name at ${width} px`, async ({ page }) => {
+				await page.setViewportSize({ width, height: 800 });
+				await open(page);
+				for (const name of ['Call Mozart', /^Ask Leonardo/]) {
+					const box = (await page.getByRole('button', { name }).boundingBox())!;
+					expect(box.x).toBeGreaterThanOrEqual(0);
+					expect(box.x + box.width).toBeLessThanOrEqual(width);
+				}
+				expect(
+					await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
+				).toBe(true);
+			});
+		}
+
+		test.describe('with a finger at 390 px', () => {
+			test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 800 } });
+
+			test('every row reaches its touch floor', async ({ page }) => {
+				await open(page);
+				expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true);
+				const rows = await page.getByRole('listitem').all();
+				expect(rows).toHaveLength(3);
+				for (const row of rows) {
+					expect((await row.boundingBox())!.height).toBeGreaterThanOrEqual(touchRowFloor);
+				}
+			});
+		});
+
+		test.describe('with a mouse at 390 px', () => {
+			test.use({ hasTouch: false, viewport: { width: 390, height: 800 } });
+
+			test('a row stays below the touch floor', async ({ page }) => {
+				await open(page);
+				expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(false);
+				const row = page.getByRole('listitem').first();
+				expect((await row.boundingBox())!.height).toBeLessThan(touchRowFloor);
+			});
+		});
+
+		test('sizes the AI mark by the control, not by the font size of its place', async ({ page }) => {
+			await open(page);
+			const mark = page.getByText('AI', { exact: true }).first();
+			const size = () => mark.evaluate((node) => parseFloat(getComputedStyle(node).fontSize));
+			const before = await size();
+			await page.getByRole('list').evaluate((list) => {
+				list.closest('div')!.style.fontSize = '24px';
+			});
+			expect(await size()).toBe(before);
+		});
+
+		test('reports the key of a call and of a send-away once each and keeps the page', async ({ page }) => {
+			await open(page);
+			await page.getByRole('button', { name: 'Call Mozart' }).click();
+			expect(await reportsOf(page)).toEqual(['call:key-mozart']);
+			await page.getByRole('button', { name: /^Ask Leonardo.* to leave$/ }).click();
+			expect(await reportsOf(page)).toEqual(['call:key-mozart', 'leave:key-leonardo']);
+			await expect(page.getByRole('dialog')).toHaveCount(0);
+			expect(page.url()).toBe(`${origin}/?agents=`);
+		});
+
+		test('gives the waiting row no button and keeps the dots still under reduced motion', async ({ page }) => {
+			await open(page);
+			const waiting = page.getByRole('status');
+			await expect(waiting).toHaveText('Calling…');
+			await expect(waiting.getByRole('button')).toHaveCount(0);
+			const dot = waiting.locator('i').first();
+			await page.emulateMedia({ reducedMotion: 'no-preference' });
+			await expect(dot).not.toHaveCSS('animation-name', 'none');
+			await page.emulateMedia({ reducedMotion: 'reduce' });
+			await expect(dot).toHaveCSS('animation-name', 'none');
+		});
+
+		test('is operable by keyboard in reading order', async ({ page }) => {
+			await open(page);
+			await page.keyboard.press('Tab');
+			await expect(page.getByRole('button', { name: 'Call Mozart' })).toBeFocused();
+			await page.keyboard.press('Tab');
+			await expect(page.getByRole('button', { name: /^Ask Leonardo/ })).toBeFocused();
+			await page.keyboard.press('Enter');
+			expect(await reportsOf(page)).toEqual(['leave:key-leonardo']);
+		});
+
+		test('draws only the empty sentence when no agent is listed', async ({ page }) => {
+			await routeTo(page.context(), outDir);
+			await page.goto(`${origin}/?agents=empty`);
+			await expect(page.getByText('No agent is reachable right now.')).toBeVisible();
+			await expect(page.getByRole('button')).toHaveCount(0);
+			await expect(page.getByRole('list')).toHaveCount(0);
+		});
+	});
+}
