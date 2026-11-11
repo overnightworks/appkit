@@ -3,5 +3,6 @@ agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
 role = "builder"
 base = "c0fc9549689336aed414d128b133b576ab746012"
 branch = "claude/issue-162-language-standard"
-scope = ["AGENTS.md", "README.md", "docs/languages.md"]
+scope = ["AGENTS.md", "README.md", "docs/languages.md", "docs/stylesheet.md"]
 opened_commit = "13e6785b3b53e25a159ab42c834331c84ef45919"
+whole_reason = "One standard document, the two entry documents that point to it and the one sentence in the stylesheet document that the ruling replaces."
