@@ -40,7 +40,10 @@ def test_render_writes_the_language_the_written_out_type_the_words_and_the_key_t
 
 
 def test_render_gives_the_same_bytes_for_the_same_catalog(source_catalog):
-    assert render(source_catalog(table_seatFree="Frei")) == render(source_catalog(table_seatFree="Frei"))
+    first = render(source_catalog(table_seatFree="Frei"))
+    second = render(source_catalog(table_seatFree="Frei"))
+
+    assert first == second
 
 
 def test_render_keeps_umlauts_readable(source_catalog):
