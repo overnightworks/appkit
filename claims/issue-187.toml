@@ -1,0 +1,8 @@
+claim_id = "4ba3f6ba171a4b5daf26ec2ee92fc187"
+agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
+role = "builder"
+base = "839892f72f89c49e5ab9d6c52458217e07eda4a5"
+branch = "claude/issue-187-pyright-strict-module"
+scope = ["AGENTS.md", "package.json", "pnpm-lock.yaml", "src/design/catalogs/python_module.py", "tests/catalogs"]
+opened_commit = "6d16aaa78995b47329201e1c932a0ec6e9bdbada"
+whole_reason = "The renderer's fix needs its type-check test, the pinned tool that runs it and the command note that names what the test needs."
