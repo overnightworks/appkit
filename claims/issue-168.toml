@@ -1,8 +1,0 @@
-claim_id = "c7d66ce5ba784837a425fbb08446ef16"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "b55195036668de6382a309a484ca722007fe98de"
-branch = "claude/issue-168-catalogs-declaration"
-scope = ["AGENTS.md", "README.md", "docs/ARCHITECTURE.md", "docs/VISION.md", "docs/languages.md", "package.json", "pyproject.toml", "src/design/catalogs", "tests/catalogs", "tests/test_wheel.py", "uv.lock"]
-opened_commit = "dcad9eb2cb51c7b564d97da84b625abd9ca6b207"
-whole_reason = "Two small modules with their tests, the three documents that describe the kit, and the version bump of the release."
