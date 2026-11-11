@@ -730,7 +730,7 @@ def test_main_sync_refuses_a_translation_it_cannot_follow_and_writes_no_catalog(
     error = capsys.readouterr().err
     assert "en.po" in error
     assert "app.name is a duplicate" in error
-    assert (stale_translation.read_bytes(), broken.read_bytes()) == before
+    assert before == (stale_translation.read_bytes(), broken.read_bytes())
 
 
 def test_main_sync_refuses_a_translation_whose_language_header_is_wrong_and_writes_no_catalog(
@@ -742,7 +742,7 @@ def test_main_sync_refuses_a_translation_whose_language_header_is_wrong_and_writ
     assert main(["--sync"]) == 1
 
     assert "en.po" in capsys.readouterr().err
-    assert (stale_translation.read_bytes(), wrong.read_bytes()) == before
+    assert before == (stale_translation.read_bytes(), wrong.read_bytes())
 
 
 def test_main_help_says_the_command_runs_after_the_translations_are_written(capsys):
