@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-STRING_LINE = re.compile(rb'(msg\w+(\[\d+\])?\s+)?"(?:[^"\\]|\\.)*"\s*')
+STRING_LINE = re.compile(rb'^(?:msg\w+(?:\[\d+\])?\s+)?"(?:[^"\\]|\\.)*"')
 LANGUAGE_HEADER = re.compile(r"^Language: *(.*?) *$", re.MULTILINE)
 
 
