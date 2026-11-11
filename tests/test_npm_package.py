@@ -43,6 +43,8 @@ COMPONENT_FILES = {
     "svelte-dist/types.d.ts",
     "svelte-dist/AccountMenu.svelte",
     "svelte-dist/AccountMenu.svelte.d.ts",
+    "svelte-dist/AgentControl.svelte",
+    "svelte-dist/AgentControl.svelte.d.ts",
     "svelte-dist/AiMark.svelte",
     "svelte-dist/AiMark.svelte.d.ts",
     "svelte-dist/LegalLinks.svelte",
@@ -67,6 +69,34 @@ def tarball(tmp_path_factory):
     with tarfile.open(archive) as opened:
         opened.extractall(unpacked, filter="data")
     return unpacked / "package"
+
+
+class Consumer:
+    """A project that installed the packed package, type-checked the way an app's compiler sees it."""
+
+    def __init__(self, name, project):
+        self.name = name
+        self.project = project
+
+    def check(self, source):
+        (self.project / "consumer.ts").write_text(source)
+        result = subprocess.run(
+            [str(REPOSITORY / "node_modules/.bin/tsc"), *TSC_ARGUMENTS],
+            cwd=self.project,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stdout
+
+
+@pytest.fixture
+def consumer(tarball, tmp_path):
+    name = json.loads((tarball / "package.json").read_text())["name"]
+    modules = tmp_path / "node_modules"
+    modules.mkdir()
+    shutil.copytree(tarball, modules / name)
+    (modules / "svelte").symlink_to(REPOSITORY / "node_modules/svelte")
+    return Consumer(name, tmp_path)
 
 
 def packed_files(package):
@@ -149,14 +179,9 @@ def test_shipped_components_neither_store_nor_fetch_nor_write_the_theme_which_th
         assert not re.search(r"setAttribute\([^)]*data-theme", source), component.name
 
 
-def test_a_consumer_imports_legal_links_and_its_props_type_from_the_package_root(tarball, tmp_path):
-    name = json.loads((tarball / "package.json").read_text())["name"]
-    modules = tmp_path / "node_modules"
-    modules.mkdir()
-    shutil.copytree(tarball, modules / name)
-    (modules / "svelte").symlink_to(REPOSITORY / "node_modules/svelte")
-    (tmp_path / "consumer.ts").write_text(
-        f"import {{ LegalLinks, type LegalLinksProps }} from '{name}';\n"
+def test_a_consumer_imports_legal_links_and_its_props_type_from_the_package_root(consumer):
+    consumer.check(
+        f"import {{ LegalLinks, type LegalLinksProps }} from '{consumer.name}';\n"
         "const props: LegalLinksProps = { links: [{ label: 'Imprint', href: '/imprint' }] };\n"
         "export const component: typeof LegalLinks = LegalLinks;\n"
         "// @ts-expect-error links is required\n"
@@ -168,39 +193,13 @@ def test_a_consumer_imports_legal_links_and_its_props_type_from_the_package_root
         "// @ts-expect-error the menu place always opens a new tab\n"
         "export const menuNewTab: LegalLinksProps = { links: [], place: 'menu', newTab: true };\n"
     )
-    result = subprocess.run(
-        [
-            str(REPOSITORY / "node_modules/.bin/tsc"),
-            "--noEmit",
-            "--strict",
-            "--skipLibCheck",
-            "--module",
-            "esnext",
-            "--moduleResolution",
-            "bundler",
-            "--target",
-            "es2022",
-            "--allowImportingTsExtensions",
-            "--verbatimModuleSyntax",
-            "consumer.ts",
-        ],
-        cwd=tmp_path,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, result.stdout
 
 
 def test_a_consumer_gives_the_no_access_state_at_most_one_log_out_form_and_a_released_state_still_type_checks(
-    tarball, tmp_path
+    consumer,
 ):
-    name = json.loads((tarball / "package.json").read_text())["name"]
-    modules = tmp_path / "node_modules"
-    modules.mkdir()
-    shutil.copytree(tarball, modules / name)
-    (modules / "svelte").symlink_to(REPOSITORY / "node_modules/svelte")
-    (tmp_path / "consumer.ts").write_text(
-        f"import type {{ LogOut, SignInState }} from '{name}';\n"
+    consumer.check(
+        f"import type {{ LogOut, SignInState }} from '{consumer.name}';\n"
         "export const callback: SignInState = { page: 'no-access', onLogOut: () => {}, logOutFailure: 'x' };\n"
         "export const action: SignInState = { page: 'no-access', logOutAction: '/logout' };\n"
         "export const shared: LogOut = { logOutAction: '/logout' };\n"
@@ -212,23 +211,11 @@ def test_a_consumer_gives_the_no_access_state_at_most_one_log_out_form_and_a_rel
         "// @ts-expect-error a failure text belongs to the callback form\n"
         "export const mixed: SignInState = { page: 'no-access', logOutAction: '/logout', logOutFailure: 'x' };\n"
     )
-    result = subprocess.run(
-        [str(REPOSITORY / "node_modules/.bin/tsc"), *TSC_ARGUMENTS],
-        cwd=tmp_path,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, result.stdout
 
 
-def test_a_consumer_gives_each_sign_in_state_only_its_own_props(tarball, tmp_path):
-    name = json.loads((tarball / "package.json").read_text())["name"]
-    modules = tmp_path / "node_modules"
-    modules.mkdir()
-    shutil.copytree(tarball, modules / name)
-    (modules / "svelte").symlink_to(REPOSITORY / "node_modules/svelte")
-    (tmp_path / "consumer.ts").write_text(
-        f"import type {{ SignInPageProps }} from '{name}';\n"
+def test_a_consumer_gives_each_sign_in_state_only_its_own_props(consumer):
+    consumer.check(
+        f"import type {{ SignInPageProps }} from '{consumer.name}';\n"
         "export const starting: SignInPageProps = {\n"
         "  appName: 'A', state: { page: 'signed-out', signInHref: '/in', onSignIn: () => {}, unfinished: true },\n"
         "  legalLinks: [],\n"
@@ -269,23 +256,11 @@ def test_a_consumer_gives_each_sign_in_state_only_its_own_props(tarball, tmp_pat
         "  legalLinks: [],\n"
         "};\n"
     )
-    result = subprocess.run(
-        [str(REPOSITORY / "node_modules/.bin/tsc"), *TSC_ARGUMENTS],
-        cwd=tmp_path,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, result.stdout
 
 
-def test_a_consumer_gives_the_account_menu_one_log_out_form_and_a_typed_theme_choice(tarball, tmp_path):
-    name = json.loads((tarball / "package.json").read_text())["name"]
-    modules = tmp_path / "node_modules"
-    modules.mkdir()
-    shutil.copytree(tarball, modules / name)
-    (modules / "svelte").symlink_to(REPOSITORY / "node_modules/svelte")
-    (tmp_path / "consumer.ts").write_text(
-        f"import {{ AccountMenu, type AccountMenuProps, type ThemeChoice }} from '{name}';\n"
+def test_a_consumer_gives_the_account_menu_one_log_out_form_and_a_typed_theme_choice(consumer):
+    consumer.check(
+        f"import {{ AccountMenu, type AccountMenuProps, type ThemeChoice }} from '{consumer.name}';\n"
         "const common = { name: 'F', accountHref: '/a', onAccountOpen: () => {}, appRows: [], legalLinks: [] };\n"
         "export const component: typeof AccountMenu = AccountMenu;\n"
         "export const callback: AccountMenuProps = { ...common, onLogOut: () => {}, logOutFailure: 'x' };\n"
@@ -310,23 +285,12 @@ def test_a_consumer_gives_the_account_menu_one_log_out_form_and_a_typed_theme_ch
         "// @ts-expect-error a failure text belongs to the callback form\n"
         "export const mixed: AccountMenuProps = { ...common, logOutAction: '/l', logOutFailure: 'x' };\n"
     )
-    result = subprocess.run(
-        [str(REPOSITORY / "node_modules/.bin/tsc"), *TSC_ARGUMENTS],
-        cwd=tmp_path,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, result.stdout
 
 
-def test_a_consumer_imports_both_words_types_from_the_package_root_and_gives_each_whole(tarball, tmp_path):
-    name = json.loads((tarball / "package.json").read_text())["name"]
-    modules = tmp_path / "node_modules"
-    modules.mkdir()
-    shutil.copytree(tarball, modules / name)
-    (modules / "svelte").symlink_to(REPOSITORY / "node_modules/svelte")
-    (tmp_path / "consumer.ts").write_text(
-        f"import type {{ AccountMenuProps, AccountMenuWords, SignInPageProps, SignInPageWords }} from '{name}';\n"
+def test_a_consumer_imports_both_words_types_from_the_package_root_and_gives_each_whole(consumer):
+    consumer.check(
+        "import type { AccountMenuProps, AccountMenuWords, SignInPageProps, SignInPageWords } "
+        f"from '{consumer.name}';\n"
         "const menuWords: AccountMenuWords = { theme: 'T', followSystem: 'F', light: 'L', dark: 'D', logOut: 'O' };\n"
         "const pageWords: SignInPageWords = {\n"
         "  loggedOut: 'a', logIn: 'b', loginFailed: 'c', loginFailedBanner: 'd',\n"
@@ -351,28 +315,48 @@ def test_a_consumer_imports_both_words_types_from_the_package_root_and_gives_eac
         "// @ts-expect-error the no-access sentence is a function of the app name\n"
         "export const textSentence: SignInPageWords = { ...pageWords, noAccessSentence: 'f' };\n"
     )
-    result = subprocess.run(
-        [str(REPOSITORY / "node_modules/.bin/tsc"), *TSC_ARGUMENTS],
-        cwd=tmp_path,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, result.stdout
 
 
-def test_a_consumer_imports_the_ai_mark_from_the_package_root(tarball, tmp_path):
-    name = json.loads((tarball / "package.json").read_text())["name"]
-    modules = tmp_path / "node_modules"
-    modules.mkdir()
-    shutil.copytree(tarball, modules / name)
-    (modules / "svelte").symlink_to(REPOSITORY / "node_modules/svelte")
-    (tmp_path / "consumer.ts").write_text(
-        f"import {{ AiMark }} from '{name}';\nexport const component: typeof AiMark = AiMark;\n"
+def test_a_consumer_imports_the_ai_mark_from_the_package_root(consumer):
+    consumer.check(f"import {{ AiMark }} from '{consumer.name}';\nexport const component: typeof AiMark = AiMark;\n")
+
+
+def test_a_consumer_imports_the_agent_control_with_its_types_from_the_package_root_and_gives_the_words_whole(
+    consumer,
+):
+    consumer.check(
+        f"import {{ AgentControl, type AgentControlProps, type AgentControlRefusal, type AgentControlWords, "
+        f"type AgentRow }} from '{consumer.name}';\n"
+        "export const component: typeof AgentControl = AgentControl;\n"
+        "const common = { onCall: (key: string) => void key, onSendAway: (key: string) => void key };\n"
+        "const rows: AgentRow[] = [\n"
+        "  { key: 'k1', name: 'Mozart', state: 'available' },\n"
+        "  { key: 'k2', name: 'Bach', state: 'inviting' },\n"
+        "  { key: 'k3', name: 'Leonardo', state: 'here' },\n"
+        "];\n"
+        "export const plain: AgentControlProps = { ...common, rows };\n"
+        "export const refused: AgentControlProps = { ...common, rows, refusal: 'place-full' };\n"
+        "export const reasons: AgentControlRefusal[] = [\n"
+        "  'not-allowed', 'owner-absent', 'place-full', 'agent-unavailable', 'try-again',\n"
+        "];\n"
+        "const words: AgentControlWords = {\n"
+        "  call: 'a', calling: 'b', askToLeave: 'c', callLabel: (name: string) => name,\n"
+        "  askToLeaveLabel: (name: string) => name, empty: 'd',\n"
+        "  refusals: {\n"
+        "    'not-allowed': 'e', 'owner-absent': 'f', 'place-full': 'g', 'agent-unavailable': 'h', 'try-again': 'i',\n"
+        "  },\n"
+        "};\n"
+        "export const worded: AgentControlProps = { ...common, rows, words };\n"
+        "type OptionalKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? K : never }[keyof T];\n"
+        "export const noOptionalWord: [OptionalKeys<AgentControlWords>] extends [never] ? true : false = true;\n"
+        "// @ts-expect-error the words are whole\n"
+        "export const partialWords: AgentControlWords = { call: 'a' };\n"
+        "// @ts-expect-error a refusal sentence is missing\n"
+        "export const missingRefusal: AgentControlWords = { ...words, refusals: { 'not-allowed': 'e' } };\n"
+        "// @ts-expect-error a refusal outside the five reasons\n"
+        "export const unknownRefusal: AgentControlProps = { ...common, rows, refusal: 'sorry' };\n"
+        "// @ts-expect-error a state outside the three\n"
+        "export const unknownState: AgentRow = { key: 'k', name: 'N', state: 'gone' };\n"
+        "// @ts-expect-error the rows are required\n"
+        "export const noRows: AgentControlProps = { ...common };\n"
     )
-    result = subprocess.run(
-        [str(REPOSITORY / "node_modules/.bin/tsc"), *TSC_ARGUMENTS],
-        cwd=tmp_path,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, result.stdout

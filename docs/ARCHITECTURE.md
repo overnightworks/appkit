@@ -3,7 +3,7 @@
 ## 1. Context and Scope
 
 design is the family look that overnightworks products share: one stylesheet,
-its fonts and four Svelte components. It runs no service. Outside it: the
+its fonts and five Svelte components. It runs no service. Outside it: the
 product apps that load the stylesheet (and, for SvelteKit apps, the components),
 the Keycloak themes and the legal pages, which take the wheel's stylesheet and fonts through the
 repository that builds them, the GitHub release that distributes it, and the shared quality gate that checks every pull request and every release.
@@ -33,7 +33,7 @@ get identical CSS and fonts. The components exist only in the tarball.
 flowchart TB
   subgraph source[src]
     css[design/static: design.css and fonts]
-    comp[lib: SignInPage, AccountMenu, LegalLinks, AiMark and types]
+    comp[lib: SignInPage, AccountMenu, AgentControl, LegalLinks, AiMark and types]
   end
   css --> wheel[wheel: import design]
   css --> tgz[tarball: design.css and fonts]
@@ -44,8 +44,10 @@ flowchart TB
 - **Stylesheet and fonts** (`design.css`, [`stylesheet.md`](stylesheet.md)): the family
   tokens, the `@font-face` rules and the classes `as-typed` and `legal`.
 - **Components**: `SignInPage` and `AccountMenu` render the page and the panel,
-  and both render `LegalLinks`. `AiMark` stands alone: the "AI" pill before an
-  agent's name, with no props. Each prop's meaning is a docstring in
+  and both render `LegalLinks`. `AgentControl` is the panel of rows with which a
+  person calls an agent and asks it to leave; each row leads with `AiMark`, the
+  "AI" pill before an agent's name, which takes no props. The app owns the
+  trigger and the popover, and the control holds no state of the call. Each prop's meaning is a docstring in
   [`src/lib/types.ts`](../src/lib/types.ts).
 - **Wheel**: the stylesheet and fonts for apps without a JavaScript bundler. It
   holds no `.svelte`.

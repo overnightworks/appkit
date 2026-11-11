@@ -46,7 +46,9 @@ The tarball's `SignInPage` component takes its words from the app's catalog (the
 
 The tarball's `AccountMenu` component takes its words from the app's catalog (see the [`types.ts`](../src/lib/types.ts)): "Theme", "Follow system", "Light", "Dark" and "Log out". Without `words` it renders those en words as its defaults. The de strings of the theme rows are not ruled.
 
-The tarball's `AiMark` component takes no words: its text is "AI" in every language, so a caller passes nothing.
+The tarball's `AgentControl` component takes its words from the app's catalog (see the [`types.ts`](../src/lib/types.ts)): the three action words, the two accessible-name patterns (which include the agent's name), the empty sentence and the five refusal sentences. Without `words` it renders its en defaults: "Call", "Calling…" and "Ask to leave"; the names "Call Mozart" and "Ask Mozart to leave"; the empty sentence "No agent is reachable right now."; and the refusals "You may not call this agent." (`not-allowed`), "Its owner is not here." (`owner-absent`), "There is no room here for another agent." (`place-full`), "The agent is not reachable right now." (`agent-unavailable`) and "That did not work. Please try again." (`try-again`). The de words are ruled: "Rufen", "Wird gerufen…", "Bitten zu gehen", "Mozart rufen", "Mozart bitten zu gehen", "Gerade ist kein Agent erreichbar." and the refusals "Du darfst diesen Agenten nicht rufen.", "Sein Besitzer ist nicht hier.", "Hier ist kein Platz für einen weiteren Agenten.", "Der Agent ist gerade nicht erreichbar." and "Das hat nicht geklappt. Versuch es noch einmal."
+
+The tarball's `AiMark` component takes no words: its text is "AI" in every language, so a caller passes nothing. Its size is fixed, not relative to the place it stands in.
 
 Each state has at most one way out: Signed out shows "Log in" and never redirects by itself; No access shows "Log out" (no "Back": the page is reached through the Keycloak redirect chain, so going back returns to Keycloak, which sends a live session straight back here), unless the app passes no log-out form, as inside a call's frame; Login failed shows "Try again"; Signing in shows only "Open in a tab", a link that opens the app in a tab of its own; Window blocked, shown when the browser blocked the sign-in window, shows only the same link.
 
@@ -87,7 +89,7 @@ hal's [docs/keycloak.md](https://github.com/overnightworks/hal/blob/main/docs/ke
 
 ## What it leaves to each product
 
-- **Wording.** Catalogs carry every string; the stylesheet has none. Only the sign-in wording list above is ruled here.
-- **Page layout and markup.** App bar, page structure, forms and any markup outside the components stays in the product, as do the legal row's spacing and placement around it. A product keeps its own selectors off the legal row: a rule that reaches the row or its links through an ancestor (`.top nav a`, say) can change the kit's look.
+- **Wording.** Catalogs carry every string; the stylesheet has none. Only the sign-in and AgentControl wording lists above are ruled here.
+- **Page layout and markup.** App bar, page structure, forms and any markup outside the components stay in the product, as do the legal row's spacing and placement around it. A product keeps its own selectors off the legal row: a rule that reaches the row or its links through an ancestor (`.top nav a`, say) can change the kit's look.
 - **The app colour.** `--primary`, `--accent` and `--on-accent`; `design.css` defines none of them.
 - **Meaning that differs.** State words (reachable vs ready vs active) and which state a domain shows.

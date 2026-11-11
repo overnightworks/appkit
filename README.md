@@ -1,7 +1,7 @@
 # design
 
 The family look that overnightworks products share (tokens, fonts, two classes
-and four Svelte components), for the engineers of those products.
+and five Svelte components), for the engineers of those products.
 
 ## Quick start
 
@@ -10,7 +10,7 @@ Distribution is a GitHub release. It carries:
 - the wheel `overnightworks_design-<version>-py3-none-any.whl` (import `design`):
   `design/static/design.css` and `design/static/fonts/`;
 - `overnightworks-design-<version>.tgz`: the same stylesheet and fonts, plus the
-  components `SignInPage`, `AccountMenu`, `LegalLinks` and `AiMark`. It is the
+  components `SignInPage`, `AccountMenu`, `AgentControl`, `LegalLinks` and `AiMark`. It is the
   only npm distribution, and `svelte` ^5.20 is its only, peer, dependency;
 - `design-<version>-tokens.txt`: the sorted custom-property names `design.css`
   defines.
@@ -62,6 +62,16 @@ components render.
 	{legalLinks}
 	{onLogOut}
 />
+```
+
+## AgentControl
+
+The panel of rows with which a person calls an agent into a place and asks it
+to leave again. The trigger and the popover stay with the app. Props and
+behaviour are documented in [`src/lib/types.ts`](src/lib/types.ts).
+
+```svelte
+<AgentControl {rows} {onCall} {onSendAway} {refusal} />
 ```
 
 ## Documentation

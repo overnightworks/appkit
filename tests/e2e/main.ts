@@ -1,11 +1,11 @@
 import './app.css';
 import { mount } from 'svelte';
 import { SvelteMap } from 'svelte/reactivity';
-import { AccountMenu, LegalLinks, SignInPage, type SignInState, type ThemeChoice } from 'overnightworks-design';
+import { AccountMenu, AgentControl, LegalLinks, SignInPage, type AgentRow, type SignInState, type ThemeChoice } from 'overnightworks-design';
 
 declare global {
 	interface Window {
-		/** Every report the menu or the sign-in page made, in order. */
+		/** Every report the menu, the agent control or the sign-in page made, in order. */
 		reports: string[];
 	}
 }
@@ -58,6 +58,26 @@ function mountMenu(variant: string): void {
 	mount(AccountMenu, { target: document.body, props: { ...common, ...logOut, theme } });
 }
 
+/** A long name shows how a row keeps its action in the panel. */
+const agentRows: AgentRow[] = [
+	{ key: 'key-mozart', name: 'Mozart', state: 'available' },
+	{ key: 'key-bach', name: 'Bach', state: 'inviting' },
+	{ key: 'key-leonardo', name: 'Leonardo da Vinci, the long-named painter and inventor', state: 'here' }
+];
+
+function mountAgentControl(variant: string): void {
+	window.reports = [];
+	mount(AgentControl, {
+		target: document.body,
+		props: {
+			rows: variant === 'empty' ? [] : agentRows,
+			refusal: variant === 'refusal' ? 'owner-absent' : undefined,
+			onCall: (key: string) => void window.reports.push(`call:${key}`),
+			onSendAway: (key: string) => void window.reports.push(`leave:${key}`)
+		}
+	});
+}
+
 if (location.search === '?typed') {
 	// A person typed the name; the app wrote the words around it.
 	document.body.innerHTML = '<main><h1>Source <span class="as-typed">talks</span></h1></main>';
@@ -70,6 +90,8 @@ if (location.search === '?typed') {
 		target: document.getElementById('component')!,
 		props: { links: legalLinks }
 	});
+} else if (location.search.startsWith('?agents')) {
+	mountAgentControl(new URLSearchParams(location.search).get('agents') ?? '');
 } else if (location.search.startsWith('?menu')) {
 	mountMenu(new URLSearchParams(location.search).get('menu') ?? '');
 } else {
