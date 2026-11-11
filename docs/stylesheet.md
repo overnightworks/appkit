@@ -89,7 +89,7 @@ hal's [docs/keycloak.md](https://github.com/overnightworks/hal/blob/main/docs/ke
 
 ## What it leaves to each product
 
-- **Wording.** Catalogs carry every string; the stylesheet has none. Only the sign-in wording list above is ruled here.
+- **Wording.** Catalogs carry every string; the stylesheet has none. Only the sign-in and AgentControl wording lists above are ruled here.
 - **Page layout and markup.** App bar, page structure, forms and any markup outside the components stay in the product, as do the legal row's spacing and placement around it. A product keeps its own selectors off the legal row: a rule that reaches the row or its links through an ancestor (`.top nav a`, say) can change the kit's look.
 - **The app colour.** `--primary`, `--accent` and `--on-accent`; `design.css` defines none of them.
 - **Meaning that differs.** State words (reachable vs ready vs active) and which state a domain shows.
