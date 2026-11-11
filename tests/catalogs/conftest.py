@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import subprocess
 from typing import TYPE_CHECKING
 
 import pytest
@@ -94,3 +95,23 @@ def write_source(write_catalog: Callable[[str, str | bytes], Path]) -> Callable[
 @pytest.fixture
 def module_for(project: Path) -> Callable[[str], Path]:
     return lambda language: project / DEFAULT.typescript / f"{language}.ts"
+
+
+@pytest.fixture
+def evaluate(tmp_path: Path) -> Callable[[dict[str, str], str], object]:
+    """Writes generated modules by file name, runs the probe (a module body that prints one JSON value) in Node
+    and returns that value."""
+
+    def run(modules: dict[str, str], probe: str) -> object:
+        for name, module in modules.items():
+            (tmp_path / name).write_text(module, encoding="utf-8")
+        result = subprocess.run(
+            ["node", "--input-type=module", "--eval", probe],
+            cwd=tmp_path,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return json.loads(result.stdout)
+
+    return run

@@ -17,8 +17,16 @@ def translation(*keys: str) -> TranslationCatalog:
     return TranslationCatalog(language=LanguageTag("pl"), entries=tuple(Entry(Key(key), "Tekst") for key in keys))
 
 
-def type_check(directory: Path, probe: str, target: str = "") -> subprocess.CompletedProcess[str]:
-    (directory / "de.ts").write_text(render(CATALOG), encoding="utf-8")
+GAP_CATALOG = SourceCatalog(
+    language=LanguageTag("de"),
+    entries=(Entry(key=Key("chat.greeting"), text="Hallo {name}, du hast {count} Nachrichten"),),
+)
+
+
+def type_check(
+    directory: Path, probe: str, target: str = "", catalog: SourceCatalog = CATALOG
+) -> subprocess.CompletedProcess[str]:
+    (directory / "de.ts").write_text(render(catalog), encoding="utf-8")
     (directory / "pl.ts").write_text(target, encoding="utf-8")
     (directory / "consumer.ts").write_text(probe, encoding="utf-8")
     return subprocess.run(
@@ -97,3 +105,64 @@ def test_a_target_module_whose_keys_differ_from_the_sources_fails_tsc_strict(tmp
     assert result.returncode != 0
     assert "pl.ts" in result.stdout
     assert named in result.stdout
+
+
+TARGET_GREETING = (
+    'import { words } from "./pl";\nexport const text: string = words["chat.greeting"]({ name: "Eva", count: 3 });\n'
+)
+
+
+def gap_translation(text: str) -> str:
+    catalog = TranslationCatalog(language=LanguageTag("pl"), entries=(Entry(Key("chat.greeting"), text),))
+    return render_translation(catalog, LanguageTag("de"))
+
+
+def greet(gaps: str) -> str:
+    return f'import {{ words }} from "./de";\nexport const text: string = words["chat.greeting"]({gaps});\n'
+
+
+def test_a_consumer_passing_every_gap_of_a_text_passes_tsc_strict(tmp_path):
+    result = type_check(tmp_path, greet('{ name: "Eva", count: 3 }'), catalog=GAP_CATALOG)
+
+    assert result.returncode == 0, result.stdout
+
+
+@pytest.mark.parametrize(
+    ("gaps", "named"),
+    [
+        pytest.param('{ name: "Eva" }', "count", id="missing gap"),
+        pytest.param('{ name: "Eva", count: 3, other: "x" }', "other", id="extra gap"),
+        pytest.param(
+            "{ name: 1, count: 3 }", "'number' is not assignable to type 'string'", id="wrong type of a plain gap"
+        ),
+        pytest.param(
+            '{ name: "Eva", count: "3" }',
+            "'string' is not assignable to type 'number'",
+            id="wrong type of the count gap",
+        ),
+    ],
+)
+def test_a_consumer_passing_the_wrong_gaps_fails_tsc_strict(tmp_path, gaps, named):
+    result = type_check(tmp_path, greet(gaps), catalog=GAP_CATALOG)
+
+    assert result.returncode != 0
+    assert "consumer.ts" in result.stdout
+    assert named in result.stdout
+
+
+def test_a_target_module_with_the_gaps_of_the_source_passes_tsc_strict(tmp_path):
+    target = gap_translation("{count} wiadomosci dla {name}")
+
+    result = type_check(tmp_path, TARGET_GREETING, target, GAP_CATALOG)
+
+    assert result.returncode == 0, result.stdout
+
+
+def test_a_target_module_using_a_gap_the_source_lacks_fails_tsc_strict(tmp_path):
+    target = gap_translation("{count} wiadomosci dla {name} {other}")
+
+    result = type_check(tmp_path, TARGET_GREETING, target, GAP_CATALOG)
+
+    assert result.returncode != 0
+    assert "pl.ts" in result.stdout
+    assert "other" in result.stdout

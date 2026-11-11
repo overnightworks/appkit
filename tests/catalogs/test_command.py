@@ -33,6 +33,20 @@ def test_main_writes_the_typed_source_module_from_the_source_catalog(clean_sourc
     assert '    "table.seatFree": "Frei",' in written
 
 
+def test_main_writes_a_text_with_gaps_as_a_function_in_the_source_module(
+    write_source, catalog_text, block, module_path, evaluate
+):
+    write_source(catalog_text(block("chat.greeting", "Hallo {name}, {count} Nachrichten")))
+    probe = (
+        'import { words } from "./de.ts";'
+        ' process.stdout.write(JSON.stringify(words["chat.greeting"]({ name: "Eva", count: 1000 })));'
+    )
+
+    assert main([]) == 0
+
+    assert evaluate({"de.ts": module_path.read_text(encoding="utf-8")}, probe) == "Hallo Eva, 1.000 Nachrichten"
+
+
 def test_main_run_again_gives_the_same_bytes(clean_source, module_path):
     main([])
     first = module_path.read_bytes()
@@ -126,6 +140,7 @@ def test_main_without_check_leaves_a_file_no_catalog_produces_alone(clean_transl
         pytest.param([(None, "Schlicht")], "Schlicht", id="no msgctxt"),
         pytest.param([("seat_free", "Frei")], "seat_free", id="bad key"),
         pytest.param([("table.seatFree", "Frei", "Free")], "table.seatFree", id="non-empty msgstr"),
+        pytest.param([("table.seatFree", "Frei {name:>5}")], "name:>5", id="gap with a format spec"),
         pytest.param([("table.seatFree", "Frei"), ("table.seatFree", "Platz")], "table.seatFree", id="duplicate"),
     ],
 )
@@ -193,6 +208,18 @@ def test_main_fails_naming_file_and_line_of_a_malformed_catalog_and_writes_nothi
             "pl",
             ["pl.po", "table.seatFree", "Platz frei", "Frei"],
             id="older than its source",
+        ),
+        pytest.param(
+            [("table.seatFree", "Frei", "Wolne {name}"), ("app.name", "Skat", "Skat")],
+            "pl",
+            ["pl.po", "table.seatFree", "{name}", "none"],
+            id="gaps the source lacks",
+        ),
+        pytest.param(
+            [("table.seatFree", "Frei", "Wolne {name:>5}"), ("app.name", "Skat", "Skat")],
+            "pl",
+            ["pl.po", "table.seatFree", "{name:>5}"],
+            id="malformed gap",
         ),
         pytest.param(
             [("table.seatFree", "Frei", "Wolne"), ("app.name", "Skat", "Skat")],
