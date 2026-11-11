@@ -47,9 +47,13 @@ def test_main_check_passes_on_a_current_module_and_writes_nothing(clean_source, 
 
 
 @pytest.mark.parametrize("language", [SOURCE_LANGUAGE, "pl"])
-@pytest.mark.parametrize("content", [None, "// edited by hand\n"], ids=["missing", "differing"])
+@pytest.mark.parametrize(
+    ("content", "sentence"),
+    [(None, "the module is missing"), ("// edited by hand\n", "the module differs from its catalog")],
+    ids=["missing", "differing"],
+)
 def test_main_check_fails_naming_a_missing_or_differing_module_and_writes_nothing(
-    clean_translation, module_for, capsys, language, content
+    clean_translation, module_for, capsys, language, content, sentence
 ):
     main([])
     module = module_for(language)
@@ -60,7 +64,9 @@ def test_main_check_fails_naming_a_missing_or_differing_module_and_writes_nothin
 
     assert main(["--check"]) == 1
 
-    assert module.name in capsys.readouterr().err
+    error = capsys.readouterr().err
+    assert module.name in error
+    assert f"{sentence}; run design-catalogs" in error
     assert (module.read_text(encoding="utf-8") if module.exists() else None) == content
 
 

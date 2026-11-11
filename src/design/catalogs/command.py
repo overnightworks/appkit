@@ -51,7 +51,7 @@ def stale_modules(modules: dict[Path, str]) -> list[str]:
     from design.catalogs.po_file import list_files, read_module
 
     stale = [
-        f"{path}: the module is {'missing' if current is None else 'differs from its catalog'}; run design-catalogs"
+        f"{path}: the module {'is missing' if current is None else 'differs from its catalog'}; run design-catalogs"
         for path, module in modules.items()
         if (current := read_module(path)) != module
     ]
