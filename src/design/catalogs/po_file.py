@@ -1,13 +1,14 @@
-"""The filesystem boundary of the catalogs: catalog files are read here, generated modules read and written."""
+"""The boundary to Babel and the filesystem: catalogs and plural rules are read, generated modules read and written."""
 
 import re
 from io import BytesIO
 from typing import TYPE_CHECKING
 
+from babel import Locale, UnknownLocaleError
 from babel.messages.catalog import Catalog, Message
 from babel.messages.pofile import PoFileError, PoFileParser
 
-from design.catalogs.catalog import RawCatalog, RawEntry
+from design.catalogs.catalog import LanguageTag, PluralCategories, PluralCategory, RawCatalog, RawEntry
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -91,6 +92,15 @@ def read_catalog(path: Path) -> RawCatalog:
             for message in entries
         ),
     )
+
+
+def plural_categories(language: LanguageTag) -> PluralCategories:
+    """The CLDR plural categories a language needs, as Babel holds them, and `other`."""
+    try:
+        locale = Locale.parse(language.value, sep="-")
+    except UnknownLocaleError:
+        raise CatalogFileError(f"{language.value}: Babel has no CLDR plural rules for this language") from None
+    return frozenset({PluralCategory.OTHER, *map(PluralCategory, locale.plural_form.tags)})
 
 
 def list_files(directory: Path) -> tuple[Path, ...]:

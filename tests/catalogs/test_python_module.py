@@ -174,3 +174,12 @@ def test_ruff_check_finds_nothing_in_the_module(write_module, texts):
     result = run_ruff(["check", "--no-cache"], write_module(texts))
 
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_render_holds_the_raw_text_of_every_category_of_a_family_under_its_own_key(module_text, load):
+    module = load(module_text(("de", {"table_seats_one": "{count} Platz", "table_seats_other": "{count} Plätze"})))
+
+    assert [module.text("de", "table.seats.one"), module.text("de", "table.seats.other")] == [
+        "{count} Platz",
+        "{count} Plätze",
+    ]

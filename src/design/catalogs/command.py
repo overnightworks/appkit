@@ -27,21 +27,22 @@ def translation_catalogs(
     paths: tuple[Path, ...], source: SourceCatalog
 ) -> tuple[tuple[TranslationCatalog, ...], list[object]]:
     """The translation of every catalog file, and every problem of the files."""
-    from design.catalogs.po_file import CatalogFileError, read_catalog
+    from design.catalogs.po_file import CatalogFileError, plural_categories, read_catalog
 
     catalogs: list[TranslationCatalog] = []
     problems: list[object] = []
     for path in paths:
         try:
             raw = read_catalog(path)
+            language, language_findings = read_language(str(path), path.stem, raw.language)
+            problems.extend(language_findings)
+            if language is None:
+                continue
+            categories = plural_categories(language)
         except CatalogFileError as error:
             problems.append(error)
             continue
-        language, language_findings = read_language(str(path), path.stem, raw.language)
-        problems.extend(language_findings)
-        if language is None:
-            continue
-        catalog, findings = read_translation(str(path), language, raw.entries, source)
+        catalog, findings = read_translation(str(path), language, categories, raw.entries, source)
         problems.extend(findings)
         catalogs.append(catalog)
     return tuple(catalogs), problems
@@ -83,7 +84,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
     parser.add_argument("--check", action="store_true", help="write nothing; fail on a finding or a stale module")
     options = parser.parse_args(arguments)
     try:
-        from design.catalogs.po_file import CatalogFileError, list_files, read_catalog, write_module
+        from design.catalogs.po_file import CatalogFileError, list_files, plural_categories, read_catalog, write_module
     except ModuleNotFoundError as error:  # pragma: no cover - run in a subprocess without Babel (tests/test_wheel.py)
         if not (error.name or "").startswith("babel"):
             raise
@@ -96,10 +97,11 @@ def main(arguments: Sequence[str] | None = None) -> int:
     source_path = declaration.catalogs / f"{declaration.source.value}.po"
     try:
         raw = read_catalog(source_path)
+        source_categories = plural_categories(declaration.source)
     except CatalogFileError as error:
         return fail(error)
     _, header_findings = read_language(str(source_path), declaration.source.value, raw.language)
-    source, findings = read_source(str(source_path), declaration.source, raw.entries)
+    source, findings = read_source(str(source_path), declaration.source, source_categories, raw.entries)
     if header_findings or findings:
         return fail(*header_findings, *findings)
 

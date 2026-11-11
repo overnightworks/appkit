@@ -6,6 +6,7 @@ from design.catalogs.catalog import (
     Gap,
     Key,
     LanguageTag,
+    PluralCategory,
     RawEntry,
     SourceCatalog,
     gap_names,
@@ -17,11 +18,28 @@ from design.catalogs.catalog import (
 
 FILE = "frontend/src/lib/catalogs/de.po"
 TRANSLATION_FILE = "frontend/src/lib/catalogs/pl.po"
+GERMAN = frozenset({PluralCategory.ONE, PluralCategory.OTHER})
+POLISH = frozenset({PluralCategory.ONE, PluralCategory.FEW, PluralCategory.MANY, PluralCategory.OTHER})
+JAPANESE = frozenset({PluralCategory.OTHER})
 
 
-@pytest.mark.parametrize("value", ["table.seatFree", "app.name", "login.title2"])
-def test_key_accepts_a_surface_and_a_camel_case_name(value):
+@pytest.mark.parametrize(
+    "value", ["table.seatFree", "app.name", "login.title2", "table.few", "table.seats.one", "table.seats.other"]
+)
+def test_key_accepts_a_surface_a_camel_case_name_and_an_optional_plural_category(value):
     assert Key(value).value == value
+
+
+@pytest.mark.parametrize(
+    ("value", "category", "family"),
+    [
+        pytest.param("table.seatFree", None, "table.seatFree", id="plain key"),
+        pytest.param("table.few", None, "table.few", id="plain key named like a category"),
+        pytest.param("table.seats.few", PluralCategory.FEW, "table.seats", id="family entry"),
+    ],
+)
+def test_key_names_its_plural_category_and_the_key_of_its_family(value, category, family):
+    assert (Key(value).category, Key(value).family) == (category, Key(family))
 
 
 @pytest.mark.parametrize(
@@ -32,7 +50,10 @@ def test_key_accepts_a_surface_and_a_camel_case_name(value):
         "Table.seatFree",
         "table.SeatFree",
         "table.seat_free",
-        "table.seatFree.one",
+        "table.seats.some",
+        "table.seats.One",
+        "table.seats.one.other",
+        "table.seats.",
         "table.seat free",
         "table.seatFree\n",
         "tablé.seatFree",
@@ -99,6 +120,13 @@ def test_pieces_of_refuses_a_gap_that_is_not_a_plain_name_and_names_it(text, pie
     assert piece in str(error.value)
 
 
+def test_pieces_of_refuses_a_gap_named_proto_and_says_why():
+    with pytest.raises(ValueError, match="__proto__") as error:
+        pieces_of("Hallo {__proto__}")
+
+    assert "prototype" in str(error.value)
+
+
 @pytest.mark.parametrize("text", ["Hallo {name", "Hallo name}", "Hallo {", "Hallo }", "Hallo {name!}"])
 def test_pieces_of_refuses_an_unbalanced_brace(text):
     with pytest.raises(ValueError, match="unbalanced brace"):
@@ -111,7 +139,7 @@ def entry(context, text, translation="", *, fuzzy=False, plural=False):
 
 def test_read_source_turns_clean_entries_into_a_catalog_in_file_order():
     catalog, findings = read_source(
-        FILE, LanguageTag("de"), (entry("table.seatFree", "Frei"), entry("app.name", "Skat"))
+        FILE, LanguageTag("de"), GERMAN, (entry("table.seatFree", "Frei"), entry("app.name", "Skat"))
     )
 
     assert findings == ()
@@ -139,26 +167,26 @@ def test_read_source_turns_clean_entries_into_a_catalog_in_file_order():
     ],
 )
 def test_read_source_names_file_and_key_of_every_broken_entry(raw, key):
-    _, findings = read_source(FILE, LanguageTag("de"), raw)
+    _, findings = read_source(FILE, LanguageTag("de"), GERMAN, raw)
 
     assert [(finding.file, finding.key) for finding in findings] == [(FILE, key)]
 
 
 def test_read_source_reports_every_problem_of_an_entry():
-    _, findings = read_source(FILE, LanguageTag("de"), (entry("table.seatFree", "", "x", fuzzy=True),))
+    _, findings = read_source(FILE, LanguageTag("de"), GERMAN, (entry("table.seatFree", "", "x", fuzzy=True),))
 
     assert len(findings) == 3
     assert {finding.key for finding in findings} == {"table.seatFree"}
 
 
 def test_read_source_names_the_offending_piece_of_a_malformed_gap():
-    _, findings = read_source(FILE, LanguageTag("de"), (entry("table.seatFree", "Hallo {user.name}"),))
+    _, findings = read_source(FILE, LanguageTag("de"), GERMAN, (entry("table.seatFree", "Hallo {user.name}"),))
 
     assert [finding.problem for finding in findings] == ["is malformed: gap {user.name} is not a plain name"]
 
 
 def test_read_source_keeps_a_text_with_gaps_and_doubled_braces_as_the_catalog_wrote_it():
-    catalog, findings = read_source(FILE, LanguageTag("de"), (entry("table.seatFree", "{{Hallo}} {name}"),))
+    catalog, findings = read_source(FILE, LanguageTag("de"), GERMAN, (entry("table.seatFree", "{{Hallo}} {name}"),))
 
     assert findings == ()
     assert [item.text for item in catalog.entries] == ["{{Hallo}} {name}"]
@@ -169,7 +197,7 @@ def test_finding_reads_as_file_key_and_problem():
 
 
 def test_read_source_refuses_a_plural_entry_saying_that_plural_forms_are_not_used():
-    _, findings = read_source(FILE, LanguageTag("de"), (entry("table.seatFree", "Frei", plural=True),))
+    _, findings = read_source(FILE, LanguageTag("de"), GERMAN, (entry("table.seatFree", "Frei", plural=True),))
 
     assert [finding.problem for finding in findings] == ["uses msgid_plural; gettext plural forms are not used"]
 
@@ -186,6 +214,7 @@ def test_read_translation_turns_a_current_translation_into_a_catalog_in_the_sour
     catalog, findings = read_translation(
         TRANSLATION_FILE,
         LanguageTag("pl"),
+        POLISH,
         (entry("app.name", "Skat", "Skat (pl)"), entry("table.seatFree", "Frei", "Wolne")),
         source,
     )
@@ -255,7 +284,7 @@ def translated(*changes):
     ],
 )
 def test_read_translation_names_file_and_key_of_every_broken_entry(source, raw, key, problem):
-    _, findings = read_translation(TRANSLATION_FILE, LanguageTag("pl"), raw, source)
+    _, findings = read_translation(TRANSLATION_FILE, LanguageTag("pl"), POLISH, raw, source)
 
     assert [(finding.file, finding.key) for finding in findings] == [(TRANSLATION_FILE, key)]
     assert problem in findings[0].problem
@@ -263,7 +292,7 @@ def test_read_translation_names_file_and_key_of_every_broken_entry(source, raw, 
 
 def test_read_translation_names_the_key_the_text_it_was_made_from_and_the_sources_current_text(source):
     _, findings = read_translation(
-        TRANSLATION_FILE, LanguageTag("pl"), translated(entry("table.seatFree", "Platz frei", "Wolne")), source
+        TRANSLATION_FILE, LanguageTag("pl"), POLISH, translated(entry("table.seatFree", "Platz frei", "Wolne")), source
     )
 
     assert len(findings) == 1
@@ -274,7 +303,7 @@ def test_read_translation_names_the_key_the_text_it_was_made_from_and_the_source
 
 def test_read_translation_leaves_a_broken_entry_out_of_the_catalog(source):
     catalog, _ = read_translation(
-        TRANSLATION_FILE, LanguageTag("pl"), translated(entry("table.seatFree", "Frei", "")), source
+        TRANSLATION_FILE, LanguageTag("pl"), POLISH, translated(entry("table.seatFree", "Frei", "")), source
     )
 
     assert [item.key.value for item in catalog.entries] == ["app.name"]
@@ -294,7 +323,7 @@ def greeting(translation):
 
 def test_read_translation_accepts_a_translation_with_the_same_gaps_in_another_order(gap_source):
     catalog, findings = read_translation(
-        TRANSLATION_FILE, LanguageTag("pl"), greeting("{count} wiadomosci dla {name}"), gap_source
+        TRANSLATION_FILE, LanguageTag("pl"), POLISH, greeting("{count} wiadomosci dla {name}"), gap_source
     )
 
     assert findings == ()
@@ -307,13 +336,13 @@ def test_read_translation_accepts_a_translation_with_the_same_gaps_in_another_or
         pytest.param("Czesc {name}", "{name}", id="a gap dropped"),
         pytest.param("Czesc {name} {count} {other}", "{count, name, other}", id="a gap added"),
         pytest.param("Czesc {nome} {count}", "{count, nome}", id="a gap renamed"),
-        pytest.param("Czesc", "none", id="no gaps"),
+        pytest.param("Czesc", "has no gaps", id="no gaps"),
     ],
 )
 def test_read_translation_names_the_key_and_both_gap_sets_of_a_translation_whose_gaps_differ(
     gap_source, translation, translated_gaps
 ):
-    catalog, findings = read_translation(TRANSLATION_FILE, LanguageTag("pl"), greeting(translation), gap_source)
+    catalog, findings = read_translation(TRANSLATION_FILE, LanguageTag("pl"), POLISH, greeting(translation), gap_source)
 
     assert [(finding.file, finding.key) for finding in findings] == [(TRANSLATION_FILE, "chat.greeting")]
     assert translated_gaps in findings[0].problem
@@ -322,14 +351,16 @@ def test_read_translation_names_the_key_and_both_gap_sets_of_a_translation_whose
 
 
 def test_read_translation_names_the_offending_piece_of_a_malformed_gap(gap_source):
-    _, findings = read_translation(TRANSLATION_FILE, LanguageTag("pl"), greeting("Czesc {name:>5} {count}"), gap_source)
+    _, findings = read_translation(
+        TRANSLATION_FILE, LanguageTag("pl"), POLISH, greeting("Czesc {name:>5} {count}"), gap_source
+    )
 
     assert [(finding.file, finding.key) for finding in findings] == [(TRANSLATION_FILE, "chat.greeting")]
     assert "{name:>5}" in findings[0].problem
 
 
 def test_read_translation_names_an_empty_msgstr_alone_without_a_gap_mismatch(gap_source):
-    _, findings = read_translation(TRANSLATION_FILE, LanguageTag("pl"), greeting(""), gap_source)
+    _, findings = read_translation(TRANSLATION_FILE, LanguageTag("pl"), POLISH, greeting(""), gap_source)
 
     assert [finding.problem for finding in findings] == ["has an empty msgstr"]
 
@@ -352,3 +383,217 @@ def test_read_language_takes_the_tag_from_the_file_stem_and_requires_the_header_
     assert [(finding.file, problem in finding.problem) for finding in findings] == (
         [(TRANSLATION_FILE, True)] if problem else []
     )
+
+
+def test_read_translation_says_so_when_the_source_has_no_gaps(source):
+    _, findings = read_translation(
+        TRANSLATION_FILE, LanguageTag("pl"), POLISH, translated(entry("table.seatFree", "Frei", "Wolne {name}")), source
+    )
+
+    assert [finding.problem for finding in findings] == ["has the gaps {name}; the source has no gaps"]
+
+
+def family(key, **texts):
+    """The entries of one plural family as the source catalog writes them, by category."""
+    return tuple(entry(f"{key}.{category}", text) for category, text in texts.items())
+
+
+SEATS = {"one": "{count} Platz", "other": "{count} Plätze"}
+
+
+@pytest.mark.parametrize(
+    ("categories", "texts"),
+    [
+        pytest.param(GERMAN, SEATS, id="one and other"),
+        pytest.param(POLISH, {"one": "a", "few": "b", "many": "c", "other": "d"}, id="four categories"),
+        pytest.param(JAPANESE, {"other": "a"}, id="other only"),
+    ],
+)
+def test_read_source_takes_a_family_holding_exactly_the_categories_of_its_language(categories, texts):
+    catalog, findings = read_source(FILE, LanguageTag("de"), categories, family("table.seats", **texts))
+
+    assert findings == ()
+    assert [item.key.category for item in catalog.entries] == [PluralCategory(name) for name in texts]
+
+
+@pytest.mark.parametrize(
+    ("categories", "texts", "key", "problem"),
+    [
+        pytest.param(POLISH, {"one": "a", "few": "b", "other": "d"}, "table.seats.many", "is missing", id="missing"),
+        pytest.param(GERMAN, {"one": "a"}, "table.seats.other", "is missing", id="missing other"),
+        pytest.param(
+            GERMAN, {"one": "a", "few": "b", "other": "d"}, "table.seats.few", "is not a plural category", id="extra"
+        ),
+    ],
+)
+def test_read_source_names_the_key_and_the_category_a_family_lacks_or_has_too_many_of(categories, texts, key, problem):
+    _, findings = read_source(FILE, LanguageTag("de"), categories, family("table.seats", **texts))
+
+    assert [(finding.file, finding.key) for finding in findings] == [(FILE, key)]
+    assert problem in findings[0].problem
+
+
+def test_read_source_names_the_language_and_the_categories_it_needs_in_the_finding_of_a_missing_category():
+    _, findings = read_source(FILE, LanguageTag("de"), POLISH, family("table.seats", one="a", few="b", other="d"))
+
+    assert "de" in findings[0].problem
+    assert "many" in findings[0].problem
+
+
+def test_read_source_refuses_a_plain_key_equal_to_the_key_of_a_family():
+    _, findings = read_source(
+        FILE, LanguageTag("de"), GERMAN, (entry("table.seats", "Plätze"), *family("table.seats", **SEATS))
+    )
+
+    assert [(finding.file, finding.key) for finding in findings] == [(FILE, "table.seats")]
+    assert "plural family" in findings[0].problem
+
+
+def test_read_source_refuses_a_family_whose_entries_carry_different_gaps_and_names_each_gap_set():
+    _, findings = read_source(
+        FILE, LanguageTag("de"), GERMAN, family("table.seats", one="Ein Platz", other="{count} Plätze")
+    )
+
+    assert [(finding.file, finding.key) for finding in findings] == [(FILE, "table.seats")]
+    assert "one has no gaps" in findings[0].problem
+    assert "other has the gaps {count}" in findings[0].problem
+
+
+def test_read_source_reports_the_same_family_once_however_many_entries_it_has():
+    _, findings = read_source(
+        FILE, LanguageTag("de"), POLISH, family("table.seats", one="a", few="{count}", many="{count}", other="{count}")
+    )
+
+    assert len(findings) == 1
+
+
+@pytest.fixture
+def family_source():
+    return SourceCatalog(
+        language=LanguageTag("de"),
+        entries=(
+            Entry(Key("table.seats.one"), "{count} Platz"),
+            Entry(Key("table.seats.other"), "{count} Plätze"),
+            Entry(Key("app.name"), "Skat"),
+        ),
+    )
+
+
+def seats_translation(**texts):
+    """The Polish entries of the seats family, each with the source text it was translated from (the source's
+    `one` for `one`, its `other` for every other category) and the translation `texts`, plus the plain entry."""
+    return (
+        *(
+            entry(f"table.seats.{category}", "{count} Platz" if category == "one" else "{count} Plätze", text)
+            for category, text in texts.items()
+        ),
+        entry("app.name", "Skat", "Skat"),
+    )
+
+
+POLISH_SEATS = {
+    "one": "{count} miejsce",
+    "few": "{count} miejsca",
+    "many": "{count} miejsc",
+    "other": "{count} miejsca",
+}
+
+
+def test_read_translation_takes_a_family_with_the_categories_of_its_own_language_in_the_sources_order(family_source):
+    catalog, findings = read_translation(
+        TRANSLATION_FILE, LanguageTag("pl"), POLISH, seats_translation(**POLISH_SEATS), family_source
+    )
+
+    assert findings == ()
+    assert [item.key.value for item in catalog.entries] == [
+        "table.seats.one",
+        "table.seats.few",
+        "table.seats.many",
+        "table.seats.other",
+        "app.name",
+    ]
+
+
+def test_read_translation_names_the_key_and_the_text_of_the_source_for_a_missing_category(family_source):
+    texts = {category: text for category, text in POLISH_SEATS.items() if category != "many"}
+
+    _, findings = read_translation(
+        TRANSLATION_FILE, LanguageTag("pl"), POLISH, seats_translation(**texts), family_source
+    )
+
+    assert [(finding.file, finding.key) for finding in findings] == [(TRANSLATION_FILE, "table.seats.many")]
+    assert "is missing" in findings[0].problem
+    assert "{count} Plätze" in findings[0].problem
+
+
+def test_read_translation_refuses_a_category_its_language_does_not_need(family_source):
+    _, findings = read_translation(
+        TRANSLATION_FILE, LanguageTag("en"), GERMAN, seats_translation(**POLISH_SEATS), family_source
+    )
+
+    assert [finding.key for finding in findings] == ["table.seats.few", "table.seats.many"]
+    assert all("is not a plural category" in finding.problem for finding in findings)
+
+
+def test_read_translation_reports_every_category_of_a_family_the_translation_lacks_altogether(family_source):
+    _, findings = read_translation(
+        TRANSLATION_FILE, LanguageTag("pl"), POLISH, (entry("app.name", "Skat", "Skat"),), family_source
+    )
+
+    assert [finding.key for finding in findings] == [f"table.seats.{name}" for name in ("one", "few", "many", "other")]
+
+
+@pytest.mark.parametrize(
+    ("category", "text"),
+    [
+        pytest.param("few", "{count} Platz", id="category the source lacks, translated from its one"),
+        pytest.param("few", "Alt", id="category the source lacks"),
+        pytest.param("one", "Alt", id="category the source has"),
+    ],
+)
+def test_read_translation_compares_the_msgid_with_the_source_text_of_the_same_category_or_its_other(
+    family_source, category, text
+):
+    raw = tuple(
+        entry(item.context, text, item.translation) if item.context == f"table.seats.{category}" else item
+        for item in seats_translation(**POLISH_SEATS)
+    )
+
+    _, findings = read_translation(TRANSLATION_FILE, LanguageTag("pl"), POLISH, raw, family_source)
+
+    assert [finding.key for finding in findings] == [f"table.seats.{category}"]
+    assert "was translated from" in findings[0].problem
+
+
+def test_read_translation_compares_the_gaps_with_the_source_text_of_the_same_category(family_source):
+    texts = {**POLISH_SEATS, "few": "{count} miejsca {extra}"}
+
+    _, findings = read_translation(
+        TRANSLATION_FILE, LanguageTag("pl"), POLISH, seats_translation(**texts), family_source
+    )
+
+    assert [finding.key for finding in findings] == ["table.seats.few"]
+    assert "has the gaps {count, extra}; the source has the gaps {count}" in findings[0].problem
+
+
+@pytest.mark.parametrize(
+    "key",
+    [
+        pytest.param("table.seats", id="plain key where the source has a family"),
+        pytest.param("table.chairs.one", id="family the source lacks"),
+    ],
+)
+def test_read_translation_refuses_a_key_whose_family_or_plain_key_the_source_lacks(family_source, key):
+    raw = (*seats_translation(**POLISH_SEATS), entry(key, "{count} Platz", "x"))
+
+    _, findings = read_translation(TRANSLATION_FILE, LanguageTag("pl"), POLISH, raw, family_source)
+
+    assert [(finding.key, finding.problem) for finding in findings] == [(key, "is not a key of the source")]
+
+
+def test_read_translation_names_the_missing_plain_key_beside_a_family(family_source):
+    _, findings = read_translation(
+        TRANSLATION_FILE, LanguageTag("pl"), POLISH, seats_translation(**POLISH_SEATS)[:-1], family_source
+    )
+
+    assert [finding.key for finding in findings] == ["app.name"]
