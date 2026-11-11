@@ -52,6 +52,21 @@ class _EveryEntry(Catalog):
         self.entries.append(message)
 
 
+class _WrittenFlagsParser(PoFileParser):
+    """Babel's parser, which leaves an entry the flags its file wrote.
+
+    Babel's message adds `python-brace-format` to every text with a gap, so a catalog written back would change
+    entries that were not touched.
+    """
+
+    def _add_message(self) -> None:
+        written = set(self.flags)
+        known = len(self.catalog.entries)
+        super()._add_message()
+        if len(self.catalog.entries) > known:
+            self.catalog.entries[-1].flags = written
+
+
 def _require_closed_strings(path: Path, content: bytes) -> None:
     """Babel cuts the last character off a string whose closing quote is missing, so no error would show."""
     for number, line in enumerate(content.splitlines(), start=1):
@@ -82,7 +97,7 @@ def _parse(path: Path, *, ignore_obsolete: bool) -> tuple[str, _EveryEntry]:
         content = path.read_bytes()
         text = content.decode("utf-8")
         _require_closed_strings(path, content)
-        PoFileParser(catalog, ignore_obsolete=ignore_obsolete, abort_invalid=True).parse(BytesIO(content))
+        _WrittenFlagsParser(catalog, ignore_obsolete=ignore_obsolete, abort_invalid=True).parse(BytesIO(content))
     except FileNotFoundError:
         raise CatalogFileError(f"{path}: the source catalog is missing; {TABLE} source names its language") from None
     except UnicodeDecodeError:
@@ -219,7 +234,7 @@ def write_synced(path: Path, entries: tuple[RawEntry, ...]) -> None:
     """Writes the entries as the catalog's content, below its header as it was.
 
     An entry the file holds keeps its comments and flags; its text, translation and fuzzy mark are the entry's. The
-    others are written new, and obsolete entries stay.
+    others are written new, without flags but the fuzzy mark, and obsolete entries stay.
     """
     text, parsed = _parse(path, ignore_obsolete=False)
     has_header = _holds_header(parsed.entries)
@@ -227,8 +242,9 @@ def write_synced(path: Path, entries: tuple[RawEntry, ...]) -> None:
     catalog = Catalog()
     for raw in entries:
         message = held.get(raw.context) or Message(raw.text, context=raw.context)
+        written = held[raw.context].flags if raw.context in held else set()
         message.id, message.string = raw.text, raw.translation
-        message.flags = (message.flags - {FUZZY}) | ({FUZZY} if raw.fuzzy else set())
+        message.flags = (written - {FUZZY}) | ({FUZZY} if raw.fuzzy else set())
         catalog[raw.text] = message
     catalog.obsolete.update(parsed.obsolete)
     body = "".join(generate_po(catalog, omit_header=True, width=LINE_WIDTH))

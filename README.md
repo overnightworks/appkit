@@ -100,16 +100,43 @@ dev = ["overnightworks-design[catalogs] @ git+https://github.com/overnightworks/
 ```
 
 - `design-catalogs` reads one `<tag>.po` per language and writes one TypeScript
-  module per language and, where the app declares one, a Python module.
+  module per language, the loader `index.ts` beside them and, where the app
+  declares one, a Python module.
 - `design-catalogs --check` writes nothing and fails on a broken catalog, a
-  missing, empty or outdated translation, a module that is missing or differs
-  from its catalogs, and a file in the module directory that no catalog
-  produces.
+  missing, empty, fuzzy or outdated translation, a module or loader that is
+  missing or differs from its catalogs, and a file in the module directory that
+  no catalog produces.
+- `design-catalogs --sync` brings every translation catalog in line with the
+  source by key, never by Babel's catalog update, and writes catalogs only. A
+  missing key comes with the source text as `msgid` and an empty `msgstr`; a
+  changed source text becomes the `msgid`, the old `msgstr` stays and the entry
+  is marked fuzzy; a key the source dropped is removed; a plural family holds
+  exactly the categories of its language, and a category the source lacks takes
+  the source's `other` text. A catalog's header, comments and order stay, a
+  catalog that already follows its source is not written, and a second run
+  changes no byte. It needs no network.
 
-Both run in the repository's root. The optional table `[tool.design-catalogs]` in
+A change to the source texts goes in this order: change the source catalog, run
+`design-catalogs --sync`, write the translations and clear the fuzzy marks, run
+`design-catalogs` for the modules, and `design-catalogs --check` in the app's
+lint and CI. `--sync` leaves empty and fuzzy entries behind, so `--check` fails
+until the translations are written.
+
+The loader names the languages, which always equal the catalog files, and
+loads the words of one language as its own chunk. The page reads `<html lang>`
+once, when it starts:
+
+```ts
+import { languages, loadWords, sourceLanguage } from "./words";
+const tag = document.documentElement.lang;
+const language = languages.find((candidate) => candidate === tag) ?? sourceLanguage;
+const words = await loadWords(language);
+```
+
+All three run in the repository's root. The optional table `[tool.design-catalogs]` in
 its `pyproject.toml` overrides the defaults; paths are relative to the root and
-stay inside it, the Python module lies outside the other two directories, and an
-unknown key or a wrong type fails:
+stay inside it, the TypeScript directory is not the catalogs directory, the
+Python module lies outside both, and an unknown key or a wrong type fails:
 
 ```toml
 [tool.design-catalogs]
@@ -124,10 +151,10 @@ The Python module holds `Key` and `Language`, `SOURCE_LANGUAGE`, `LANGUAGES`,
 tests and server. It needs no Babel at run time. A text names its gaps as
 `{name}`; a plural family is one key whose entries are the CLDR categories of
 each language. `text("de", "chat.greeting", name="Eva")` fills the gaps and
-raises on a missing or an unknown one; `text("de", "table.seats", count=3,
-name="Eva")` names a family by its key, chooses the sentence by the count and
-fills `count` as plain digits. The page gets the same from the TypeScript
-module, a family as `words["table.seats"](3, { name })`.
+raises on a missing or an unknown one, and on an unknown language or key;
+`text("de", "table.seats", count=3, name="Eva")` names a family by its key,
+chooses the sentence by the count and fills `count` as plain digits. The page
+gets the same from the TypeScript module, a family as `words["table.seats"](3, { name })`.
 
 The Python module is `# fmt: off`, with single-quoted texts and lines longer
 than the line length. An app whose ruff selects the line length (`E501`) or the

@@ -238,3 +238,27 @@ def test_write_synced_writes_the_same_bytes_again_and_wraps_at_a_fixed_width(ann
     assert annotated_translation.read_bytes() == first
     assert max(len(line) for line in first.decode().splitlines()) <= 76
     assert read_catalog(annotated_translation).entries == entries
+
+
+def test_write_synced_adds_no_flag_to_an_entry_with_a_gap_and_keeps_the_flags_the_file_wrote(write_catalog, block):
+    path = write_catalog(
+        "pl",
+        HEADER
+        + "\n"
+        + block("chat.plain", "Hallo {name}", "Czesc {name}")
+        + "\n#, python-brace-format\n"
+        + block("chat.flagged", "Hallo {name}", "Czesc {name}"),
+    )
+
+    write_synced(
+        path,
+        (
+            RawEntry("chat.plain", "Hallo {name}", "Czesc {name}", fuzzy=False, plural=False),
+            RawEntry("chat.flagged", "Hallo {name}", "Czesc {name}", fuzzy=False, plural=False),
+            RawEntry("chat.new", "Neu {name}", "", fuzzy=False, plural=False),
+        ),
+    )
+
+    written = path.read_text(encoding="utf-8")
+    assert written.count("python-brace-format") == 1
+    assert '#, python-brace-format\nmsgctxt "chat.flagged"' in written

@@ -257,7 +257,7 @@ def test_wheel_holds_the_catalogs_package(installed_package):
     names = set(zipfile.ZipFile(wheel).namelist())
     assert {
         f"design/catalogs/{name}.py"
-        for name in ("__init__", "catalog", "command", "declaration", "po_file", "python_module", "typescript")
+        for name in ("__init__", "catalog", "command", "declaration", "po_file", "python_module", "sync", "typescript")
     } <= names
 
 
