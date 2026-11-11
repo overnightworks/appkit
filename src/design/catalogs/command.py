@@ -23,11 +23,15 @@ def fail(*messages: object) -> int:
     return 1
 
 
+def source_path(declaration: Declaration) -> Path:
+    return declaration.catalogs / f"{declaration.source.value}.po"
+
+
 def source_catalog(declaration: Declaration) -> tuple[SourceCatalog | None, list[object]]:
     """The source catalog of the declaration, none when its file cannot be read, and every problem of the file."""
     from design.catalogs.po_file import CatalogFileError, plural_categories, read_catalog
 
-    path = declaration.catalogs / f"{declaration.source.value}.po"
+    path = source_path(declaration)
     try:
         raw = read_catalog(path)
         categories = plural_categories(declaration.source, path) if raw.holds_family else frozenset()
@@ -115,9 +119,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
     if source is None or problems:
         return fail(*problems)
 
-    source_path = declaration.catalogs / f"{declaration.source.value}.po"
     translation_paths = tuple(
-        path for path in list_files(declaration.catalogs) if path.suffix == ".po" and path != source_path
+        path for path in list_files(declaration.catalogs) if path.suffix == ".po" and path != source_path(declaration)
     )
     translations, problems = translation_catalogs(translation_paths, source)
     if problems:
