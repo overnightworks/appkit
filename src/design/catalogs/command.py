@@ -100,8 +100,11 @@ def translation_catalogs(
     return tuple(catalogs), problems
 
 
-def sync_catalogs(files: tuple[TranslationFile, ...], source: SourceCatalog) -> int:
-    """Brings every translation in line with the source and writes the catalogs that changed; none if one is refused."""
+def sync_catalogs(listed: tuple[Path, ...], files: tuple[TranslationFile, ...], source: SourceCatalog) -> int:
+    """Brings every translation in line with the source and writes the catalogs that changed; none if one is refused.
+
+    A catalog is written at the path the directory listed, never at one an object read from the file carries.
+    """
     from design.catalogs.po_file import write_synced
 
     problems = [finding for file in files for finding in structural_findings(str(file.path), file.entries)]
@@ -110,7 +113,7 @@ def sync_catalogs(files: tuple[TranslationFile, ...], source: SourceCatalog) -> 
     for file in files:
         synced = sync_translation(source, file.categories, file.entries)
         if synced != file.entries:
-            write_synced(file.path, synced)
+            write_synced(next(path for path in listed if path == file.path), synced)
     return 0
 
 
@@ -205,5 +208,5 @@ def main(arguments: Sequence[str] | None = None) -> int:
     )
     files, problems = translation_files(translation_paths, source)
     if options.sync:
-        return fail(*problems) if problems else sync_catalogs(files, source)
+        return fail(*problems) if problems else sync_catalogs(translation_paths, files, source)
     return generate(declaration, source, files, problems, check=options.check)
