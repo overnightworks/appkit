@@ -131,10 +131,11 @@ flowchart LR
   of a family are its key. A module that adds, renames or drops a gap, or
   lacks a key, fails the type check against the source's module; the generator's check refuses
   the same before it writes one. The count is the exception: a family's `count` is its argument,
-  not a gap of the type, so a module that drops `{count}` from a family keeps the type and passes
-  the type check; the catalog check refuses it instead.
+  not a gap of the type, so a category's sentence may leave out `{count}`, in the source and in a
+  translation, and both the type check and the catalog check accept it; the catalog check
+  refuses any other gap that is dropped or added.
 
-  In the Python module `text(language, key, **gaps)` fills the gaps of a plain key, reads
+  In the Python module `text(language, key, /, **gaps)` fills the gaps of a plain key, reads
   `{{` and `}}` as single braces and raises on a missing or an unknown gap. A family is named
   by its family key, `text(language, "table.seats", count=3, **gaps)`:
   `plural_category(language, count)` chooses the sentence, a category the family lacks falls
