@@ -85,6 +85,20 @@ class LanguageTag:
 
 
 @dataclass(frozen=True)
+class PluralBranch:
+    """One line of a language's plural rule for whole counts: a count takes `category` where `condition` holds.
+
+    The condition is a Python expression over `n`, the absolute count.
+    """
+
+    category: PluralCategory
+    condition: str
+
+
+PluralRule = tuple[PluralBranch, ...]
+
+
+@dataclass(frozen=True)
 class Gap:
     """A `{name}` in a text: the place a value is filled in."""
 

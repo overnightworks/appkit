@@ -58,7 +58,9 @@ def render_modules(
         for catalog in translations
     )
     if declaration.python is not None:
-        modules[declaration.python] = render_python(source, translations)
+        from design.catalogs.po_file import plural_rule
+
+        modules[declaration.python] = render_python(source, translations, plural_rule)
     return modules
 
 

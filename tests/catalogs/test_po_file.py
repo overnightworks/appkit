@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from design.catalogs.catalog import LanguageTag, PluralCategory, RawEntry
-from design.catalogs.po_file import CatalogFileError, list_files, plural_categories, read_catalog
+from design.catalogs.po_file import CatalogFileError, list_files, plural_categories, plural_rule, read_catalog
 
 
 def test_read_catalog_returns_each_entry_with_its_context_text_and_flag(write_source, catalog_text, block):
@@ -120,3 +120,18 @@ def test_plural_categories_are_the_cldr_categories_of_the_language_and_other(tag
 def test_plural_categories_refuse_a_language_babel_has_no_rules_for_naming_the_catalog_file():
     with pytest.raises(CatalogFileError, match=r"locales/tlh\.po: .*tlh"):
         plural_categories(LanguageTag("tlh"), Path("locales/tlh.po"))
+
+
+@pytest.mark.parametrize(
+    ("tag", "categories"),
+    [
+        pytest.param("de", ["one"], id="german"),
+        pytest.param("pl", ["few", "many", "one"], id="polish"),
+        pytest.param("ja", [], id="japanese without a plural"),
+        pytest.param("tlh", [], id="a language babel has no rules for"),
+    ],
+)
+def test_plural_rule_holds_a_branch_for_every_category_but_other_in_babels_order(tag, categories):
+    assert [branch.category for branch in plural_rule(LanguageTag(tag))] == [
+        PluralCategory(name) for name in categories
+    ]
