@@ -23,6 +23,7 @@ familiar.
 - Offer the same account menu everywhere: who is signed in, the theme choice,
   signing out and the legal links.
 - Let each app keep its own colour and words while the shared parts stay shared.
+- Keep every app's words, and the shared parts' words, in one place per language, and catch a missing or outdated translation before it ships, so that a further language means adding its texts, not changing the app's code.
 - Carry one change to every app: an app takes the new version when its builders
   choose, and a breaking change is announced openly.
 

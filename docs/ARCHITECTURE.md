@@ -3,7 +3,8 @@
 ## 1. Context and Scope
 
 design is the family look that overnightworks products share: one stylesheet,
-its fonts and five Svelte components. It runs no service. Outside it: the
+its fonts and five Svelte components, and the generator that turns an app's
+translation catalogs into modules. It runs no service. Outside it: the
 product apps that load the stylesheet (and, for SvelteKit apps, the components),
 the Keycloak themes and the legal pages, which take the wheel's stylesheet and fonts through the
 repository that builds them, the GitHub release that distributes it, and the shared quality gate that checks every pull request and every release.
@@ -21,6 +22,7 @@ flowchart LR
   design -- release.yml --> release
   release -- wheel, pinned by URL and hash --> py
   release -- tarball, pinned by URL --> kit
+  release -- wheel with the extra catalogs, pinned the same way --> build[app build runs design-catalogs on its catalogs]
   py -- copies design.css and fonts under a versioned path --> kc
 ```
 
@@ -34,8 +36,10 @@ flowchart TB
   subgraph source[src]
     css[design/static: design.css and fonts]
     comp[lib: SignInPage, AccountMenu, AgentControl, LegalLinks, AiMark and types]
+    gen[design/catalogs: the catalog generator]
   end
   css --> wheel[wheel: import design]
+  gen --> wheel
   css --> tgz[tarball: design.css and fonts]
   comp --> tgz
   tokens[tokens.txt] -. listed from .-> css
@@ -49,8 +53,15 @@ flowchart TB
   "AI" pill before an agent's name, which takes no props. The app owns the
   trigger and the popover, and the control holds no state of the call. Each prop's meaning is a docstring in
   [`src/lib/types.ts`](../src/lib/types.ts).
-- **Wheel**: the stylesheet and fonts for apps without a JavaScript bundler. It
-  holds no `.svelte`.
+- **Catalog generator** (`design.catalogs`, [`languages.md`](languages.md)): the
+  command `design-catalogs` reads an app's gettext catalogs and writes a typed
+  TypeScript module per language and, if the app declares one, a Python module;
+  `--check` fails on a broken catalog or a module that is stale. The optional table
+  `[tool.design-catalogs]` in the app's root `pyproject.toml` names the source
+  language and the paths. It is in the wheel only, behind the extra `catalogs`
+  (Babel), and runs at build time, never in a server or a browser.
+- **Wheel**: the stylesheet and fonts for apps without a JavaScript bundler, and
+  the generator. It holds no `.svelte`.
 - **Tarball**: the stylesheet, fonts and components; `svelte` is its only
   dependency, as a peer.
 - **Token list**: the sorted custom-property names of the stylesheet, from
@@ -105,6 +116,11 @@ commits and whose only write grant is the tag job's. The
 [residuals of that path](https://github.com/overnightworks/quality/blob/main/docs/release.md#residual)
 are quality's to name.
 
+**Trust of the generator.** It runs in an app's build on that app's own committed
+catalogs, which are as trusted as its code. It reads no network and no secret.
+A catalog text is quoted into the modules, as a JSON string in TypeScript and with
+`repr` in Python, so no text can leave its literal.
+
 **Ownership of the components.** A component owns its markup and look. The app
 owns what needs a decision about its product: routes, the trigger and popover
 of the account menu, storing the theme and setting `data-theme`, how logging out
@@ -113,7 +129,11 @@ works, how a sign-in starts, wording of failures, legal link targets, the app co
 `data-theme`.
 
 **Proof strategy.** CI runs `svelte-check` and vitest for the components, pytest
-for the wheel and the tarball, and ruff. The release gate and a check of the
+for the wheel, the tarball and the generator, with 100 % branch coverage of
+`src/design`, and ruff. The generated TypeScript is run in Node and type-checked,
+the generated Python is imported and passed through ruff, and the pin by hash is
+proven by installing the built wheel through a URL with a wrong sha256, which
+fails. The release gate and a check of the
 built file list guard `release.yml`. Two Playwright
 consumers are built for production from the packed tarball and paint the page
 in a browser. The shared quality gate adds the secret scan, the
@@ -147,6 +167,17 @@ cover them.
   fragment): it carries one provider's template format for one consumer and still
   needs the rules in the stylesheet, so such a page writes the documented markup.
   Reopens if several consumers share one template format.
+- The generator as a script in the npm tarball: it would carry Python inside an
+  npm package with no dependency resolution, so every app would declare Babel
+  itself and the copies would drift. Reopens only if an app cannot install the
+  wheel in its build.
+- Babel as a plain dependency of the wheel: its locale data would reach every
+  Python server that takes the wheel only for `design.css`, so Babel stays behind
+  the extra `catalogs`.
+- Babel's catalog update, and a hash of the source text, for freshness: the update
+  matches entries by text across keys and drops plural categories the source lacks,
+  and a hash records what a translation's `msgid` already holds, readably. A
+  translation is current when its `msgid` equals the source's text for its key.
 - Git pins (`github:overnightworks/design#vX.Y.Z`) instead of release assets: a
   git pin loses the content hash a consumer's lock checks, sha256 in the wheel
   URL and sha512 in pnpm's lock. Reopens if a git pin can carry a checked content

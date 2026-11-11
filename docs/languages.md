@@ -190,8 +190,9 @@ flowchart LR
   cooperative agents.
 - **LANG-23** Catalogs live at `frontend/src/lib/catalogs/<tag>.po` and
   generated modules beside the code that imports them, unless the repository's one
-  declaration, which the generator and quality's rule read, names other paths; the
-  declaration's form is the generator's. A file in the module directory that no catalog
+  declaration, which the generator and quality's rule read, names other paths. The
+  declaration is the optional table `[tool.design-catalogs]` in the root `pyproject.toml`
+  (design's README). A file in the module directory that no catalog
   produces is a stray, which `--check` fails; a dotfile (`.gitkeep`) is no stray.
 - **LANG-24** The rule for new text: no new literal sentence in markup, no sentence from the
   server. Literal strings in script (toasts, confirm dialogs) are bound by it too, but no
