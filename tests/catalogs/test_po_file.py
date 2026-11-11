@@ -23,6 +23,20 @@ def test_read_entries_skips_the_header_and_obsolete_entries(write_source, catalo
     assert [entry.context for entry in read_entries(path)] == ["table.seatFree"]
 
 
+def test_read_entries_skips_only_the_first_header_and_keeps_a_later_entry_without_msgctxt_and_msgid(
+    write_source, catalog_text, block
+):
+    path = write_source(catalog_text(block("table.seatFree", "Frei"), block(None, "")))
+
+    assert [entry.context for entry in read_entries(path)] == ["table.seatFree", None]
+
+
+def test_read_entries_keeps_the_first_entry_of_a_catalog_without_header(write_source, block):
+    path = write_source(block("table.seatFree", "Frei"))
+
+    assert [entry.context for entry in read_entries(path)] == ["table.seatFree"]
+
+
 @pytest.mark.parametrize(
     ("blocks", "contexts"),
     [

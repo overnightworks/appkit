@@ -1,5 +1,3 @@
-import sys
-
 import pytest
 
 from design.catalogs.command import MODULES, SOURCE_LANGUAGE, main
@@ -82,10 +80,23 @@ def test_main_fails_naming_the_source_catalog_when_it_is_missing(project, source
     assert "de.po" in capsys.readouterr().err
 
 
-def test_main_without_babel_fails_with_a_sentence_naming_the_extra(clean_source, monkeypatch, capsys):
-    monkeypatch.setitem(sys.modules, "babel.messages.pofile", None)
-    monkeypatch.delitem(sys.modules, "design.catalogs.po_file", raising=False)
+@pytest.mark.parametrize("arguments", [[], ["--check"]])
+@pytest.mark.parametrize(
+    ("damage", "line"),
+    [
+        pytest.param('msgctxt "app.name"\nmsgid "Skat\nmsgstr ""\n', 11, id="unterminated msgid"),
+        pytest.param('msgctxt "app.name"\nmsgid "Skat"\nmsgstr ""\nthis is garbage\n', 13, id="garbage line"),
+        pytest.param('msgctxt "table.title"\nmsgid "Tisch"\n', 11, id="missing msgstr"),
+    ],
+)
+def test_main_fails_naming_file_and_line_of_a_malformed_catalog_and_writes_nothing(
+    write_source, catalog_text, block, module_path, capsys, arguments, damage, line
+):
+    write_source(catalog_text(block("table.seatFree", "Frei"), damage))
 
-    assert main([]) != 0
+    assert main(arguments) == 1
 
-    assert "overnightworks-design[catalogs]" in capsys.readouterr().err
+    output = capsys.readouterr()
+    assert output.out == ""
+    assert f"de.po:{line}" in output.err
+    assert not module_path.exists()

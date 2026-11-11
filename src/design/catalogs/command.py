@@ -29,25 +29,29 @@ def main(arguments: Sequence[str] | None = None) -> int:
     parser.add_argument("--check", action="store_true", help="write nothing; fail on a finding or a stale module")
     options = parser.parse_args(arguments)
     try:
-        from design.catalogs.po_file import read_entries
-    except ModuleNotFoundError:
+        from design.catalogs.po_file import CatalogFileError, read_entries, read_module, write_module
+    except ModuleNotFoundError as error:  # pragma: no cover - run in a subprocess without Babel (tests/test_wheel.py)
+        if not (error.name or "").startswith("babel"):
+            raise
         return fail(MISSING_EXTRA)
 
     catalog_path = CATALOGS / f"{SOURCE_LANGUAGE}.po"
     module_path = MODULES / f"{SOURCE_LANGUAGE}.ts"
-    if not catalog_path.is_file():
-        return fail(f"{catalog_path}: the source catalog is missing")
-    catalog, findings = read_source(str(catalog_path), LanguageTag(SOURCE_LANGUAGE), read_entries(catalog_path))
+    try:
+        entries = read_entries(catalog_path)
+    except CatalogFileError as error:
+        return fail(error)
+    catalog, findings = read_source(str(catalog_path), LanguageTag(SOURCE_LANGUAGE), entries)
     if findings:
         return fail(*findings)
 
     module = render(catalog)
     if not options.check:
-        module_path.parent.mkdir(parents=True, exist_ok=True)
-        module_path.write_text(module, encoding="utf-8")
+        write_module(module_path, module)
         return 0
-    if not module_path.is_file():
+    current = read_module(module_path)
+    if current is None:
         return fail(f"{module_path}: the module is missing; run design-catalogs")
-    if module_path.read_text(encoding="utf-8") != module:
+    if current != module:
         return fail(f"{module_path}: the module differs from its catalog; run design-catalogs")
     return 0
