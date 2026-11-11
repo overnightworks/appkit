@@ -6,15 +6,14 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from design.catalogs.catalog import LanguageTag, SourceCatalog, read_language, read_source, read_translation
+from design.catalogs.catalog import SourceCatalog, TranslationCatalog, read_language, read_source, read_translation
+from design.catalogs.declaration import Declaration, DeclarationError, read_declaration
+from design.catalogs.python_module import render as render_python
 from design.catalogs.typescript import render, render_translation
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-SOURCE_LANGUAGE = "de"
-CATALOGS = Path("frontend/src/lib/catalogs")
-MODULES = Path("frontend/src/lib/words")
 MISSING_EXTRA = "design-catalogs needs Babel: install overnightworks-design[catalogs]."
 
 
@@ -24,11 +23,13 @@ def fail(*messages: object) -> int:
     return 1
 
 
-def translation_modules(paths: tuple[Path, ...], source: SourceCatalog) -> tuple[dict[Path, str], list[object]]:
-    """The module text of every translation catalog by module path, and every problem of the catalogs."""
+def translation_catalogs(
+    paths: tuple[Path, ...], source: SourceCatalog
+) -> tuple[tuple[TranslationCatalog, ...], list[object]]:
+    """The translation of every catalog file, and every problem of the files."""
     from design.catalogs.po_file import CatalogFileError, read_catalog
 
-    modules: dict[Path, str] = {}
+    catalogs: list[TranslationCatalog] = []
     problems: list[object] = []
     for path in paths:
         try:
@@ -42,12 +43,26 @@ def translation_modules(paths: tuple[Path, ...], source: SourceCatalog) -> tuple
             continue
         catalog, findings = read_translation(str(path), language, raw.entries, source)
         problems.extend(findings)
-        modules[MODULES / f"{language.value}.ts"] = render_translation(catalog, source.language)
-    return modules, problems
+        catalogs.append(catalog)
+    return tuple(catalogs), problems
 
 
-def stale_modules(modules: dict[Path, str]) -> list[str]:
-    """A line for every module that is missing or differs from its catalog and every file no catalog produces."""
+def render_modules(
+    declaration: Declaration, source: SourceCatalog, translations: tuple[TranslationCatalog, ...]
+) -> dict[Path, str]:
+    """The text of every module by its path: one TypeScript module per language and the Python module if declared."""
+    modules = {declaration.typescript / f"{source.language.value}.ts": render(source)}
+    modules.update(
+        (declaration.typescript / f"{catalog.language.value}.ts", render_translation(catalog, source.language))
+        for catalog in translations
+    )
+    if declaration.python is not None:
+        modules[declaration.python] = render_python(source, translations)
+    return modules
+
+
+def stale_modules(modules: dict[Path, str], directory: Path) -> list[str]:
+    """A line for every module that is missing or differs from its catalogs and every file no catalog produces."""
     from design.catalogs.po_file import list_files, read_module
 
     stale = [
@@ -57,7 +72,7 @@ def stale_modules(modules: dict[Path, str]) -> list[str]:
     ]
     strays = [
         f"{path}: no catalog produces this file; delete it"
-        for path in list_files(MODULES)
+        for path in list_files(directory)
         if path not in modules and not path.name.startswith(".")
     ]
     return [*stale, *strays]
@@ -74,25 +89,31 @@ def main(arguments: Sequence[str] | None = None) -> int:
             raise
         return fail(MISSING_EXTRA)
 
-    source_path = CATALOGS / f"{SOURCE_LANGUAGE}.po"
+    try:
+        declaration = read_declaration(Path())
+    except DeclarationError as error:
+        return fail(error)
+    source_path = declaration.catalogs / f"{declaration.source.value}.po"
     try:
         raw = read_catalog(source_path)
     except CatalogFileError as error:
         return fail(error)
-    _, header_findings = read_language(str(source_path), SOURCE_LANGUAGE, raw.language)
-    source, findings = read_source(str(source_path), LanguageTag(SOURCE_LANGUAGE), raw.entries)
+    _, header_findings = read_language(str(source_path), declaration.source.value, raw.language)
+    source, findings = read_source(str(source_path), declaration.source, raw.entries)
     if header_findings or findings:
         return fail(*header_findings, *findings)
 
-    translation_paths = tuple(path for path in list_files(CATALOGS) if path.suffix == ".po" and path != source_path)
-    modules, problems = translation_modules(translation_paths, source)
+    translation_paths = tuple(
+        path for path in list_files(declaration.catalogs) if path.suffix == ".po" and path != source_path
+    )
+    translations, problems = translation_catalogs(translation_paths, source)
     if problems:
         return fail(*problems)
-    modules[MODULES / f"{SOURCE_LANGUAGE}.ts"] = render(source)
+    modules = render_modules(declaration, source, translations)
 
     if not options.check:
         for path, module in modules.items():
             write_module(path, module)
         return 0
-    problems = stale_modules(modules)
+    problems = stale_modules(modules, declaration.typescript)
     return fail(*problems) if problems else 0

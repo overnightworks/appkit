@@ -1,8 +1,12 @@
 import configparser
 import email
+import functools
+import hashlib
+import http.server
 import re
 import subprocess
 import sys
+import threading
 import tomllib
 import zipfile
 from pathlib import Path
@@ -252,5 +256,68 @@ def test_wheel_holds_the_catalogs_package(installed_package):
     wheel, _ = installed_package
     names = set(zipfile.ZipFile(wheel).namelist())
     assert {
-        f"design/catalogs/{name}.py" for name in ("__init__", "catalog", "po_file", "typescript", "command")
+        f"design/catalogs/{name}.py"
+        for name in ("__init__", "catalog", "command", "declaration", "po_file", "python_module", "typescript")
     } <= names
+
+
+class QuietHandler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, format, *args):  # noqa: A002 - the base class's parameter name
+        """Serves without writing a line per request."""
+
+
+@pytest.fixture
+def wheel_url(installed_package):
+    """The built wheel on a local HTTP server, where a consumer's pin points to a release asset."""
+    wheel, _ = installed_package
+    handler = functools.partial(QuietHandler, directory=wheel.parent)
+    with http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler) as server:
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        yield f"http://127.0.0.1:{server.server_port}/{wheel.name}"
+        server.shutdown()
+        thread.join()
+
+
+@pytest.fixture
+def install_pinned(installed_package, wheel_url, tmp_path):
+    """Installs the wheel the way an app pins it: by URL with a `#sha256=` fragment."""
+    wheel, _ = installed_package
+
+    def install(sha256):
+        return subprocess.run(
+            [
+                "uv",
+                "pip",
+                "install",
+                "--cache-dir",
+                str(tmp_path / "cache"),
+                "--target",
+                str(tmp_path / "site"),
+                f"overnightworks-design @ {wheel_url}#sha256={sha256}",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+    return install, hashlib.sha256(wheel.read_bytes()).hexdigest()
+
+
+def test_install_by_url_with_the_wheels_hash_succeeds(install_pinned):
+    install, wheel_hash = install_pinned
+
+    result = install(wheel_hash)
+
+    assert result.returncode == 0, result.stderr
+
+
+def test_install_by_url_with_another_hash_fails_naming_both_hashes(install_pinned):
+    install, wheel_hash = install_pinned
+    wrong_hash = "0" * 64
+
+    result = install(wrong_hash)
+
+    assert result.returncode != 0
+    assert wrong_hash in result.stderr
+    assert wheel_hash in result.stderr

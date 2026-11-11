@@ -1,6 +1,9 @@
 import pytest
 
-from design.catalogs.command import SOURCE_LANGUAGE, main
+from design.catalogs.command import main
+from design.catalogs.declaration import DEFAULT
+
+SOURCE_LANGUAGE = DEFAULT.source.value
 
 
 @pytest.fixture
@@ -303,3 +306,95 @@ def test_main_fails_naming_a_catalog_that_is_not_utf8_without_a_traceback(
 
     assert f"{language}.po" in capsys.readouterr().err
     assert not module_for(language).exists()
+
+
+@pytest.fixture
+def python_module(project, declare):
+    """The declared Python module of the clean catalogs."""
+    declare(python="src/app/words.py")
+    return project / "src/app/words.py"
+
+
+def test_main_writes_the_python_module_of_every_language_where_the_declaration_names_one(
+    clean_translation, python_module, import_module
+):
+    assert main([]) == 0
+
+    words = import_module(python_module)
+    assert words.LANGUAGES == (SOURCE_LANGUAGE, "pl")
+    assert words.text(SOURCE_LANGUAGE, "table.seatFree") == "Frei"
+    assert words.text("pl", "table.seatFree") == "Wolne"
+
+
+def test_main_run_again_gives_the_same_python_module_bytes(clean_translation, python_module):
+    main([])
+    first = python_module.read_bytes()
+
+    assert main([]) == 0
+    assert python_module.read_bytes() == first
+
+
+def test_main_writes_no_python_module_where_the_declaration_names_none(clean_translation, project):
+    assert main([]) == 0
+
+    assert not list(project.rglob("*.py"))
+
+
+def test_main_check_passes_on_a_current_python_module_and_writes_nothing(clean_translation, python_module):
+    main([])
+    before = python_module.stat().st_mtime_ns
+
+    assert main(["--check"]) == 0
+    assert python_module.stat().st_mtime_ns == before
+
+
+@pytest.mark.parametrize(
+    ("content", "sentence"),
+    [(None, "the module is missing"), ("# edited by hand\n", "the module differs from its catalog")],
+    ids=["missing", "differing"],
+)
+def test_main_check_fails_naming_a_missing_or_differing_python_module_and_writes_nothing(
+    clean_translation, python_module, capsys, content, sentence
+):
+    main([])
+    if content is None:
+        python_module.unlink()
+    else:
+        python_module.write_text(content, encoding="utf-8")
+
+    assert main(["--check"]) == 1
+
+    error = capsys.readouterr().err
+    assert f"{python_module.name}: {sentence}; run design-catalogs" in error
+    assert (python_module.read_text(encoding="utf-8") if python_module.exists() else None) == content
+
+
+def test_main_reads_and_writes_the_paths_of_the_declaration(project, declare, catalog_text, block):
+    declare(source="en", catalogs="locales", typescript="web/words")
+    (project / "locales").mkdir()
+    (project / "locales" / "en.po").write_text(catalog_text(block("app.name", "Skat"), language="en"), encoding="utf-8")
+
+    assert main([]) == 0
+    assert 'export const language = "en";' in (project / "web/words/en.ts").read_text(encoding="utf-8")
+    assert main(["--check"]) == 0
+
+
+@pytest.mark.parametrize("arguments", [[], ["--check"]])
+@pytest.mark.parametrize(
+    ("table", "named"),
+    [
+        pytest.param({"unknown": "x"}, "unknown", id="unknown key"),
+        pytest.param({"python": "../words.py"}, "python", id="path above the repository"),
+    ],
+)
+def test_main_fails_naming_the_table_and_key_of_a_broken_declaration_and_writes_nothing(
+    clean_source, declare, project, module_path, capsys, arguments, table, named
+):
+    declare(**table)
+
+    assert main(arguments) == 1
+
+    error = capsys.readouterr().err
+    assert "tool.design-catalogs" in error
+    assert named in error
+    assert not module_path.exists()
