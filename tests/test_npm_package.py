@@ -43,6 +43,8 @@ COMPONENT_FILES = {
     "svelte-dist/types.d.ts",
     "svelte-dist/AccountMenu.svelte",
     "svelte-dist/AccountMenu.svelte.d.ts",
+    "svelte-dist/AiMark.svelte",
+    "svelte-dist/AiMark.svelte.d.ts",
     "svelte-dist/LegalLinks.svelte",
     "svelte-dist/LegalLinks.svelte.d.ts",
     "svelte-dist/SignInPage.svelte",
@@ -348,6 +350,24 @@ def test_a_consumer_imports_both_words_types_from_the_package_root_and_gives_eac
         "export const partialPage: SignInPageWords = { logIn: 'b' };\n"
         "// @ts-expect-error the no-access sentence is a function of the app name\n"
         "export const textSentence: SignInPageWords = { ...pageWords, noAccessSentence: 'f' };\n"
+    )
+    result = subprocess.run(
+        [str(REPOSITORY / "node_modules/.bin/tsc"), *TSC_ARGUMENTS],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stdout
+
+
+def test_a_consumer_imports_the_ai_mark_from_the_package_root(tarball, tmp_path):
+    name = json.loads((tarball / "package.json").read_text())["name"]
+    modules = tmp_path / "node_modules"
+    modules.mkdir()
+    shutil.copytree(tarball, modules / name)
+    (modules / "svelte").symlink_to(REPOSITORY / "node_modules/svelte")
+    (tmp_path / "consumer.ts").write_text(
+        f"import {{ AiMark }} from '{name}';\nexport const component: typeof AiMark = AiMark;\n"
     )
     result = subprocess.run(
         [str(REPOSITORY / "node_modules/.bin/tsc"), *TSC_ARGUMENTS],
