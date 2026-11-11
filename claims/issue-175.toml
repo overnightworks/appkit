@@ -1,0 +1,8 @@
+claim_id = "358e3e2b304940bc8318afde31888ae1"
+agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
+role = "builder"
+base = "76e0055e0ea3992fb96ffaa7a5d828480b98bbd4"
+branch = "claude/issue-175-catalogs-plurals"
+scope = ["docs/languages.md", "src/design/catalogs", "tests/catalogs"]
+opened_commit = "aa1fd0169455961e990c427773820b55e80fa910"
+whole_reason = "The reader, the checks and the renderer each change once for plural families, with their tests and the rule's wording in the standard."
