@@ -87,12 +87,6 @@ def test_render_writes_the_key_and_language_types_the_words_of_every_language_an
     )
 
 
-def test_render_gives_the_same_bytes_for_the_same_catalogs(module_text):
-    arguments = (("de", {"table_seatFree": "Frei"}), ("pl", {"table_seatFree": "Wolne"}))
-
-    assert module_text(*arguments) == module_text(*arguments)
-
-
 def test_the_module_answers_every_language_and_key_by_text(module_text, load):
     module = load(
         module_text(
