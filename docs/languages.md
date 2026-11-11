@@ -161,11 +161,13 @@ flowchart LR
 - **LANG-14** An app has one catalog per language, read by both sides. The generator emits
   one TypeScript module per language, whose key type comes from the source module, and a
   Python module where the server sends tokens, serves a script-less page (LANG-17) or a
-  Python test reads texts. The page loads the module of the language in `<html lang>`, once,
-  when it starts. Server tokens are typed against the module's key type, so that every token
-  the server can send is a key. Rejected: a second catalog for the server, which doubles the
-  source of truth and the freshness check; one module holding every language, which ships
-  every language to every person.
+  Python test reads texts. It also writes a loader, `index.ts`, beside the language modules:
+  `languages`, `Language`, `sourceLanguage` and `loadWords(language)`, which imports the
+  language's module on demand, so the list of languages always equals the catalog files. The
+  app reads `<html lang>` and calls the loader once, when it starts. Server tokens are typed
+  against the module's key type, so that every token the server can send is a key. Rejected:
+  a second catalog for the server, which doubles the source of truth and the freshness check;
+  one module holding every language, which ships every language to every person.
 
 ### Proposed: the person's language
 
@@ -218,9 +220,14 @@ flowchart LR
   catalog update, which matches entries by text across keys and drops categories the source
   lacks. The check fails when a translation's key set differs from the source's (LANG-11),
   when an entry is empty (a `msgstr` of whitespace only is empty) or fuzzy, or when a translation's `msgid` differs from the source's
-  current text for its key. The generator's sync brings a translation in line: it adds
-  missing keys with an empty `msgstr`, sets a changed `msgid` to the source's text, keeps the
-  old `msgstr` and marks it fuzzy, and removes keys the source dropped. Fuzzy means "stale,
+  current text for its key. The generator's sync (`design-catalogs --sync`) brings a translation in
+  line by key: it adds missing keys with the source text as `msgid` and an empty `msgstr`, sets
+  a changed `msgid` to the source's text, keeps the old `msgstr` and marks it fuzzy, removes
+  keys the source dropped, and gives a plural family exactly the categories of its language.
+  It keeps the header, the order of the entries and the comments and flags of the entries it keeps,
+  writes nothing for a catalog that already follows its source (the README names what Babel's
+  writer normalises in one it rewrites), and writes catalogs only: the modules follow from
+  `design-catalogs` once the translations are written. Fuzzy means "stale,
   to be re-translated", not "awaits a human" (LANG-6). The agent that changes a source text
   runs the sync, writes the translations and clears the marks in the same change; nothing
   needs a network, key or provider, and the committed catalog is the build's input. The
@@ -251,7 +258,7 @@ One question governs this section: what does a further language add that a test 
     (LANG-22);
   - each translation's `msgid` equals the source's text for its key (LANG-22);
   - each value's named gaps equal the source's, and no key is missing (LANG-10);
-  - the generated modules are current;
+  - the generated modules and the loader are current;
   - the kit ships every language the app offers (LANG-19).
 
   The type check holds the rest of the key contract: server tokens are typed against the

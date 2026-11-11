@@ -3,17 +3,29 @@
 
 import argparse
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from design.catalogs.catalog import SourceCatalog, TranslationCatalog, read_language, read_source, read_translation
+from design.catalogs.catalog import (
+    LanguageTag,
+    PluralCategories,
+    RawEntry,
+    SourceCatalog,
+    TranslationCatalog,
+    read_language,
+    read_source,
+    read_translation,
+)
 from design.catalogs.declaration import Declaration, DeclarationError, read_declaration
 from design.catalogs.python_module import render as render_python
-from design.catalogs.typescript import render, render_translation
+from design.catalogs.sync import structural_findings, sync_translation
+from design.catalogs.typescript import render, render_loader, render_translation
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+LOADER = "index.ts"
 MISSING_EXTRA = "design-catalogs needs Babel: install overnightworks-design[catalogs]."
 
 
@@ -42,13 +54,23 @@ def source_catalog(declaration: Declaration) -> tuple[SourceCatalog | None, list
     return source, [*header_findings, *findings]
 
 
-def translation_catalogs(
+@dataclass(frozen=True)
+class TranslationFile:
+    """A translation catalog file as read: its language, the plural categories that language needs and its entries."""
+
+    path: Path
+    language: LanguageTag
+    categories: PluralCategories
+    entries: tuple[RawEntry, ...]
+
+
+def translation_files(
     paths: tuple[Path, ...], source: SourceCatalog
-) -> tuple[tuple[TranslationCatalog, ...], list[object]]:
-    """The translation of every catalog file, and every problem of the files."""
+) -> tuple[tuple[TranslationFile, ...], list[object]]:
+    """The translation catalog files, and every problem of the files themselves."""
     from design.catalogs.po_file import CatalogFileError, plural_categories, read_catalog
 
-    catalogs: list[TranslationCatalog] = []
+    files: list[TranslationFile] = []
     problems: list[object] = []
     for path in paths:
         try:
@@ -61,20 +83,53 @@ def translation_catalogs(
         except CatalogFileError as error:
             problems.append(error)
             continue
-        catalog, findings = read_translation(str(path), language, categories, raw.entries, source)
+        files.append(TranslationFile(path, language, categories, raw.entries))
+    return tuple(files), problems
+
+
+def translation_catalogs(
+    files: tuple[TranslationFile, ...], source: SourceCatalog
+) -> tuple[tuple[TranslationCatalog, ...], list[object]]:
+    """The translation of every catalog file, and every problem of the entries."""
+    catalogs: list[TranslationCatalog] = []
+    problems: list[object] = []
+    for file in files:
+        catalog, findings = read_translation(str(file.path), file.language, file.categories, file.entries, source)
         problems.extend(findings)
         catalogs.append(catalog)
     return tuple(catalogs), problems
 
 
+def sync_catalogs(listed: tuple[Path, ...], files: tuple[TranslationFile, ...], source: SourceCatalog) -> int:
+    """Brings every translation in line with the source and writes the catalogs that changed; none if one is refused.
+
+    A catalog is written at the path the directory listed, found again in that listing: the path scanner traces a
+    path through the file object, whose other fields come from the file's content.
+    """
+    from design.catalogs.po_file import write_synced
+
+    problems = [finding for file in files for finding in structural_findings(str(file.path), file.entries)]
+    if problems:
+        return fail(*problems)
+    for file in files:
+        synced = sync_translation(source, file.categories, file.entries)
+        if synced != file.entries:
+            write_synced(next(path for path in listed if path == file.path), synced)
+    return 0
+
+
 def render_modules(
     declaration: Declaration, source: SourceCatalog, translations: tuple[TranslationCatalog, ...]
 ) -> dict[Path, str]:
-    """The text of every module by its path: one TypeScript module per language and the Python module if declared."""
+    """The text of every module by its path: one TypeScript module per language, their loader and the Python module
+    if declared."""
     modules = {declaration.typescript / f"{source.language.value}.ts": render(source)}
     modules.update(
         (declaration.typescript / f"{catalog.language.value}.ts", render_translation(catalog, source.language))
         for catalog in translations
+    )
+    modules[declaration.typescript / LOADER] = render_loader(
+        source.language, tuple(catalog.language for catalog in translations)
     )
     if declaration.python is not None:
         from design.catalogs.po_file import plural_rule
@@ -100,12 +155,42 @@ def stale_modules(modules: dict[Path, str], directory: Path) -> list[str]:
     return [*stale, *strays]
 
 
+def generate(
+    declaration: Declaration,
+    source: SourceCatalog,
+    files: tuple[TranslationFile, ...],
+    problems: list[object],
+    *,
+    check: bool,
+) -> int:
+    """Writes the modules of the catalogs, or with `check` finds the modules that are not current."""
+    from design.catalogs.po_file import write_module
+
+    translations, entry_problems = translation_catalogs(files, source)
+    if problems or entry_problems:
+        return fail(*problems, *entry_problems)
+    modules = render_modules(declaration, source, translations)
+    if not check:
+        for path, module in modules.items():
+            write_module(path, module)
+        return 0
+    stale = stale_modules(modules, declaration.typescript)
+    return fail(*stale) if stale else 0
+
+
 def main(arguments: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="design-catalogs", description=__doc__)
-    parser.add_argument("--check", action="store_true", help="write nothing; fail on a finding or a stale module")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--check", action="store_true", help="write nothing; fail on a finding or a stale module")
+    mode.add_argument(
+        "--sync",
+        action="store_true",
+        help="bring every translation catalog in line with the source by key and write the catalogs only;"
+        " run design-catalogs after the translations are written",
+    )
     options = parser.parse_args(arguments)
     try:
-        from design.catalogs.po_file import list_files, write_module
+        from design.catalogs.po_file import list_files
     except ModuleNotFoundError as error:  # pragma: no cover - run in a subprocess without Babel (tests/test_wheel.py)
         if not (error.name or "").startswith("babel"):
             raise
@@ -122,14 +207,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
     translation_paths = tuple(
         path for path in list_files(declaration.catalogs) if path.suffix == ".po" and path != source_path(declaration)
     )
-    translations, problems = translation_catalogs(translation_paths, source)
-    if problems:
-        return fail(*problems)
-    modules = render_modules(declaration, source, translations)
-
-    if not options.check:
-        for path, module in modules.items():
-            write_module(path, module)
-        return 0
-    problems = stale_modules(modules, declaration.typescript)
-    return fail(*problems) if problems else 0
+    files, problems = translation_files(translation_paths, source)
+    if options.sync:
+        return fail(*problems) if problems else sync_catalogs(translation_paths, files, source)
+    return generate(declaration, source, files, problems, check=options.check)

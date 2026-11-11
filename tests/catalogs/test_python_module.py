@@ -407,3 +407,27 @@ def test_python_and_typescript_modules_of_the_same_catalogs_choose_and_fill_the_
         language: [python.text(language, "table.seats", count=count) for count in counts]
         for language in ("de", "en", "pl")
     }
+
+
+@pytest.mark.parametrize(
+    ("arguments", "sentence"),
+    [
+        pytest.param(
+            ("fr", "table.seatFree"), r"unknown language 'fr'; the languages are \['de', 'pl'\]", id="language"
+        ),
+        pytest.param(("de", "table.nope"), r"unknown key 'table\.nope'", id="key"),
+        pytest.param(
+            ("pl", "table.seats.one"),
+            r"unknown key 'table\.seats\.one'; a plural family is named by its family key 'table\.seats'",
+            id="category of a family",
+        ),
+        pytest.param(
+            ("de", "table.seatFree.other"), r"unknown key 'table\.seatFree\.other'\"$", id="suffix of a plain key"
+        ),
+    ],
+)
+def test_text_raises_saying_whether_the_language_or_the_key_is_unknown(laid_out, load, arguments, sentence):
+    module = load(laid_out)
+
+    with pytest.raises(KeyError, match=sentence):
+        module.text(*arguments, count=1)

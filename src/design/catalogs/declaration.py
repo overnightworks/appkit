@@ -79,6 +79,8 @@ def declaration_from(pyproject: Mapping[str, object]) -> Declaration:
         typescript=_path(table, "typescript") or DEFAULT.typescript,
         python=_path(table, "python"),
     )
+    if declaration.typescript == declaration.catalogs:
+        raise DeclarationError(f"{TABLE} typescript must not be the catalogs directory {str(declaration.catalogs)!r}")
     if declaration.python is not None:
         if declaration.python == Path(PYPROJECT):
             raise DeclarationError(f"{TABLE} python must not be {PYPROJECT}, the file that holds the declaration")

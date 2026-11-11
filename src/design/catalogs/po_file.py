@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from babel import Locale, UnknownLocaleError
 from babel.messages.catalog import Catalog, Message
-from babel.messages.pofile import PoFileError, PoFileParser
+from babel.messages.pofile import PoFileError, PoFileParser, generate_po
 from babel.plural import _PythonCompiler
 
 from design.catalogs.catalog import (
@@ -28,6 +28,9 @@ if TYPE_CHECKING:
 WHOLE_COUNT_OPERANDS = {"n": "n", "i": "n", "v": "0", "w": "0", "f": "0", "t": "0", "c": "0", "e": "0"}
 STRING_LINE = re.compile(rb'^(?:msg\w+(?:\[\d+\])?\s+)?"(?:[^"\\]|\\.)*"')
 LANGUAGE_FIELD = "Language:"
+FUZZY = "fuzzy"
+# Babel's own width, fixed here so that the layout of a written catalog never depends on a default.
+LINE_WIDTH = 76
 
 
 class CatalogFileError(Exception):
@@ -47,6 +50,21 @@ class _EveryEntry(Catalog):
 
     def __setitem__(self, id, message: Message) -> None:  # noqa: A002 - Babel's parameter name
         self.entries.append(message)
+
+
+class _WrittenFlagsParser(PoFileParser):
+    """Babel's parser, which leaves an entry the flags its file wrote.
+
+    Babel's message adds `python-brace-format` to every text with a gap, so a catalog written back would change
+    entries that were not touched.
+    """
+
+    def _add_message(self) -> None:
+        written = set(self.flags)
+        known = len(self.catalog.entries)
+        super()._add_message()
+        if len(self.catalog.entries) > known:
+            self.catalog.entries[-1].flags = written
 
 
 def _require_closed_strings(path: Path, content: bytes) -> None:
@@ -72,13 +90,14 @@ def _header_language(header: str) -> str | None:
     )
 
 
-def read_catalog(path: Path) -> RawCatalog:
+def _parse(path: Path, *, ignore_obsolete: bool) -> tuple[str, _EveryEntry]:
+    """The text of a catalog file and its entries, the header first where it has one."""
     catalog = _EveryEntry()
     try:
         content = path.read_bytes()
-        content.decode("utf-8")
+        text = content.decode("utf-8")
         _require_closed_strings(path, content)
-        PoFileParser(catalog, ignore_obsolete=True, abort_invalid=True).parse(BytesIO(content))
+        _WrittenFlagsParser(catalog, ignore_obsolete=ignore_obsolete, abort_invalid=True).parse(BytesIO(content))
     except FileNotFoundError:
         raise CatalogFileError(f"{path}: the source catalog is missing; {TABLE} source names its language") from None
     except UnicodeDecodeError:
@@ -86,9 +105,18 @@ def read_catalog(path: Path) -> RawCatalog:
     except PoFileError as error:
         problem = error.args[0].removesuffix(f" on {error.lineno}")
         raise CatalogFileError(f"{path}:{error.lineno + 1}: {problem}") from error
+    return text, catalog
+
+
+def _holds_header(entries: list[Message]) -> bool:
+    return bool(entries) and entries[0].context is None and not entries[0].id
+
+
+def read_catalog(path: Path) -> RawCatalog:
+    _, catalog = _parse(path, ignore_obsolete=True)
     entries = catalog.entries
     language = None
-    if entries and entries[0].context is None and not entries[0].id:
+    if _holds_header(entries):
         language = _header_language(str(entries[0].string))
         entries = entries[1:]
     return RawCatalog(
@@ -191,3 +219,43 @@ def read_module(path: Path) -> str | None:
 def write_module(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
+
+
+def _header_text(text: str) -> str:
+    """The header of a catalog as the file wrote it: its first line to the last string of its `msgstr`.
+
+    Babel's parser skips blank lines, so a string may follow its `msgstr` after some.
+    """
+    lines = text.splitlines()
+    end = next(number for number, line in enumerate(lines) if line.lstrip().startswith("msgstr")) + 1
+    following = end
+    while following < len(lines) and (not lines[following].strip() or lines[following].lstrip().startswith('"')):
+        following += 1
+        if lines[following - 1].lstrip().startswith('"'):
+            end = following
+    return "\n".join(lines[:end]) + "\n\n"
+
+
+def write_synced(path: Path, entries: tuple[RawEntry, ...]) -> None:
+    """Writes the entries as the catalog's content, below its header as it was.
+
+    An entry the file holds keeps its comments and flags; its text, translation and fuzzy mark are the entry's. The
+    others are written new, without flags but the fuzzy mark. The body goes through Babel's writer: lines are wrapped
+    at the fixed width, line endings become LF, the file ends in a blank line, and `#~` obsolete entries stay as
+    messages without their flags and extracted comments; a `#|` previous-msgid comment is written as a translator
+    comment (`# | msgid "..."`).
+    """
+    text, parsed = _parse(path, ignore_obsolete=False)
+    has_header = _holds_header(parsed.entries)
+    held = {message.context: message for message in parsed.entries[has_header:]}
+    catalog = Catalog()
+    for raw in entries:
+        message = held.get(raw.context) or Message(raw.text, context=raw.context)
+        written = held[raw.context].flags if raw.context in held else set()
+        message.id, message.string = raw.text, raw.translation
+        message.flags = (written - {FUZZY}) | ({FUZZY} if raw.fuzzy else set())
+        catalog[raw.text] = message
+    catalog.obsolete.update(parsed.obsolete)
+    body = "".join(generate_po(catalog, omit_header=True, width=LINE_WIDTH))
+    with path.open("w", encoding="utf-8") as catalog_file:
+        catalog_file.write((_header_text(text) if has_header else "") + body)
