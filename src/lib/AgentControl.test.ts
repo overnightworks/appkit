@@ -206,7 +206,7 @@ describe('words', () => {
 });
 
 describe('en words', () => {
-	it('shows the texts the kit rendered before its words came from the catalogs', async () => {
+	it('renders the en texts of every row state and the empty sentence', async () => {
 		const control = await render({
 			rows: [
 				{ key: 'k1', name: 'Mozart', state: 'available' },
@@ -232,7 +232,7 @@ describe('en words', () => {
 		['place-full', 'There is no room here for another agent.'],
 		['agent-unavailable', 'The agent is not reachable right now.'],
 		['try-again', 'That did not work. Please try again.']
-	])('shows the %s sentence the kit rendered before its words came from the catalogs', async (refusal, sentence) => {
+	])('renders the %s refusal in the en words', async (refusal, sentence) => {
 		const control = await render({ rows: [], refusal });
 		expect(control.querySelector('[role="alert"]')?.textContent?.trim()).toBe(sentence);
 	});

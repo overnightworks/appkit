@@ -327,7 +327,7 @@ def test_a_consumer_passes_the_kit_words_to_each_component_and_fails_its_type_ch
 
 
 @pytest.mark.parametrize("removed", ["AccountMenuWords", "SignInPageWords", "AgentControlWords"])
-def test_a_consumer_cannot_import_a_components_own_words_type_the_kit_words_replaced(consumer, removed):
+def test_the_package_root_exports_no_per_component_words_type(consumer, removed):
     consumer.check(
         f"// @ts-expect-error the package exports no such type\nimport type {{ {removed} }} from '{consumer.name}';\n"
     )

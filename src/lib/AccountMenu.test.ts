@@ -266,7 +266,7 @@ describe('words from the app', () => {
 });
 
 describe('en words', () => {
-	it('shows the texts the kit rendered before its words came from the catalogs', async () => {
+	it('renders the en texts of the kit', async () => {
 		const menu = await render({ theme: { choice: 'dark', onChange: () => {} } });
 		const group = menu.querySelector('[role="radiogroup"]')!;
 		const label = document.getElementById(group.getAttribute('aria-labelledby')!);

@@ -341,7 +341,7 @@ describe('en words', () => {
 			{ page: 'no-access', logOutAction: '/logout' },
 			['No access', 'You are signed in, but this account has no access to Hallucinai.', 'Log out']
 		]
-	] as const)('shows the texts the kit rendered before its words came from the catalogs in %s', async (_name, state, shown) => {
+	] as const)('renders the en texts of the kit in %s', async (_name, state, shown) => {
 		const page = await render({ state });
 		const texts = [...page.querySelectorAll('h1, p, [role="alert"] span:last-child, a, button')].map((element) =>
 			element.textContent?.trim()
