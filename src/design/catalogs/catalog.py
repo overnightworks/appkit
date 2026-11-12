@@ -140,6 +140,16 @@ def _marker(piece: str) -> Marker:
     return Marker(name, closing=piece[1] == CLOSING_SIGN)
 
 
+def _check_closing(opened: Marker, piece: Marker, content: list[Piece]) -> None:
+    """The marker after an opened part closes it by its own name and leaves it not empty."""
+    if not piece.closing:
+        raise ValueError(f"marker {piece} comes inside the part {opened}; parts do not nest or cross")
+    if piece.name != opened.name:
+        raise ValueError(f"marker {piece} closes the part {opened}, but the names differ")
+    if not any(isinstance(item, Gap) or item.strip() for item in content):
+        raise ValueError(f"the part {opened} is empty")
+
+
 def _check_parts(pieces: tuple[Piece, ...]) -> None:
     """Every marked part is opened, closed by its own marker, not empty and holds no other marker."""
     opened: Marker | None = None
@@ -151,14 +161,9 @@ def _check_parts(pieces: tuple[Piece, ...]) -> None:
             if piece.closing:
                 raise ValueError(f"marker {piece} closes no part")
             opened, content = piece, []
-        elif piece.closing and piece.name == opened.name:
-            if not any(isinstance(item, Gap) or item.strip() for item in content):
-                raise ValueError(f"the part {opened} is empty")
-            opened = None
-        elif piece.closing:
-            raise ValueError(f"marker {piece} closes the part {opened}, but the names differ")
         else:
-            raise ValueError(f"marker {piece} comes inside the part {opened}; parts do not nest or cross")
+            _check_closing(opened, piece, content)
+            opened = None
     if opened is not None:
         raise ValueError(f"the part {opened} is never closed")
 
