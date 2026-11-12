@@ -153,7 +153,7 @@ export type MarkedPart<Marker extends string> = string | { readonly marker: Mark
  * Props of `Marked`, a marked sentence rendered in place, with no wrapper element and no white space of its own.
  * `parts` is the list a generated entry returns; the marker names are read from it.
  * `marked` holds one snippet per marker name, called with the part's text: the app chooses the element.
- * A missing snippet is a type error, and so is a snippet for a name the sentence does not have.
+ * A missing snippet is a type error, and so is a snippet written in place for a name the sentence lacks.
  */
 export interface MarkedProps<Marker extends string> {
 	parts: readonly MarkedPart<Marker>[];

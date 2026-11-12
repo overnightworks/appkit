@@ -17,6 +17,11 @@ describe('Marked server-rendered', () => {
 		expect(withoutAnchors(body)).toBe('<p>Nur <strong>wichtig</strong> und <a href="/more">mehr</a></p>');
 	});
 
+	it('writes every occurrence of a marker that two parts share', () => {
+		const body = markup(['a ', { marker: 'strong', text: 'x' }, ' b ', { marker: 'strong', text: 'y' }]);
+		expect(withoutAnchors(body)).toBe('<p>a <strong>x</strong> b <strong>y</strong></p>');
+	});
+
 	it('escapes the text of a marked part', () => {
 		const body = markup([{ marker: 'strong', text: '<b>{#x}</b>' }]);
 		expect(withoutAnchors(body)).toContain('<strong>&lt;b>{#x}&lt;/b></strong>');

@@ -21,6 +21,11 @@
 			elements: ['a: zwei ']
 		},
 		{
+			parts: ['a ', { marker: 'strong', text: 'x' }, ' b ', { marker: 'strong', text: 'y' }],
+			text: 'a x b y',
+			elements: ['strong:x', 'strong:y']
+		},
+		{
 			parts: ['Wert <b>x</b> ', { marker: 'strong', text: '<i>{#strong}y{/strong}</i> & {z}' }],
 			text: 'Wert <b>x</b> <i>{#strong}y{/strong}</i> & {z}',
 			elements: ['strong:<i>{#strong}y{/strong}</i> & {z}']
