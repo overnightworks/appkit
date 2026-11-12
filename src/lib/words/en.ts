@@ -33,6 +33,7 @@ const translated = {
     "agent.placeFull": "There is no room here for another agent.",
     "agent.agentUnavailable": "The agent is not reachable right now.",
     "agent.tryAgain": "That did not work. Please try again.",
+    "legalLinks.name": "Legal",
 } satisfies Words;
 // A translation that leaves out a gap of its source fails here.
 ({} as Words) satisfies typeof translated;

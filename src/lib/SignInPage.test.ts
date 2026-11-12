@@ -228,6 +228,14 @@ describe('page frame', () => {
 		}
 	});
 
+	it.each([
+		['en', en],
+		['de', de]
+	])('names the legal row in the %s words', async (_language, words) => {
+		const page = await render({ words, legalLinks: [{ label: 'Impressum', href: '/impressum' }] });
+		expect(page.querySelector('nav')?.getAttribute('aria-label')).toBe(words['legalLinks.name']);
+	});
+
 	it('shows no legal row when the list is empty', async () => {
 		const page = await render({ legalLinks: [] });
 		expect(page.querySelector('nav')).toBeNull();

@@ -35,4 +35,20 @@ describe('AccountMenu server-rendered', () => {
 			expect(body).not.toMatch(/role="alert"/);
 		}
 	);
+
+	it.each<Language>(['en', 'de'])('names the legal row in the %s words', async (language) => {
+		const words = await loadWords(language);
+		const { body } = render(AccountMenu, {
+			props: {
+				name: 'Felix',
+				accountHref: 'https://account.example/me',
+				onAccountOpen: () => {},
+				appRows: [],
+				legalLinks: [{ label: 'Imprint', href: '/imprint' }],
+				logOutAction: '/logout',
+				words
+			}
+		});
+		expect(body).toContain(`<nav class="legal menu" aria-label="${words['legalLinks.name']}">`);
+	});
 });

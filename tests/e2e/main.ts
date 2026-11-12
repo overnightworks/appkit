@@ -101,6 +101,7 @@ document.documentElement.lang = pageLanguage;
 if (query.has('words')) {
 	const tag = query.get('words');
 	const language = pageLanguages.find((candidate) => candidate === tag) ?? pageLanguages[0];
+	document.documentElement.lang = language;
 	void loadKitWords(language).then((words) => {
 		document.body.innerHTML = `<p role="status">${words['account.logOut']}</p>`;
 	});
@@ -109,12 +110,13 @@ if (query.has('words')) {
 	document.body.innerHTML = '<main><h1>Source <span class="as-typed">talks</span></h1></main>';
 } else if (query.has('legal')) {
 	// The markup contract of a page that cannot render Svelte, beside the component's own row.
-	document.body.innerHTML = `<div id="written"><nav class="legal" aria-label="Legal">${legalLinks
+	const words = await loadKitWords(pageLanguage);
+	document.body.innerHTML = `<div id="written"><nav class="legal" aria-label="${words['legalLinks.name']}">${legalLinks
 		.map((link) => `<a href="${link.href}">${link.label}</a>`)
 		.join('')}</nav></div><div id="component"></div>`;
 	mount(LegalLinks, {
 		target: document.getElementById('component')!,
-		props: { links: legalLinks }
+		props: { links: legalLinks, words }
 	});
 } else if (query.has('agents')) {
 	mountAgentControl(query.get('agents') ?? '', await loadKitWords(pageLanguage));

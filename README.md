@@ -54,7 +54,7 @@ The sign-in page in its five states: signed out, signing in (in a separate windo
 ## AccountMenu
 
 The account panel for an app's popover. Props and behaviour are documented in
-[`src/lib/types.ts`](src/lib/types.ts); `LegalLinks` is the legal row both
+[`src/lib/types.ts`](src/lib/types.ts); [`LegalLinks`](#legallinks) is the legal row both
 components render.
 
 ```svelte
@@ -67,6 +67,16 @@ components render.
 	{onLogOut}
 	words={kitWords}
 />
+```
+
+## LegalLinks
+
+The legal row, for a page without the account menu. `SignInPage` and `AccountMenu`
+draw it with their own `words`; an app that draws it itself passes the same words.
+The labels and addresses stay the app's.
+
+```svelte
+<LegalLinks links={legalLinks} words={kitWords} />
 ```
 
 ## AgentControl
@@ -185,6 +195,11 @@ literals trip `python:S1192`:
 sonar.exclusions=src/app/words.py
 ```
 
+An app with 100 % coverage thresholds omits the generated Python module from its
+measured set, because the module carries the paths for gaps and plural families
+whether or not the app's catalog uses them. It also excludes the loader `index.ts`
+from frontend coverage until a second language calls it.
+
 The TypeScript modules use four spaces and double quotes; an app whose prettier
 settings differ adds the words directory to `.prettierignore`:
 
@@ -197,9 +212,9 @@ The shape of the catalogs and the rules `--check` holds are in
 
 ## The kit's words
 
-The words of `SignInPage`, `AccountMenu` and `AgentControl` come from the kit's own
-catalogs, which the kit builds with `design-catalogs` like an app. Each of the three
-takes them as the required prop `words: KitWords`, holds no default and reads no
+The words of `SignInPage`, `AccountMenu`, `AgentControl` and `LegalLinks` come from the
+kit's own catalogs, which the kit builds with `design-catalogs` like an app. Each of the
+four takes them as the required prop `words: KitWords`, holds no default and reads no
 language itself, so a page cannot show one language on another's page; the
 examples above get `kitWords` from the `load` below. To override one word, pass a
 spread typed as `KitWords`: `words={{ ...kitWords, "account.logOut": "Exit" }}`. The

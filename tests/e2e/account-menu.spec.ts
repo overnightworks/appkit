@@ -308,6 +308,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 					for (const label of [kit['account.followSystem'], kit['account.light'], kit['account.dark']]) {
 						await expect(group.getByRole('radio', { name: label })).toBeVisible();
 					}
+					await expect(page.getByRole('navigation', { name: kit['legalLinks.name'] })).toBeVisible();
 					const panelBox = (await panelOf(page).boundingBox())!;
 					const logOut = page.getByRole('button', { name: kit['account.logOut'] });
 					await expect(logOut).toBeVisible();

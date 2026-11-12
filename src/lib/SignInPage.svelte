@@ -82,7 +82,7 @@
 			{/if}
 		{/if}
 	</main>
-	<LegalLinks links={legalLinks} newTab={legalLinksNewTab} />
+	<LegalLinks links={legalLinks} {words} newTab={legalLinksNewTab} />
 </div>
 
 <style>

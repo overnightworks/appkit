@@ -33,6 +33,7 @@ export type Words = {
     readonly "agent.placeFull": string;
     readonly "agent.agentUnavailable": string;
     readonly "agent.tryAgain": string;
+    readonly "legalLinks.name": string;
 };
 // prettier-ignore
 export const words: Words = {
@@ -66,5 +67,6 @@ export const words: Words = {
     "agent.placeFull": "Hier ist kein Platz für einen weiteren Agenten.",
     "agent.agentUnavailable": "Der Agent ist gerade nicht erreichbar.",
     "agent.tryAgain": "Das hat nicht geklappt. Versuch es noch einmal.",
+    "legalLinks.name": "Rechtliches",
 };
 export type Key = keyof Words;

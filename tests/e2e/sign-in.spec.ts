@@ -112,6 +112,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 						await expect(card.getByRole('link').or(card.getByRole('button'))).toHaveText(action);
 						if (alert) await expect(card.getByRole('alert')).toHaveText(alert);
 						else await expect(card.getByRole('alert')).toHaveCount(0);
+						await expect(page.getByRole('navigation', { name: kit['legalLinks.name'] })).toBeVisible();
 						if (variant === 'no-access') {
 							await expect(card.getByText(kit['signIn.noAccessSentence']({ appName: 'Probe' }))).toBeVisible();
 						}
