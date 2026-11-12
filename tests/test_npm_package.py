@@ -36,6 +36,21 @@ TSC_ARGUMENTS = [
     "--verbatimModuleSyntax",
     "consumer.ts",
 ]
+SVELTE_TSCONFIG = json.dumps(
+    {
+        "compilerOptions": {
+            "strict": True,
+            "skipLibCheck": True,
+            "noEmit": True,
+            "module": "esnext",
+            "moduleResolution": "bundler",
+            "target": "es2022",
+            "verbatimModuleSyntax": True,
+            "allowImportingTsExtensions": True,
+        },
+        "include": ["*.svelte", "*.ts"],
+    }
+)
 COMPONENT_FILES = {
     "svelte-dist/index.js",
     "svelte-dist/index.d.ts",
@@ -49,6 +64,8 @@ COMPONENT_FILES = {
     "svelte-dist/AiMark.svelte.d.ts",
     "svelte-dist/LegalLinks.svelte",
     "svelte-dist/LegalLinks.svelte.d.ts",
+    "svelte-dist/Marked.svelte",
+    "svelte-dist/Marked.svelte.d.ts",
     "svelte-dist/SignInPage.svelte",
     "svelte-dist/SignInPage.svelte.d.ts",
 }
@@ -87,6 +104,26 @@ class Consumer:
             text=True,
         )
         assert result.returncode == 0, result.stdout
+
+    def check_page(self, source):
+        """Type-check a Svelte page the way an app's svelte-check sees it; returns the exit status and the findings."""
+        (self.project / "tsconfig.json").write_text(SVELTE_TSCONFIG)
+        (self.project / "Page.svelte").write_text(source)
+        result = subprocess.run(
+            [
+                str(REPOSITORY / "node_modules/.bin/svelte-check"),
+                "--workspace",
+                str(self.project),
+                "--tsconfig",
+                "tsconfig.json",
+                "--output",
+                "machine",
+            ],
+            cwd=self.project,
+            capture_output=True,
+            text=True,
+        )
+        return result.returncode, result.stdout
 
 
 @pytest.fixture
@@ -393,3 +430,50 @@ def test_a_consumer_imports_the_agent_control_with_its_types_from_the_package_ro
         "// @ts-expect-error the rows are required\n"
         "export const noRows: AgentControlProps = { ...common };\n"
     )
+
+
+MARKED_PAGE = """<script lang="ts">
+  import { Marked } from '%s';
+  const note: readonly (string | { readonly marker: "strong" | "link"; readonly text: string })[] = [];
+  const snippets = { strong, link, code };
+</script>
+{#snippet strong(text: string)}<strong>{text}</strong>{/snippet}
+{#snippet link(text: string)}<a href="/more">{text}</a>{/snippet}
+{#snippet code(text: string)}<code>{text}</code>{/snippet}
+%s
+"""
+
+
+def test_a_consumer_page_renders_a_marked_sentence_and_an_unused_snippet_in_a_variable_is_harmless(
+    consumer,
+):
+    status, findings = consumer.check_page(
+        MARKED_PAGE
+        % (
+            consumer.name,
+            "<Marked parts={note} marked={{ strong, link }} />\n<Marked parts={note} marked={snippets} />",
+        )
+    )
+    assert status == 0, findings
+
+
+@pytest.mark.parametrize(
+    ("markup", "finding"),
+    [
+        pytest.param(
+            "<Marked parts={note} marked={{ strong }} />", "Property 'link' is missing", id="a missing snippet"
+        ),
+        pytest.param("<Marked parts={note} marked={{}} />", "is missing the following properties", id="no snippets"),
+        pytest.param(
+            "<Marked parts={note} marked={{ strong, link, code }} />",
+            "'code' does not exist",
+            id="a snippet for a marker the sentence lacks",
+        ),
+        pytest.param("<Marked marked={{ strong, link }} />", "Property 'parts' is missing", id="no parts"),
+    ],
+)
+def test_a_consumer_page_with_a_missing_or_an_unused_snippet_in_place_fails_its_type_check(consumer, markup, finding):
+    status, findings = consumer.check_page(MARKED_PAGE % (consumer.name, markup))
+    assert status != 0
+    assert "Page.svelte" in findings
+    assert finding in findings

@@ -258,7 +258,8 @@ flowchart LR
   name as often as the source, and may move them and the gaps anywhere in its sentence; every
   entry of a plural family carries the same markers. In the TypeScript module a text with
   markers returns a list of parts, each a string or `{ marker, text }` with its gaps filled,
-  which the page renders as text, never as HTML. In the Python module `text()` returns the
+  which the page renders as text, never as HTML; a Svelte page renders them with the kit's
+  `Marked` component. In the Python module `text()` returns the
   sentence without its markers, as MessageFormat 2 formats markup to a string by default. A
   page without script reads no marked text while the Python module returns sentences without
   their markers; parts in the Python module wait for such a page. Markup the page derives from
@@ -272,7 +273,9 @@ flowchart LR
   msgid "Archive {#strong}{count} takes{/strong} and delete {#strong}{deleted}{/strong}. {#help}Learn more{/help}"
   ```
 
-  The page chooses the element of each marker with an each block and text interpolation only:
+  A Svelte page renders the parts with the kit's `Marked` component, one snippet per marker
+  name ([README](../README.md#marked)). It does what this each block does, with text
+  interpolation only, but writes it on one line so that it adds no white space:
 
   ```svelte
   <script lang="ts">

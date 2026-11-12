@@ -58,6 +58,45 @@ def test_read_source_refuses_a_malformed_marker_with_one_finding_naming_the_key_
     assert named in findings[0].problem
 
 
+PAIRS_ONLY = "a part is written {#name}...{/name}, nothing after the name"
+
+
+@pytest.mark.parametrize(
+    ("text", "problem"),
+    [
+        pytest.param(
+            "{#s}b{/t}",
+            "is malformed: marker {/t} closes the part {#s}, but the names differ",
+            id="a close that names another part than the open",
+        ),
+        pytest.param(
+            "Alles {#strong/}",
+            f"is malformed: marker {{#strong/}} is not supported: {PAIRS_ONLY}",
+            id="a standalone marker",
+        ),
+        pytest.param(
+            "Alles {#strong class=x}y{/strong}",
+            f"is malformed: marker {{#strong class=x}} is not supported: {PAIRS_ONLY}",
+            id="an option after the name",
+        ),
+        pytest.param(
+            "Alles {#strong}y{/strong foo}",
+            f"is malformed: marker {{/strong foo}} is not supported: {PAIRS_ONLY}",
+            id="an option on the close",
+        ),
+        pytest.param(
+            "Alles {#my-name}y{/my-name}",
+            "is malformed: marker {#my-name} is not a plain name",
+            id="a name that is no identifier",
+        ),
+    ],
+)
+def test_read_source_says_which_rule_a_malformed_marker_breaks(text, problem):
+    _, findings = read_source(FILE, LanguageTag("de"), GERMAN, (entry("table.seatFree", text),))
+
+    assert [finding.problem for finding in findings] == [problem]
+
+
 @pytest.mark.parametrize(("text", "named"), MARKER_REFUSALS)
 def test_read_translation_refuses_a_malformed_marker_with_one_finding_naming_the_key(text, named):
     source = SourceCatalog(LanguageTag("de"), (Entry(Key("table.seatFree"), "Frei {#strong}hier{/strong}"),))
@@ -141,7 +180,7 @@ def test_read_translation_names_the_key_and_both_marker_multisets_of_a_translati
     ]
 
 
-def test_read_translation_reports_gaps_and_markers_that_both_differ_as_one_finding_for_the_key():
+def test_read_translation_reports_gaps_and_markers_that_both_differ_as_two_statements_of_one_finding_for_the_key():
     source = SourceCatalog(LanguageTag("de"), (Entry(Key("table.seatFree"), "{#strong}{name}{/strong}"),))
 
     _, findings = read_translation(
@@ -152,9 +191,13 @@ def test_read_translation_reports_gaps_and_markers_that_both_differ_as_one_findi
         source,
     )
 
-    assert [finding.key for finding in findings] == ["table.seatFree"]
-    assert "the gaps {other}" in findings[0].problem
-    assert "the markers {#code}" in findings[0].problem
+    assert [(finding.key, finding.problem) for finding in findings] == [
+        (
+            "table.seatFree",
+            "has the gaps {other}; the source has the gaps {name}."
+            " It has the markers {#code}; the source has the markers {#strong}",
+        )
+    ]
 
 
 def test_read_translation_names_a_marker_the_source_lacks():
