@@ -1,8 +1,0 @@
-claim_id = "e93a21445587419db8c5fcb072809e6b"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "2d7de49dab744036235a89db8df23badad14afb1"
-branch = "claude/issue-205-words-docs-notes"
-scope = ["README.md", "docs/ARCHITECTURE.md", "docs/languages.md", "src/design/catalogs/declaration.py"]
-opened_commit = "2d46b23801673dd894702dc21be53f729b5e993f"
-whole_reason = "One ruling on catalogs per shipped unit reaches four documents that state it; split, they would contradict each other."
