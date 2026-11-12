@@ -184,15 +184,19 @@ describe('log out', () => {
 });
 
 describe('legal row', () => {
-	it('opens the links in a new tab in the given order inside a nav named Legal', async () => {
+	it.each([
+		['en', en],
+		['de', de]
+	])('opens the links in a new tab in the given order inside a nav named in the %s words', async (_language, words) => {
 		const menu = await render({
+			words,
 			legalLinks: [
 				{ label: 'Privacy', href: '/privacy' },
 				{ label: 'Imprint', href: '/imprint' }
 			]
 		});
 		const nav = menu.querySelector('nav')!;
-		expect(nav.getAttribute('aria-label')).toBe('Legal');
+		expect(nav.getAttribute('aria-label')).toBe(words['legalLinks.name']);
 		const anchors = [...nav.querySelectorAll('a')];
 		expect(anchors.map((anchor) => anchor.textContent)).toEqual(['Privacy', 'Imprint']);
 		for (const anchor of anchors) {

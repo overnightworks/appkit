@@ -192,17 +192,18 @@ def test_shipped_components_neither_store_nor_fetch_nor_write_the_theme_which_th
 
 def test_a_consumer_imports_legal_links_and_its_props_type_from_the_package_root(consumer):
     consumer.check(
-        f"import {{ LegalLinks, type LegalLinksProps }} from '{consumer.name}';\n"
-        "const props: LegalLinksProps = { links: [{ label: 'Imprint', href: '/imprint' }] };\n"
+        f"import {{ LegalLinks, type KitWords, type LegalLinksProps }} from '{consumer.name}';\n"
+        "declare const words: KitWords;\n"
+        "const props: LegalLinksProps = { links: [{ label: 'Imprint', href: '/imprint' }], words };\n"
         "export const component: typeof LegalLinks = LegalLinks;\n"
         "// @ts-expect-error links is required\n"
         "export const missing: LegalLinksProps = {};\n"
         "export { props };\n"
-        "export const menuPlace: LegalLinksProps = { links: [], place: 'menu' };\n"
-        "export const pageNewTab: LegalLinksProps = { links: [], place: 'page', newTab: true };\n"
-        "export const defaultPlaceNewTab: LegalLinksProps = { links: [], newTab: true };\n"
+        "export const menuPlace: LegalLinksProps = { links: [], words, place: 'menu' };\n"
+        "export const pageNewTab: LegalLinksProps = { links: [], words, place: 'page', newTab: true };\n"
+        "export const defaultPlaceNewTab: LegalLinksProps = { links: [], words, newTab: true };\n"
         "// @ts-expect-error the menu place always opens a new tab\n"
-        "export const menuNewTab: LegalLinksProps = { links: [], place: 'menu', newTab: true };\n"
+        "export const menuNewTab: LegalLinksProps = { links: [], words, place: 'menu', newTab: true };\n"
     )
 
 
@@ -308,6 +309,7 @@ COMPONENT_PROPS = {
     ),
     "SignInPageProps": "{ appName: 'A', state: { page: 'signed-out', signInHref: '/in' }, legalLinks: []",
     "AgentControlProps": "{ rows: [], onCall: (key: string) => void key",
+    "LegalLinksProps": "{ links: []",
 }
 
 

@@ -97,7 +97,7 @@
 			{/if}
 		{/if}
 	</div>
-	<LegalLinks links={legalLinks} place="menu" />
+	<LegalLinks links={legalLinks} {words} place="menu" />
 </div>
 
 <style>

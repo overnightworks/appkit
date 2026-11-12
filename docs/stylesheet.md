@@ -40,13 +40,17 @@ Sign-in wording is identical in every app. The kit's catalogs carry these string
 - en: "Log in", "Log out", "You are logged out.", "No access", "Login failed", "Try again", "Legal"
 - de: "Anmelden", "Abmelden", "Du bist abgemeldet.", "Kein Zugang", "Anmeldung fehlgeschlagen", "Erneut versuchen"
 
+The de word "Rechtliches" beside en "Legal", the accessible name of the legal row, is not ruled until the operator answers the open question on it.
+
 ## The components' words
 
-The tarball's `SignInPage`, `AccountMenu` and `AgentControl` components take their words from the kit's catalogs: the app loads them with `loadKitWords` for the page's language and passes them as the required prop `words`, see the [README](../README.md#the-kits-words); [Languages](languages.md) requires that the kit ships its words per language.
+The tarball's `SignInPage`, `AccountMenu`, `AgentControl` and `LegalLinks` components take their words from the kit's catalogs: the app loads them with `loadKitWords` for the page's language and passes them as the required prop `words`, see the [README](../README.md#the-kits-words); [Languages](languages.md) requires that the kit ships its words per language.
 
 `SignInPage` shows the strings above, the failure banner of a login that failed, the sentence of no access, which names the app, the sentence of a sign-in that did not finish, the words of the signing-in state and the words of the window-blocked state. The list above binds the sign-in words in the kit's catalogs; the de strings of the other words are not ruled.
 
 `AccountMenu` shows the name of the theme row, its three choices and "Log out". The de strings of the theme rows are not ruled.
+
+`LegalLinks` takes the words for the row's accessible name alone, "Legal" in en and "Rechtliches" in de; the labels and addresses of the links stay the app's.
 
 `AgentControl` shows the three action words, the two accessible-name patterns (which include the agent's name), the empty sentence and the five refusal sentences, one for each of `not-allowed`, `owner-absent`, `place-full`, `agent-unavailable` and `try-again`. The de words are ruled: "Rufen", "Wird gerufen…", "Bitten zu gehen", "Mozart rufen", "Mozart bitten zu gehen", "Gerade ist kein Agent erreichbar." and the refusals "Du darfst diesen Agenten nicht rufen.", "Sein Besitzer ist nicht hier.", "Hier ist kein Platz für einen weiteren Agenten.", "Der Agent ist gerade nicht erreichbar." and "Das hat nicht geklappt. Versuch es noch einmal." A `here` row draws its ask-to-leave button only when the app passes `onSendAway`; without it the row shows the AI mark and the name.
 
@@ -77,10 +81,10 @@ hopin and hal deviate by name:
 
 ## Writing the legal row by hand
 
-An app's page that cannot render Svelte writes the same row by hand: `<nav class="legal" aria-label="Legal">` holding one `<a href>` per link in that order, with no separator characters. The accessible name, not printed, is the literal "Legal" in every app, as in `LegalLinks`'s `<nav>`. The row then gets its look from `design.css`, as the component's does; the menu form (`legal menu`) is the kit's own and is not offered. The page keeps the row's spacing and placement relative to its neighbours.
+An app's page that cannot render Svelte writes the same row by hand: `<nav class="legal" aria-label="Rechtliches">` holding one `<a href>` per link in that order, with no separator characters. The accessible name, not printed, is the kit's `legalLinks.name` in the page's language ("Rechtliches" in de, "Legal" in en), as in `LegalLinks`'s `<nav>`. The row then gets its look from `design.css`, as the component's does; the menu form (`legal menu`) is the kit's own and is not offered. The page keeps the row's spacing and placement relative to its neighbours.
 
 ```html
-<nav class="legal" aria-label="Legal"><a href="https://hallucinai.de/impressum#songmaker">Impressum</a><a href="https://hallucinai.de/datenschutz#songmaker">Datenschutz</a><a href="https://hallucinai.de/nutzungsbedingungen#songmaker">Nutzungsbedingungen</a></nav>
+<nav class="legal" aria-label="Rechtliches"><a href="https://hallucinai.de/impressum#songmaker">Impressum</a><a href="https://hallucinai.de/datenschutz#songmaker">Datenschutz</a><a href="https://hallucinai.de/nutzungsbedingungen#songmaker">Nutzungsbedingungen</a></nav>
 ```
 
 A page that belongs to no single app, such as Keycloak's central sign-in pages, writes the same row with the addresses the central legal pages give it.

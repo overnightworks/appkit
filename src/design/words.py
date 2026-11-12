@@ -37,6 +37,7 @@ type Key = Literal[
     'agent.placeFull',
     'agent.agentUnavailable',
     'agent.tryAgain',
+    'legalLinks.name',
 ]
 type Language = Literal[
     'de',
@@ -88,6 +89,7 @@ WORDS: Mapping[Language, Mapping[Key, str | Mapping[Category, str]]] = {
         'agent.placeFull': 'Hier ist kein Platz für einen weiteren Agenten.',
         'agent.agentUnavailable': 'Der Agent ist gerade nicht erreichbar.',
         'agent.tryAgain': 'Das hat nicht geklappt. Versuch es noch einmal.',
+        'legalLinks.name': 'Rechtliches',
     },
     'en': {
         'signIn.loggedOut': 'You are logged out.',
@@ -120,6 +122,7 @@ WORDS: Mapping[Language, Mapping[Key, str | Mapping[Category, str]]] = {
         'agent.placeFull': 'There is no room here for another agent.',
         'agent.agentUnavailable': 'The agent is not reachable right now.',
         'agent.tryAgain': 'That did not work. Please try again.',
+        'legalLinks.name': 'Legal',
     },
 }
 

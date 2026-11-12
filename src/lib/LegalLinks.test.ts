@@ -2,16 +2,20 @@ import { mount, tick, unmount } from 'svelte';
 import { afterEach, describe, expect, it } from 'vitest';
 import LegalLinks from './LegalLinks.svelte';
 import type { LegalLink } from './types.ts';
+import { loadWords, type Language } from './words/index.ts';
+
+const words = { en: await loadWords('en'), de: await loadWords('de') };
 
 const mounted: { target: HTMLElement; component: ReturnType<typeof mount> }[] = [];
 
 async function render(
 	links: readonly LegalLink[],
-	options: { place?: 'page'; newTab?: boolean } | { place: 'menu' } = {}
+	options: { place?: 'page'; newTab?: boolean } | { place: 'menu' } = {},
+	language: Language = 'en'
 ): Promise<HTMLElement> {
 	const target = document.createElement('div');
 	document.body.append(target);
-	mounted.push({ target, component: mount(LegalLinks, { target, props: { links, ...options } }) });
+	mounted.push({ target, component: mount(LegalLinks, { target, props: { links, words: words[language], ...options } }) });
 	await tick();
 	return target;
 }
@@ -49,17 +53,17 @@ describe('LegalLinks', () => {
 		expect([...page.querySelectorAll('a')].map((anchor) => anchor.textContent)).toEqual(['Imprint', 'Privacy']);
 	});
 
-	it('is named Legal and opens links in the same tab on a page', async () => {
-		const page = await render([{ label: 'Imprint', href: '/imprint' }]);
-		expect(page.querySelector('nav')?.getAttribute('aria-label')).toBe('Legal');
+	it.each<Language>(['en', 'de'])('is named in the %s words on a page and opens links in the same tab', async (language) => {
+		const page = await render([{ label: 'Imprint', href: '/imprint' }], {}, language);
+		expect(page.querySelector('nav')?.getAttribute('aria-label')).toBe(words[language]['legalLinks.name']);
 		const anchor = page.querySelector('a')!;
 		expect(anchor.hasAttribute('target')).toBe(false);
 		expect(anchor.hasAttribute('rel')).toBe(false);
 	});
 
-	it('is named Legal and opens links in a new tab in a menu', async () => {
-		const page = await render([{ label: 'Imprint', href: '/imprint' }], { place: 'menu' });
-		expect(page.querySelector('nav')?.getAttribute('aria-label')).toBe('Legal');
+	it.each<Language>(['en', 'de'])('is named in the %s words in a menu and opens links in a new tab', async (language) => {
+		const page = await render([{ label: 'Imprint', href: '/imprint' }], { place: 'menu' }, language);
+		expect(page.querySelector('nav')?.getAttribute('aria-label')).toBe(words[language]['legalLinks.name']);
 		const anchor = page.querySelector('a')!;
 		expect(anchor.getAttribute('target')).toBe('_blank');
 		expect(anchor.getAttribute('rel')).toBe('noopener');

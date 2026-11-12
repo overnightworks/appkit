@@ -1,17 +1,15 @@
 <script lang="ts">
 	import AiMark from './AiMark.svelte';
 	import type { AgentControlProps, AgentControlRefusal } from './types.ts';
+	import type { Words as KitWords } from './words/de.ts';
 
-	const refusalKeys: Record<
-		AgentControlRefusal,
-		'agent.notAllowed' | 'agent.ownerAbsent' | 'agent.placeFull' | 'agent.agentUnavailable' | 'agent.tryAgain'
-	> = {
+	const refusalKeys = {
 		'not-allowed': 'agent.notAllowed',
 		'owner-absent': 'agent.ownerAbsent',
 		'place-full': 'agent.placeFull',
 		'agent-unavailable': 'agent.agentUnavailable',
 		'try-again': 'agent.tryAgain'
-	};
+	} satisfies Record<AgentControlRefusal, keyof KitWords>;
 
 	let { rows, onCall, onSendAway, refusal, words }: AgentControlProps = $props();
 </script>

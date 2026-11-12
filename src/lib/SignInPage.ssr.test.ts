@@ -55,6 +55,13 @@ describe.each(languages)('SignInPage server-rendered in the %s words', (language
 		expect(body).not.toMatch(/onclick/);
 	});
 
+	it('names the legal row and renders nothing for an empty list', () => {
+		const props = { appName: 'Hopin', state: { page: 'no-access' }, words: kit } as const;
+		const named = render(SignInPage, { props: { ...props, legalLinks: [{ label: 'Imprint', href: '/imprint' }] } });
+		expect(named.body).toContain(`<nav class="legal" aria-label="${kit['legalLinks.name']}">`);
+		expect(render(SignInPage, { props: { ...props, legalLinks: [] } }).body).not.toMatch(/<nav\b/);
+	});
+
 	it.each([
 		[
 			'signed-out, unfinished',

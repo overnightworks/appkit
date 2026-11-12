@@ -122,3 +122,7 @@ msgstr ""
 msgctxt "agent.tryAgain"
 msgid "Das hat nicht geklappt. Versuch es noch einmal."
 msgstr ""
+
+msgctxt "legalLinks.name"
+msgid "Rechtliches"
+msgstr ""

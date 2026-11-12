@@ -293,11 +293,15 @@ def test_kit_words_import_without_the_catalogs_extra_and_list_the_catalogs_langu
     assert json.loads(result.stdout) == sorted(path.stem for path in (REPOSITORY / "src" / "catalogs").glob("*.po"))
 
 
-def test_kit_words_give_the_german_log_out_of_the_account_menu(kit_words_probe):
-    result = kit_words_probe("print(words.text('de', 'account.logOut'))")
+@pytest.mark.parametrize(
+    ("key", "german"),
+    [("account.logOut", "Abmelden"), ("legalLinks.name", "Rechtliches")],
+)
+def test_kit_words_give_the_german_text_of_a_key(kit_words_probe, key, german):
+    result = kit_words_probe(f"print(words.text('de', '{key}'))")
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout.strip() == "Abmelden"
+    assert result.stdout.strip() == german
 
 
 def test_kit_words_refuse_an_unknown_key(kit_words_probe):
