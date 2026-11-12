@@ -1,6 +1,6 @@
 [project]
 name = "overnightworks-design"
-version = "0.26.0"
+version = "0.27.0"
 description = "Family design tokens and fonts shared by overnightworks products"
 readme = "README.md"
 license = "MIT"

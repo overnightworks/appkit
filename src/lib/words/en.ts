@@ -1,6 +1,6 @@
 // Generated from the en catalog by design-catalogs. Do not edit.
 
-import type { Words } from "./de";
+import type { Words } from "./de.js";
 // prettier-ignore
 const translated = {
     "signIn.loggedOut": "You are logged out.",

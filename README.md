@@ -166,8 +166,10 @@ and clear the fuzzy marks, run `design-catalogs` for the modules, and
 until the translations are written.
 
 The loader names the languages, which always equal the catalog files, and
-loads the words of one language as its own chunk through extensionless dynamic
-imports, which a bundler resolves. `loadWords` is called only with a member of
+loads the words of one language as its own chunk through dynamic imports. Every
+specifier between the generated modules ends in `.js`, as standard ESM needs, so
+Node loads the modules as they are; a bundler, Vitest, Playwright and TypeScript with
+`moduleResolution: bundler` map the ending to the `.ts` file. `loadWords` is called only with a member of
 `languages`: an unknown language is a type error, and at run time the promise
 rejects. The page reads `<html lang>` once, when it starts:
 
@@ -244,12 +246,29 @@ language itself, so a page cannot show one language on another's page; the
 examples above get `kitWords` from the `load` below. To override one word, pass a
 spread typed as `KitWords`: `words={{ ...kitWords, "account.logOut": "Exit" }}`. The
 tarball ships the words per language, each as its own chunk, and the package root
-exports:
+and the export `overnightworks-design/words` offer:
 
 - `loadKitWords(language)`: the words of one language, as a promise. The kit reads
   no language itself; the caller passes it.
 - `KitLanguage`: the languages the kit ships.
 - `KitWords`: the shape of one language's words.
+
+The export `overnightworks-design/words` holds these three and nothing else, no
+component, so a plain Node process can import it, which the package root cannot: the root
+re-exports `.svelte` files, which Node does not load. A Playwright spec names the kit's
+texts from it:
+
+```ts
+// tests/sign-in.spec.ts
+import { expect, test } from "@playwright/test";
+import { loadKitWords } from "overnightworks-design/words";
+
+test("the sign-in page offers the kit's log-in text", async ({ page }) => {
+  const words = await loadKitWords("en");
+  await page.goto("/en/");
+  await expect(page.getByText(words["signIn.logIn"])).toBeVisible();
+});
+```
 
 The wheel's `design.words` is the same words in Python, for an app's tests and
 not for its server; it needs no Babel and no extra.

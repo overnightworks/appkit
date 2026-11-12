@@ -5,8 +5,8 @@ import { dirname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import type { BrowserContext, Page } from '@playwright/test';
-import type { KitLanguage, KitWords } from 'overnightworks-design';
-import { build, createServer } from 'vite';
+import type { KitLanguage, KitWords } from 'overnightworks-design/words';
+import { build } from 'vite';
 
 const consumersRoot = dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = resolve(consumersRoot, '../..');
@@ -75,21 +75,9 @@ export async function routeTo(target: Page | BrowserContext, outDir: string): Pr
 	});
 }
 
-/** What a prerendering `load` does under Node: the package root loaded through Vite's server-side module graph, then the words of one language. */
+/** What a prerendering `load` does under Node: the kit's words export, imported by name, then the words of one language. */
 export async function loadKitWordsUnderNode(language: KitLanguage): Promise<KitWords> {
 	installPackage();
-	const server = await createServer({
-		root: join(consumersRoot, 'imported'),
-		configFile: false,
-		logLevel: 'warn',
-		appType: 'custom',
-		server: { middlewareMode: true },
-		plugins: [svelte()]
-	});
-	try {
-		const kit = await server.ssrLoadModule('overnightworks-design');
-		return await kit.loadKitWords(language);
-	} finally {
-		await server.close();
-	}
+	const { loadKitWords } = await import('overnightworks-design/words');
+	return loadKitWords(language);
 }

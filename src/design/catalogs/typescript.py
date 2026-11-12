@@ -41,6 +41,11 @@ def quoted(text: str) -> str:
     return json.dumps(text, ensure_ascii=False)
 
 
+def module_specifier(language: LanguageTag) -> str:
+    """The quoted specifier of a language's module: standard ESM needs `.js`, a bundler maps it to the `.ts` file."""
+    return quoted(f"./{language.value}.js")
+
+
 def reference(name: str, *, family: bool) -> str:
     if name != COUNT:
         return f"gaps.{name}"
@@ -197,7 +202,7 @@ def render_translation(catalog: TranslationCatalog, source: LanguageTag) -> str:
     words = words_of(catalog.entries)
     return (
         f"{header(catalog.language)}\n\n"
-        f"import type {{ Words }} from {quoted(f'./{source.value}')};\n"
+        f"import type {{ Words }} from {module_specifier(source)};\n"
         f"{helper_lines(catalog.language, words)}"
         f"{PRETTIER_IGNORE}\n"
         f"{words_declaration(words)}"
@@ -210,10 +215,10 @@ def render_loader(source: LanguageTag, translations: Sequence[LanguageTag]) -> s
     A dynamic import gives each language its own chunk, so a person's page loads one language only.
     """
     languages = [source, *translations]
-    imports = "".join(f"    {quoted(tag.value)}: () => import({quoted(f'./{tag.value}')}),\n" for tag in languages)
+    imports = "".join(f"    {quoted(tag.value)}: () => import({module_specifier(tag)}),\n" for tag in languages)
     return (
         "// Generated from the catalogs by design-catalogs. Do not edit.\n\n"
-        f"import type {{ Words }} from {quoted(f'./{source.value}')};\n\n"
+        f"import type {{ Words }} from {module_specifier(source)};\n\n"
         f"export const languages = [{', '.join(quoted(tag.value) for tag in languages)}] as const;\n"
         "export type Language = (typeof languages)[number];\n"
         f"export const sourceLanguage: Language = {quoted(source.value)};\n"

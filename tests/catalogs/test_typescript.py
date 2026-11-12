@@ -47,7 +47,7 @@ def test_render_translation_imports_the_words_type_of_the_source_and_declares_th
     assert render_translation(catalog, LanguageTag("de")) == (
         "// Generated from the pl catalog by design-catalogs. Do not edit.\n"
         "\n"
-        'import type { Words } from "./de";\n'
+        'import type { Words } from "./de.js";\n'
         "// prettier-ignore\n"
         "export const words: Words = {\n"
         '    "table.seatFree": "Wolne",\n'
@@ -65,7 +65,7 @@ def test_render_translation_checks_the_gaps_of_a_translation_with_gaps_in_both_d
     assert render_translation(catalog, LanguageTag("de")) == (
         "// Generated from the pl catalog by design-catalogs. Do not edit.\n"
         "\n"
-        'import type { Words } from "./de";\n'
+        'import type { Words } from "./de.js";\n'
         "// prettier-ignore\n"
         "const translated = {\n"
         '    "table.seatFree": "Wolne",\n'
@@ -351,16 +351,16 @@ def test_render_loader_lists_the_languages_source_first_and_loads_each_module_by
     assert render_loader(LanguageTag("de"), (LanguageTag("pl"), LanguageTag("pt-BR"))) == (
         "// Generated from the catalogs by design-catalogs. Do not edit.\n"
         "\n"
-        'import type { Words } from "./de";\n'
+        'import type { Words } from "./de.js";\n'
         "\n"
         'export const languages = ["de", "pl", "pt-BR"] as const;\n'
         "export type Language = (typeof languages)[number];\n"
         'export const sourceLanguage: Language = "de";\n'
         "// prettier-ignore\n"
         "const modules: Record<Language, () => Promise<{ readonly words: Words }>> = {\n"
-        '    "de": () => import("./de"),\n'
-        '    "pl": () => import("./pl"),\n'
-        '    "pt-BR": () => import("./pt-BR"),\n'
+        '    "de": () => import("./de.js"),\n'
+        '    "pl": () => import("./pl.js"),\n'
+        '    "pt-BR": () => import("./pt-BR.js"),\n'
         "};\n"
         "export const loadWords = async (language: Language): Promise<Words> => (await modules[language]()).words;\n"
     )
@@ -374,8 +374,8 @@ def test_render_loader_lists_the_source_alone_when_there_is_no_translation():
 def run_loader(evaluate):
     """Runs a probe over the loader and the modules of a source (`de`) and a translation (`pl`) in Node.
 
-    The modules import each other without an extension, as an app's bundler resolves them; the hook adds the
-    extension Node needs.
+    The modules import each other by their `.js` ending, which a bundler maps to the `.ts` file; the hook does the
+    same for Node.
     """
 
     def run(probe: str):
@@ -384,7 +384,7 @@ def run_loader(evaluate):
         hook = (
             "export async function resolve(specifier, context, next) {"
             " try { return await next(specifier, context); }"
-            " catch { return next(`${specifier}.ts`, context); } }"
+            " catch { return next(specifier.replace(/\\.js$/, '.ts'), context); } }"
         )
         return evaluate(
             {
