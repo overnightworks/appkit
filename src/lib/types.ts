@@ -146,6 +146,26 @@ export interface AgentControlProps {
 	words: KitWords;
 }
 
+/** The two directions of an agent's hearing: the agent hears the person, or the person hears the agent. */
+export type HearingKind = 'hear' | 'listen';
+
+/**
+ * One chip with a switch for an agent's hearing, drawn on a video: `hear` is the agent hearing the
+ * person ("Agent may hear me"), `listen` the person hearing the agent ("I want to hear the agent").
+ * The chip holds no state: it shows `on` and, when pressed, calls `onChange` with the negated value;
+ * the app sets `on` again or leaves it. The on colour is the app's `--accent`; the glass and the ink
+ * are the chip's own. Where the chips stand and what a switch does stay with the app.
+ */
+export interface HearingSwitchProps {
+	kind: HearingKind;
+	/** Also the chip's `aria-checked`. */
+	on: boolean;
+	/** Called with the negated `on` by a press, Space or Enter. */
+	onChange: (on: boolean) => void;
+	/** The kit's words in the page's language, from `loadKitWords`. */
+	words: KitWords;
+}
+
 /** One part of a marked sentence, as `design-catalogs` generates it: plain text, or text under a marker name. */
 export type MarkedPart<Marker extends string> = string | { readonly marker: Marker; readonly text: string };
 

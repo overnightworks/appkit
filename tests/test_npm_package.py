@@ -65,6 +65,8 @@ COMPONENT_FILES = {
     "svelte-dist/AgentControl.svelte.d.ts",
     "svelte-dist/AiMark.svelte",
     "svelte-dist/AiMark.svelte.d.ts",
+    "svelte-dist/HearingSwitch.svelte",
+    "svelte-dist/HearingSwitch.svelte.d.ts",
     "svelte-dist/LegalLinks.svelte",
     "svelte-dist/LegalLinks.svelte.d.ts",
     "svelte-dist/Marked.svelte",
@@ -361,6 +363,7 @@ COMPONENT_PROPS = {
     ),
     "SignInPage": "{ appName: 'A', state: { page: 'signed-out', signInHref: '/in' }, legalLinks: []",
     "AgentControl": "{ rows: [], onCall: (key: string) => void key",
+    "HearingSwitch": "{ kind: 'hear', on: true, onChange: (on: boolean) => void on",
     "LegalLinks": "{ links: []",
 }
 
@@ -382,7 +385,7 @@ def test_a_consumer_passes_the_kit_words_to_each_component_and_fails_its_type_ch
     )
 
 
-@pytest.mark.parametrize("removed", ["AccountMenuWords", "SignInPageWords", "AgentControlWords"])
+@pytest.mark.parametrize("removed", ["AccountMenuWords", "SignInPageWords", "AgentControlWords", "HearingSwitchWords"])
 def test_the_package_root_exports_no_per_component_words_type(consumer, removed):
     consumer.check(
         f"// @ts-expect-error the package exports no such type\nimport type {{ {removed} }} from '{consumer.name}';\n"
@@ -470,6 +473,27 @@ def test_a_consumer_imports_the_agent_control_with_its_types_from_the_package_ro
         "export const unknownState: AgentRow = { key: 'k', name: 'N', state: 'gone' };\n"
         "// @ts-expect-error the rows are required\n"
         "export const noRows: AgentControlProps = { ...common };\n"
+    )
+
+
+def test_a_consumer_imports_the_hearing_switch_with_its_types_from_the_package_root(consumer):
+    consumer.check(
+        f"import {{ HearingSwitch, type HearingKind, type HearingSwitchProps, type KitWords }} "
+        f"from '{consumer.name}';\n"
+        "export const component: typeof HearingSwitch = HearingSwitch;\n"
+        "declare const words: KitWords;\n"
+        "const common = { on: true, onChange: (on: boolean) => void on, words };\n"
+        "export const hear: HearingSwitchProps = { ...common, kind: 'hear' };\n"
+        "export const listen: HearingSwitchProps = { ...common, kind: 'listen' };\n"
+        "export const kinds: HearingKind[] = ['hear', 'listen'];\n"
+        "// @ts-expect-error a kind outside the two\n"
+        "export const unknownKind: HearingSwitchProps = { ...common, kind: 'mute' };\n"
+        "// @ts-expect-error the switch is controlled: the state is required\n"
+        "export const uncontrolled: HearingSwitchProps = "
+        "{ kind: 'hear', onChange: (on: boolean) => void on, words };\n"
+        "// @ts-expect-error a press reports the new state as a boolean\n"
+        "export const wrongReport: HearingSwitchProps = "
+        "{ ...common, kind: 'hear', onChange: (on: string) => void on };\n"
     )
 
 

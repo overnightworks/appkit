@@ -4,10 +4,12 @@ import { SvelteMap } from 'svelte/reactivity';
 import {
 	AccountMenu,
 	AgentControl,
+	HearingSwitch,
 	LegalLinks,
 	SignInPage,
 	loadKitWords,
 	type AgentRow,
+	type HearingKind,
 	type KitLanguage,
 	type KitWords,
 	type SignInState,
@@ -17,7 +19,7 @@ import MarkedSentence from './MarkedSentence.svelte';
 
 declare global {
 	interface Window {
-		/** Every report the menu, the agent control or the sign-in page made, in order. */
+		/** Every report the menu, the agent control, the hearing switch or the sign-in page made, in order. */
 		reports: string[];
 	}
 }
@@ -91,6 +93,37 @@ function mountAgentControl(variant: string, words: KitWords): void {
 	});
 }
 
+/**
+ * Both chips on a stand-in for the video they always sit on, held by the app as a controlled switch is:
+ * `off` starts them off, `ignore` is an app that never takes the change.
+ */
+function mountHearingSwitches(variant: string, words: KitWords): void {
+	window.reports = [];
+	const held = new SvelteMap<HearingKind, boolean>([
+		['hear', variant !== 'off'],
+		['listen', variant !== 'off']
+	]);
+	const stage = document.createElement('div');
+	stage.className = 'hearing-stage';
+	document.body.append(stage);
+	for (const kind of ['hear', 'listen'] as const satisfies HearingKind[]) {
+		mount(HearingSwitch, {
+			target: stage,
+			props: {
+				kind,
+				get on() {
+					return held.get(kind)!;
+				},
+				onChange(on: boolean) {
+					window.reports.push(`${kind}:${on}`);
+					if (variant !== 'ignore') held.set(kind, on);
+				},
+				words
+			}
+		});
+	}
+}
+
 /** The languages this page offers; the type check fails when the kit lacks one. */
 const pageLanguages = ['de', 'en'] as const satisfies readonly KitLanguage[];
 
@@ -121,6 +154,8 @@ if (query.has('words')) {
 	});
 } else if (query.has('marked')) {
 	mount(MarkedSentence, { target: document.body });
+} else if (query.has('hearing')) {
+	mountHearingSwitches(query.get('hearing') ?? '', await loadKitWords(pageLanguage));
 } else if (query.has('agents')) {
 	mountAgentControl(query.get('agents') ?? '', await loadKitWords(pageLanguage));
 } else if (query.has('menu')) {

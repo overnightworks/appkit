@@ -10,3 +10,16 @@ h1 {
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
 }
+
+/* A stand-in for the video the hearing switch sits on. */
+.hearing-stage {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 4px;
+	box-sizing: border-box;
+	max-width: calc(100% - 64px);
+	margin: 8px;
+	padding: 8px;
+	background: #1b2a33;
+}

@@ -33,6 +33,8 @@ export type Words = {
     readonly "agent.placeFull": string;
     readonly "agent.agentUnavailable": string;
     readonly "agent.tryAgain": string;
+    readonly "hearing.agentMayHearMe": string;
+    readonly "hearing.iWantToHearAgent": string;
     readonly "legalLinks.name": string;
 };
 // prettier-ignore
@@ -67,6 +69,8 @@ export const words: Words = {
     "agent.placeFull": "Hier ist kein Platz für einen weiteren Agenten.",
     "agent.agentUnavailable": "Der Agent ist gerade nicht erreichbar.",
     "agent.tryAgain": "Das hat nicht geklappt. Versuch es noch einmal.",
+    "hearing.agentMayHearMe": "Agent darf mich hören",
+    "hearing.iWantToHearAgent": "Ich will den Agenten hören",
     "legalLinks.name": "Rechtliches",
 };
 export type Key = keyof Words;
