@@ -1,4 +1,5 @@
 import pytest
+from builders import entry, family
 
 from design.catalogs.catalog import (
     Entry,
@@ -9,7 +10,6 @@ from design.catalogs.catalog import (
     Marker,
     PluralCategory,
     RawCatalog,
-    RawEntry,
     SourceCatalog,
     gap_names,
     pieces_of,
@@ -109,7 +109,7 @@ def test_language_tag_rejects_anything_else(value):
         ),
     ],
 )
-def test_pieces_of_splits_a_text_into_literals_and_gaps(text, pieces):
+def test_pieces_of_splits_a_text_into_literals_gaps_and_markers(text, pieces):
     assert pieces_of(text) == pieces
 
 
@@ -149,10 +149,6 @@ def test_pieces_of_refuses_a_gap_named_proto_and_says_why():
 def test_pieces_of_refuses_an_unbalanced_brace(text):
     with pytest.raises(ValueError, match="unbalanced brace"):
         pieces_of(text)
-
-
-def entry(context, text, translation="", *, fuzzy=False, plural=False):
-    return RawEntry(context=context, text=text, translation=translation, fuzzy=fuzzy, plural=plural)
 
 
 def test_read_source_turns_clean_entries_into_a_catalog_in_file_order():
@@ -409,11 +405,6 @@ def test_read_translation_says_so_when_the_source_has_no_gaps(source):
     )
 
     assert [finding.problem for finding in findings] == ["has the gaps {name}; the source has no gaps"]
-
-
-def family(key, **texts):
-    """The entries of one plural family as the source catalog writes them, by category."""
-    return tuple(entry(f"{key}.{category}", text) for category, text in texts.items())
 
 
 SEATS = {"one": "{count} Platz", "other": "{count} Plätze"}

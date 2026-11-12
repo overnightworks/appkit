@@ -1,11 +1,11 @@
 import pytest
+from builders import entry, family
 
 from design.catalogs.catalog import (
     Entry,
     Key,
     LanguageTag,
     PluralCategory,
-    RawEntry,
     SourceCatalog,
     read_source,
     read_translation,
@@ -16,15 +16,6 @@ FILE = "frontend/src/lib/catalogs/de.po"
 TRANSLATION_FILE = "frontend/src/lib/catalogs/pl.po"
 GERMAN = frozenset({PluralCategory.ONE, PluralCategory.OTHER})
 POLISH = frozenset({PluralCategory.ONE, PluralCategory.FEW, PluralCategory.MANY, PluralCategory.OTHER})
-
-
-def entry(context, text, translation=""):
-    return RawEntry(context=context, text=text, translation=translation, fuzzy=False, plural=False)
-
-
-def family(key, **texts):
-    """The entries of one plural family as the source catalog writes them, by category."""
-    return tuple(entry(f"{key}.{category}", text) for category, text in texts.items())
 
 
 @pytest.mark.parametrize(
