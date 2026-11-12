@@ -1,4 +1,4 @@
-"""Where an app keeps its catalogs and generated modules: the one optional table of its root pyproject.toml."""
+"""Where a shipped unit keeps its catalogs and generated modules: the optional table of its pyproject.toml."""
 
 import os
 import tomllib
