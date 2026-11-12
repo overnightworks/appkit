@@ -168,7 +168,7 @@ until the translations are written.
 The loader names the languages, which always equal the catalog files, and
 loads the words of one language as its own chunk through dynamic imports. Every
 specifier between the generated modules ends in `.js`, as standard ESM needs, so
-Node loads the modules as they are; a bundler, Vitest, Playwright and TypeScript with
+their compiled JavaScript loads under plain Node without a rewrite; a bundler, Vitest, Playwright and TypeScript with
 `moduleResolution: bundler` map the ending to the `.ts` file. `loadWords` is called only with a member of
 `languages`: an unknown language is a type error, and at run time the promise
 rejects. The page reads `<html lang>` once, when it starts:
