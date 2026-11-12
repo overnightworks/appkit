@@ -123,6 +123,14 @@ msgctxt "agent.tryAgain"
 msgid "Das hat nicht geklappt. Versuch es noch einmal."
 msgstr "That did not work. Please try again."
 
+msgctxt "hearing.agentMayHearMe"
+msgid "Agent darf mich hören"
+msgstr "Agent may hear me"
+
+msgctxt "hearing.iWantToHearAgent"
+msgid "Ich will den Agenten hören"
+msgstr "I want to hear the agent"
+
 msgctxt "legalLinks.name"
 msgid "Rechtliches"
 msgstr "Legal"
