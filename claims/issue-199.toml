@@ -1,8 +1,0 @@
-claim_id = "ffed6b8826114ab192e9d283cddc721e"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "a8fe85e5b75424e7dfe7dd24e06b3bd61ceafa17"
-branch = "claude/issue-199-marked-component"
-scope = ["README.md", "docs/ARCHITECTURE.md", "docs/languages.md", "docs/stylesheet.md", "package.json", "pyproject.toml", "src/design/catalogs/catalog.py", "src/lib", "tests/catalogs", "tests/e2e", "tests/test_npm_package.py", "uv.lock"]
-opened_commit = "419dc3a46007d18d377240e9891314727ed0fc64"
-whole_reason = "One new public component with its type contract, the release's version and the documents and finding wordings routed to this slice."
