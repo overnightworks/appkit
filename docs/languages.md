@@ -103,7 +103,8 @@ flowchart LR
   surface, that surface gets its own key. The kit's words never enter an app catalog.
   Renaming a key changes every catalog. Rejected: flat keys, which collide at a thousand texts. A value
   is a whole sentence, never assembled from fragments: where it varies, it names its gaps
-  (`{name}`), and the typed module types each gap. An entry of a plural family adds a dot and
+  (`{name}`), and the typed module types each gap; a part the page sets apart is marked inside
+  the sentence (LANG-25). An entry of a plural family adds a dot and
   its CLDR plural category (`table.seats.one`); a family's key is its entries' `msgctxt`
   without the category, and a plain key equal to a family's key fails the check.
 - **LANG-10** A language is whole or absent. A key missing from a catalog fails the check;
@@ -248,6 +249,50 @@ flowchart LR
 - **LANG-24** The rule for new text: no new literal sentence in markup, no sentence from the
   server. Literal strings in script (toasts, confirm dialogs) are bound by it too, but no
   machine catches them; the scheduled audit finds them.
+- **LANG-25** A sentence with a part the page sets apart (emphasis, code, a link) stays one
+  text and marks that part as `{#name}…{/name}`, the markup placeholder of Unicode
+  MessageFormat 2, only the open and close pair. The name is a plain identifier the app
+  chooses (`strong`, `code`, `terms`); the page alone decides the element, its attributes and
+  any link target, and the text never carries them. A marked part holds literal text and gaps,
+  is not empty and holds no other marked part. A translation keeps the source's markers, each
+  name as often as the source, and may move them and the gaps anywhere in its sentence; every
+  entry of a plural family carries the same markers. In the TypeScript module a text with
+  markers returns a list of parts, each a string or `{ marker, text }` with its gaps filled,
+  which the page renders as text, never as HTML. In the Python module `text()` returns the
+  sentence without its markers, as MessageFormat 2 formats markup to a string by default. A
+  page without script reads no marked text while the Python module returns sentences without
+  their markers; parts in the Python module wait for such a page. Markup the page derives from
+  data, such as a highlighted search match, is no catalog text. Rejected: XML-like tags
+  (`<b>…</b>`, `<0>…</0>`), which make `<` syntax in every text; HTML in the text, which needs
+  a sanitiser and `{@html}`; a gap whose value is a rendered element, which cannot mark words
+  that are themselves translated; a sentence split around its marked part (LANG-9).
+
+  ```po
+  msgctxt "retention.archiveConfirm"
+  msgid "Archive {#strong}{count} takes{/strong} and delete {#strong}{deleted}{/strong}. {#help}Learn more{/help}"
+  ```
+
+  The page chooses the element of each marker with an each block and text interpolation only:
+
+  ```svelte
+  <script lang="ts">
+    import { words } from "./de";
+
+    const parts = words["retention.archiveConfirm"]({ count: 3, deleted: "2" });
+  </script>
+
+  <p>
+    {#each parts as part}
+      {#if typeof part === "string"}
+        {part}
+      {:else if part.marker === "help"}
+        <a href="/help">{part.text}</a>
+      {:else}
+        <strong>{part.text}</strong>
+      {/if}
+    {/each}
+  </p>
+  ```
 
 ## Tests and checks
 
@@ -264,6 +309,8 @@ One question governs this section: what does a further language add that a test 
     (LANG-22);
   - each translation's `msgid` equals the source's text for its key (LANG-22);
   - each value's named gaps equal the source's, and no key is missing (LANG-10);
+  - each value's markers are well formed and unnested and equal the source's, each name as
+    often (LANG-25);
   - the generated modules and the loader are current.
 
   The type check holds the rest of the key contract: server tokens are typed against the
@@ -276,7 +323,8 @@ One question governs this section: what does a further language add that a test 
 - **The render pass.** An automated test of the app that runs in CI on every change, per
   further language, at the mobile and the desktop width. It asserts that no catalog key
   appears as text, `<html lang>` equals the language, and no text element's scroll width
-  exceeds its client width unless it scrolls by design. quality requires its presence. A
+  exceeds its client width unless it scrolls by design, and no text shows `[object Object]`
+  or a function's source. quality requires its presence. A
   delegated agent drives the surfaces once when a language is added.
 - **Tested once, outside the app:** the resolver (LANG-16), the generator and the freshness
   check. An app tests only that it calls the resolver and writes `<html lang>`.

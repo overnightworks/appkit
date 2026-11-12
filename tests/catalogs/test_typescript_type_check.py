@@ -1,4 +1,7 @@
+import json
+import re
 import subprocess
+import textwrap
 from pathlib import Path
 
 import pytest
@@ -427,3 +430,65 @@ def test_a_target_module_whose_markers_differ_from_the_sources_fails_tsc_strict(
     assert result.returncode != 0
     assert "pl.ts" in result.stdout
     assert named in result.stdout
+
+
+def documented_block(language: str) -> str:
+    """The one fenced block of `language` in the languages standard, without its indentation."""
+    document = (REPOSITORY / "docs" / "languages.md").read_text(encoding="utf-8")
+    (block,) = re.findall(rf"^ *```{language}\n(.*?)^ *```$", document, flags=re.DOTALL | re.MULTILINE)
+    return textwrap.dedent(block)
+
+
+def svelte_check(directory: Path, page: str) -> subprocess.CompletedProcess[str]:
+    """Type checks the documented marked text's module and the page against each other."""
+    text = re.search(r'^msgid "(.*)"$', documented_block("po"), flags=re.MULTILINE)
+    assert text
+    catalog = SourceCatalog(language=LanguageTag("de"), entries=(Entry(Key("retention.archiveConfirm"), text[1]),))
+    (directory / "de.ts").write_text(render(catalog), encoding="utf-8")
+    (directory / "Page.svelte").write_text(page, encoding="utf-8")
+    (directory / "tsconfig.json").write_text(
+        json.dumps(
+            {
+                "compilerOptions": {
+                    "strict": True,
+                    "target": "ES2022",
+                    "module": "ESNext",
+                    "moduleResolution": "bundler",
+                    "noEmit": True,
+                    "skipLibCheck": True,
+                    "verbatimModuleSyntax": True,
+                },
+                "include": ["*.ts", "*.svelte"],
+            }
+        ),
+        encoding="utf-8",
+    )
+    return subprocess.run(
+        [
+            *("pnpm", "exec", "svelte-check", "--workspace", str(directory)),
+            *("--tsconfig", str(directory / "tsconfig.json"), "--threshold", "error"),
+        ],
+        cwd=REPOSITORY,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def test_the_page_of_the_languages_standard_renders_the_parts_of_a_marked_text_under_svelte_check(tmp_path):
+    page = documented_block("svelte")
+
+    result = svelte_check(tmp_path, page)
+
+    assert result.returncode == 0, result.stdout
+    assert "{@html" not in page
+
+
+def test_a_page_choosing_the_element_of_a_marker_the_text_lacks_fails_svelte_check(tmp_path):
+    page = documented_block("svelte").replace('"help"', '"terms"')
+
+    result = svelte_check(tmp_path, page)
+
+    assert result.returncode != 0
+    assert "Page.svelte" in result.stdout
+    assert "no overlap" in result.stdout
