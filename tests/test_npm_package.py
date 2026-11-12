@@ -65,6 +65,8 @@ COMPONENT_FILES = {
     "svelte-dist/AgentControl.svelte.d.ts",
     "svelte-dist/AiMark.svelte",
     "svelte-dist/AiMark.svelte.d.ts",
+    "svelte-dist/EarMark.svelte",
+    "svelte-dist/EarMark.svelte.d.ts",
     "svelte-dist/HearingSwitch.svelte",
     "svelte-dist/HearingSwitch.svelte.d.ts",
     "svelte-dist/LegalLinks.svelte",
@@ -364,6 +366,7 @@ COMPONENT_PROPS = {
     "SignInPage": "{ appName: 'A', state: { page: 'signed-out', signInHref: '/in' }, legalLinks: []",
     "AgentControl": "{ rows: [], onCall: (key: string) => void key",
     "HearingSwitch": "{ kind: 'hear', on: true, onChange: (on: boolean) => void on",
+    "EarMark": "{ agent: 'Mozart'",
     "LegalLinks": "{ links: []",
 }
 
@@ -385,7 +388,9 @@ def test_a_consumer_passes_the_kit_words_to_each_component_and_fails_its_type_ch
     )
 
 
-@pytest.mark.parametrize("removed", ["AccountMenuWords", "SignInPageWords", "AgentControlWords", "HearingSwitchWords"])
+@pytest.mark.parametrize(
+    "removed", ["AccountMenuWords", "SignInPageWords", "AgentControlWords", "HearingSwitchWords", "EarMarkWords"]
+)
 def test_the_package_root_exports_no_per_component_words_type(consumer, removed):
     consumer.check(
         f"// @ts-expect-error the package exports no such type\nimport type {{ {removed} }} from '{consumer.name}';\n"
@@ -494,6 +499,20 @@ def test_a_consumer_imports_the_hearing_switch_with_its_types_from_the_package_r
         "// @ts-expect-error a press reports the new state as a boolean\n"
         "export const wrongReport: HearingSwitchProps = "
         "{ ...common, kind: 'hear', onChange: (on: string) => void on };\n"
+    )
+
+
+def test_a_consumer_imports_the_ear_mark_with_its_types_from_the_package_root(consumer):
+    consumer.check(
+        f"import {{ EarMark, type EarMarkProps, type KitWords }} from '{consumer.name}';\n"
+        "export const component: typeof EarMark = EarMark;\n"
+        "declare const words: KitWords;\n"
+        "export const own: EarMarkProps = { agent: 'Mozart', words };\n"
+        "export const other: EarMarkProps = { agent: 'Mozart', person: 'Anna', words };\n"
+        "// @ts-expect-error the agent's name is required\n"
+        "export const nameless: EarMarkProps = { words };\n"
+        "// @ts-expect-error the person's name is a string or absent\n"
+        "export const wrongPerson: EarMarkProps = { agent: 'Mozart', person: 1, words };\n"
     )
 
 

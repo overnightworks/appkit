@@ -35,6 +35,8 @@ export type Words = {
     readonly "agent.tryAgain": string;
     readonly "hearing.agentMayHearMe": string;
     readonly "hearing.iWantToHearAgent": string;
+    readonly "hearing.agentHearsYou": (gaps: { readonly agent: string }) => string;
+    readonly "hearing.agentHearsPerson": (gaps: { readonly agent: string; readonly name: string }) => string;
     readonly "legalLinks.name": string;
 };
 // prettier-ignore
@@ -71,6 +73,8 @@ export const words: Words = {
     "agent.tryAgain": "Das hat nicht geklappt. Versuch es noch einmal.",
     "hearing.agentMayHearMe": "Agent darf mich hören",
     "hearing.iWantToHearAgent": "Ich will den Agenten hören",
+    "hearing.agentHearsYou": (gaps: { readonly agent: string }) => gaps.agent + " hört dich",
+    "hearing.agentHearsPerson": (gaps: { readonly agent: string; readonly name: string }) => gaps.agent + " hört " + gaps.name,
     "legalLinks.name": "Rechtliches",
 };
 export type Key = keyof Words;

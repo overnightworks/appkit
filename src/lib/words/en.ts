@@ -35,6 +35,8 @@ const translated = {
     "agent.tryAgain": "That did not work. Please try again.",
     "hearing.agentMayHearMe": "Agent may hear me",
     "hearing.iWantToHearAgent": "I want to hear the agent",
+    "hearing.agentHearsYou": (gaps: { readonly agent: string }) => gaps.agent + " hears you",
+    "hearing.agentHearsPerson": (gaps: { readonly agent: string; readonly name: string }) => gaps.agent + " hears " + gaps.name,
     "legalLinks.name": "Legal",
 } satisfies Words;
 // A translation that leaves out a gap of its source fails here.

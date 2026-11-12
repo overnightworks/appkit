@@ -39,6 +39,8 @@ type Key = Literal[
     'agent.tryAgain',
     'hearing.agentMayHearMe',
     'hearing.iWantToHearAgent',
+    'hearing.agentHearsYou',
+    'hearing.agentHearsPerson',
     'legalLinks.name',
 ]
 type Language = Literal[
@@ -93,6 +95,8 @@ WORDS: Mapping[Language, Mapping[Key, str | Mapping[Category, str]]] = {
         'agent.tryAgain': 'Das hat nicht geklappt. Versuch es noch einmal.',
         'hearing.agentMayHearMe': 'Agent darf mich hören',
         'hearing.iWantToHearAgent': 'Ich will den Agenten hören',
+        'hearing.agentHearsYou': '{agent} hört dich',
+        'hearing.agentHearsPerson': '{agent} hört {name}',
         'legalLinks.name': 'Rechtliches',
     },
     'en': {
@@ -128,6 +132,8 @@ WORDS: Mapping[Language, Mapping[Key, str | Mapping[Category, str]]] = {
         'agent.tryAgain': 'That did not work. Please try again.',
         'hearing.agentMayHearMe': 'Agent may hear me',
         'hearing.iWantToHearAgent': 'I want to hear the agent',
+        'hearing.agentHearsYou': '{agent} hears you',
+        'hearing.agentHearsPerson': '{agent} hears {name}',
         'legalLinks.name': 'Legal',
     },
 }

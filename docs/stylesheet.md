@@ -42,7 +42,7 @@ Sign-in wording is identical in every app. The kit's catalogs carry these string
 
 ## The components' words
 
-The tarball's `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch` and `LegalLinks` components take their words from the kit's catalogs: the app loads them with `loadKitWords` for the page's language and passes them as the required prop `words`, see the [README](../README.md#the-kits-words); [Languages](languages.md) requires that the kit ships its words per language.
+The tarball's `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `EarMark` and `LegalLinks` components take their words from the kit's catalogs: the app loads them with `loadKitWords` for the page's language and passes them as the required prop `words`, see the [README](../README.md#the-kits-words); [Languages](languages.md) requires that the kit ships its words per language.
 
 `SignInPage` shows the strings above, the failure banner of a login that failed, the sentence of no access, which names the app, the sentence of a sign-in that did not finish, the words of the signing-in state and the words of the window-blocked state. The list above binds the sign-in words in the kit's catalogs; the de strings of the other words are not ruled.
 
@@ -53,6 +53,8 @@ The tarball's `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch` and `
 `AgentControl` shows the three action words, the two accessible-name patterns (which include the agent's name), the empty sentence and the five refusal sentences, one for each of `not-allowed`, `owner-absent`, `place-full`, `agent-unavailable` and `try-again`. The de words are ruled: "Rufen", "Wird gerufen…", "Bitten zu gehen", "Mozart rufen", "Mozart bitten zu gehen", "Gerade ist kein Agent erreichbar." and the refusals "Du darfst diesen Agenten nicht rufen.", "Sein Besitzer ist nicht hier.", "Hier ist kein Platz für einen weiteren Agenten.", "Der Agent ist gerade nicht erreichbar." and "Das hat nicht geklappt. Versuch es noch einmal." A `here` row draws its ask-to-leave button only when the app passes `onSendAway`; without it the row shows the AI mark and the name.
 
 `HearingSwitch` shows one label, "Agent may hear me" for `hear` and "I want to hear the agent" for `listen`; the label is the chip's accessible name. The de words are ruled: "Agent darf mich hören" and "Ich will den Agenten hören". The en words are not ruled.
+
+`EarMark` shows the agent's name in a pill and names the mark with two accessible-name patterns, which the title repeats: "{agent} hört dich" on the person's own tile and "{agent} hört {name}" on another person's. The de words and the en words, "{agent} hears you" and "{agent} hears {name}", are ruled.
 
 The tarball's `AiMark` component takes no words: its text is "AI" in every language, so a caller passes nothing. Its size is fixed, not relative to the place it stands in.
 
@@ -95,7 +97,7 @@ hal's [docs/keycloak.md](https://github.com/overnightworks/hal/blob/main/docs/ke
 
 ## What it leaves to each product
 
-- **Wording.** The kit's catalogs carry the components' words and the app's catalogs every other string; the stylesheet has none. Only the sign-in, AgentControl and HearingSwitch wording lists above are ruled here.
+- **Wording.** The kit's catalogs carry the components' words and the app's catalogs every other string; the stylesheet has none. Only the sign-in, AgentControl, HearingSwitch and EarMark wording lists above are ruled here.
 - **Page layout and markup.** App bar, page structure, forms and any markup outside the components stay in the product, as do the legal row's spacing and placement around it. A product keeps its own selectors off the legal row: a rule that reaches the row or its links through an ancestor (`.top nav a`, say) can change the kit's look.
-- **The app colour.** `--primary`, `--accent` and `--on-accent`; `design.css` defines none of them. `HearingSwitch` draws its on state in `--accent`.
+- **The app colour.** `--primary`, `--accent` and `--on-accent`; `design.css` defines none of them. `HearingSwitch` draws its on state and `EarMark` its ring in `--accent`.
 - **Meaning that differs.** State words (reachable vs ready vs active) and which state a domain shows.
