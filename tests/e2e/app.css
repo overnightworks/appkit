@@ -23,3 +23,16 @@ h1 {
 	padding: 8px;
 	background: #1b2a33;
 }
+
+/* A stand-in for the tile the ear marks sit on; the app stacks the marks and places them. */
+.ear-stage {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 4px;
+	box-sizing: border-box;
+	width: 200px;
+	margin: 8px;
+	padding: 8px;
+	background: #1b2a33;
+}

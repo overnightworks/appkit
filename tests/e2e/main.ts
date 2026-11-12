@@ -4,6 +4,7 @@ import { SvelteMap } from 'svelte/reactivity';
 import {
 	AccountMenu,
 	AgentControl,
+	EarMark,
 	HearingSwitch,
 	LegalLinks,
 	SignInPage,
@@ -124,6 +125,26 @@ function mountHearingSwitches(variant: string, words: KitWords): void {
 	}
 }
 
+/**
+ * Ear marks stacked in a column on a stand-in for a tile, as an app places them: `one` shows a single mark
+ * on one's own tile, `two` stacks two agents' marks on another person's tile, `long` shows an agent whose
+ * name does not fit.
+ */
+function mountEarMarks(variant: string, words: KitWords): void {
+	const stage = document.createElement('div');
+	stage.className = 'ear-stage';
+	document.body.append(stage);
+	const agents =
+		variant === 'long'
+			? ['Leonardo da Vinci, the long-named painter and inventor']
+			: variant === 'two'
+				? ['Mozart', 'Bach']
+				: ['Mozart'];
+	for (const agent of agents) {
+		mount(EarMark, { target: stage, props: { agent, person: variant === 'two' ? 'Anna' : undefined, words } });
+	}
+}
+
 /** The languages this page offers; the type check fails when the kit lacks one. */
 const pageLanguages = ['de', 'en'] as const satisfies readonly KitLanguage[];
 
@@ -154,6 +175,8 @@ if (query.has('words')) {
 	});
 } else if (query.has('marked')) {
 	mount(MarkedSentence, { target: document.body });
+} else if (query.has('ear')) {
+	mountEarMarks(query.get('ear') ?? '', await loadKitWords(pageLanguage));
 } else if (query.has('hearing')) {
 	mountHearingSwitches(query.get('hearing') ?? '', await loadKitWords(pageLanguage));
 } else if (query.has('agents')) {
