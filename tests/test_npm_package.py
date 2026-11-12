@@ -304,27 +304,29 @@ def test_a_consumer_gives_the_account_menu_one_log_out_form_and_a_typed_theme_ch
 
 
 COMPONENT_PROPS = {
-    "AccountMenuProps": (
+    "AccountMenu": (
         "{ name: 'F', accountHref: '/a', onAccountOpen: () => {}, appRows: [], legalLinks: [], logOutAction: '/l'"
     ),
-    "SignInPageProps": "{ appName: 'A', state: { page: 'signed-out', signInHref: '/in' }, legalLinks: []",
-    "AgentControlProps": "{ rows: [], onCall: (key: string) => void key",
-    "LegalLinksProps": "{ links: []",
+    "SignInPage": "{ appName: 'A', state: { page: 'signed-out', signInHref: '/in' }, legalLinks: []",
+    "AgentControl": "{ rows: [], onCall: (key: string) => void key",
+    "LegalLinks": "{ links: []",
 }
 
 
-@pytest.mark.parametrize("props_type", COMPONENT_PROPS)
-def test_a_consumer_passes_the_kit_words_to_each_component_and_fails_its_type_check_without_them(consumer, props_type):
-    props = COMPONENT_PROPS[props_type]
+@pytest.mark.parametrize("component", COMPONENT_PROPS)
+def test_a_consumer_passes_the_kit_words_to_each_component_and_fails_its_type_check_without_them(consumer, component):
+    props = COMPONENT_PROPS[component]
     consumer.check(
-        f"import type {{ {props_type}, KitWords }} from '{consumer.name}';\n"
+        f"import {{ {component}, type KitWords }} from '{consumer.name}';\n"
+        "import type { ComponentProps } from 'svelte';\n"
+        f"type Props = ComponentProps<typeof {component}>;\n"
         "declare const words: KitWords;\n"
-        f"export const worded: {props_type} = {props}, words }};\n"
-        f"export const overridden: {props_type} = {props}, words: {{ ...words, 'account.logOut': 'Exit' }} }};\n"
+        f"export const worded: Props = {props}, words }};\n"
+        f"export const overridden: Props = {props}, words: {{ ...words, 'account.logOut': 'Exit' }} }};\n"
         "// @ts-expect-error the words are required\n"
-        f"export const unworded: {props_type} = {props} }};\n"
+        f"export const unworded: Props = {props} }};\n"
         "// @ts-expect-error the words are not optional\n"
-        f"export const undefinedWords: {props_type} = {props}, words: undefined }};\n"
+        f"export const undefinedWords: Props = {props}, words: undefined }};\n"
     )
 
 
