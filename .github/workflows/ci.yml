@@ -64,6 +64,7 @@ jobs:
       # loadfile keeps test_npm_package.py on one worker: its pnpm pack runs prepack, which rewrites the shared svelte-dist/.
       - name: Run the package tests and build the wheel
         run: |
+          uv run --frozen --extra catalogs design-catalogs --check
           uv run --frozen ruff check .
           uv run --frozen ruff format --check .
           uv run --frozen --extra catalogs pytest -q -n auto --dist loadfile --cov=design --cov-branch --cov-fail-under=100 --cov-report=term --cov-report=xml:coverage/python.xml tests

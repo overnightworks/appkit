@@ -196,11 +196,13 @@ flowchart LR
 
 ### Proposed: kit, content, source and freshness
 
-- **LANG-19** The kit's components take the page's language and bring their words for it.
-  A component learns the page's language from `<html lang>` unless the app passes it. The kit
-  exposes the list of languages it ships, so an app's check can compare; the details are the
-  kit's. An app's check fails when the kit lacks a language the app offers. The kit's own
-  conversion is a separate epic that follows this document.
+- **LANG-19** The kit ships its components' words per language as the generator's modules and
+  loader. The app loads them with `loadKitWords` for the page's language, as it loads its own,
+  and passes them to every kit component; a component reads no language itself. The app passes
+  its generated `Language`, never a literal or a cast, and its words module carries the line
+  `languages satisfies readonly KitLanguage[]`, so the app's type check fails when it offers a
+  language the kit lacks. The components take these words in the release after the one that
+  ships them.
 - **LANG-20** Content never follows the interface language: lyrics, slides, chat messages
   and names. Where an app needs content's own language (for example to mark a span with
   `lang`), the content carries a tag of its own. An agent's reply follows the message that
@@ -227,7 +229,8 @@ flowchart LR
   It keeps the header, the order of the entries and the comments and flags of the entries it keeps,
   writes nothing for a catalog that already follows its source (the README names what Babel's
   writer normalises in one it rewrites), and writes catalogs only: the modules follow from
-  `design-catalogs` once the translations are written. Fuzzy means "stale,
+  `design-catalogs` once the translations are written, so a change goes in the order sync,
+  translate, generate, check. Fuzzy means "stale,
   to be re-translated", not "awaits a human" (LANG-6). The agent that changes a source text
   runs the sync, writes the translations and clears the marks in the same change; nothing
   needs a network, key or provider, and the committed catalog is the build's input. The
@@ -258,11 +261,11 @@ One question governs this section: what does a further language add that a test 
     (LANG-22);
   - each translation's `msgid` equals the source's text for its key (LANG-22);
   - each value's named gaps equal the source's, and no key is missing (LANG-10);
-  - the generated modules and the loader are current;
-  - the kit ships every language the app offers (LANG-19).
+  - the generated modules and the loader are current.
 
   The type check holds the rest of the key contract: server tokens are typed against the
-  module's key type (LANG-14).
+  module's key type (LANG-14), and the kit ships every language the app offers, by the line
+  `languages satisfies readonly KitLanguage[]` (LANG-19).
 - **quality's rule** (a) requires the `--check` in the app's CI and the render pass below, and
   (b) owns the scan for literal text in markup, in a text or in a human-readable attribute
   (presentator's `scripts/check_catalog_purity.py` is the reference), with a baseline that

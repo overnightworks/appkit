@@ -8,10 +8,12 @@ and five Svelte components), for the engineers of those products.
 Distribution is a GitHub release. It carries:
 
 - the wheel `overnightworks_design-<version>-py3-none-any.whl` (import `design`):
-  `design/static/design.css` and `design/static/fonts/`, and the command
-  `design-catalogs` ([Catalogs](#catalogs));
+  `design/static/design.css` and `design/static/fonts/`, the command
+  `design-catalogs` ([Catalogs](#catalogs)) and the kit's Python words
+  ([The kit's words](#the-kits-words));
 - `overnightworks-design-<version>.tgz`: the same stylesheet and fonts, plus the
-  components `SignInPage`, `AccountMenu`, `AgentControl`, `LegalLinks` and `AiMark`. It is the
+  components `SignInPage`, `AccountMenu`, `AgentControl`, `LegalLinks` and `AiMark` and the
+  kit's words per language ([The kit's words](#the-kits-words)). It is the
   only npm distribution, and `svelte` ^5.20 is its only, peer, dependency;
 - `design-<version>-tokens.txt`: the sorted custom-property names `design.css`
   defines.
@@ -120,10 +122,10 @@ dev = ["overnightworks-design[catalogs] @ git+https://github.com/overnightworks/
   (`# | msgid "..."`), obsolete (`#~`) entries lose their flags and extracted
   comments, and the file ends in a blank line. It needs no network.
 
-A change to the source texts goes in this order: change the source catalog, run
-`design-catalogs --sync`, write the translations and clear the fuzzy marks, run
-`design-catalogs` for the modules, and `design-catalogs --check` in the app's
-lint and CI. `--sync` leaves empty and fuzzy entries behind, so `--check` fails
+A change to the source texts goes in this order: sync, translate, generate, check.
+Change the source catalog, run `design-catalogs --sync`, write the translations
+and clear the fuzzy marks, run `design-catalogs` for the modules, and
+`design-catalogs --check` in the app's lint and CI. `--sync` leaves empty and fuzzy entries behind, so `--check` fails
 until the translations are written.
 
 The loader names the languages, which always equal the catalog files, and
@@ -190,6 +192,46 @@ frontend/src/lib/words/
 
 The shape of the catalogs and the rules `--check` holds are in
 [Languages](docs/languages.md).
+
+## The kit's words
+
+The words of `SignInPage`, `AccountMenu` and `AgentControl` come from the kit's own
+catalogs, which the kit builds with `design-catalogs` like an app. The tarball
+ships them per language, each as its own chunk, and the package root exports:
+
+- `loadKitWords(language)`: the words of one language, as a promise. The kit reads
+  no language itself; the caller passes it.
+- `KitLanguage`: the languages the kit ships.
+- `KitWords`: the shape of one language's words.
+
+The wheel's `design.words` is the same words in Python, for an app's tests and
+not for its server; it needs no Babel and no extra.
+
+An app loads the kit's words for the page's language as it loads its own. A
+prerendering `load` serves each language once; the app's words module checks that
+the kit ships every language the app offers:
+
+```ts
+// src/lib/words/languages.ts
+import type { KitLanguage } from "overnightworks-design";
+import { languages } from "./index";
+
+languages satisfies readonly KitLanguage[]; // a language the kit lacks fails the type check
+```
+
+```ts
+// src/routes/[language]/+layout.ts
+import { loadKitWords } from "overnightworks-design";
+import { languages, loadWords } from "$lib/words";
+
+export const prerender = true;
+export const entries = () => languages.map((language) => ({ language }));
+
+export const load = async ({ params }) => {
+  const language = languages.find((candidate) => candidate === params.language) ?? languages[0];
+  return { words: await loadWords(language), kitWords: await loadKitWords(language) };
+};
+```
 
 ## Documentation
 
