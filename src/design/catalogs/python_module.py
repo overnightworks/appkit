@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from design.catalogs.catalog import Entry, Family, PluralCategory, words_of
+from design.catalogs.catalog import Entry, Family, PluralCategory, without_markers, words_of
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
@@ -54,8 +54,10 @@ def _lines(items: Iterable[str], indent: int = 1) -> str:
 
 def _word(word: Entry | Family) -> str:
     if isinstance(word, Entry):
-        return f"{word.key.value!r}: {word.text!r}"
-    sentences = _lines((f"{category.value!r}: {text!r}" for category, text in word.texts.items()), indent=3)
+        return f"{word.key.value!r}: {without_markers(word.text)!r}"
+    sentences = _lines(
+        (f"{category.value!r}: {without_markers(text)!r}" for category, text in word.texts.items()), indent=3
+    )
     return f"{word.key.value!r}: {{\n{sentences}        }}"
 
 
@@ -82,7 +84,8 @@ def _plural_category(catalogs: Sequence[Catalog], rule_of: Callable[[LanguageTag
 def render(
     source: SourceCatalog, translations: Sequence[TranslationCatalog], rule_of: Callable[[LanguageTag], PluralRule]
 ) -> str:
-    """The module of the source and its translations, in this order, every text `repr`-quoted.
+    """The module of the source and its translations, in this order, every text `repr`-quoted and
+    without its markers.
 
     A plural family is one key; `rule_of` gives the plural rule of a language, which the module holds as code.
     """

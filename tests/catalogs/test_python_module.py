@@ -386,6 +386,35 @@ def test_python_and_typescript_modules_of_the_same_catalogs_choose_and_fill_the_
     }
 
 
+def test_text_returns_a_marked_sentence_without_its_markers(module_text, load):
+    text = "Archive {#strong}{count} takes{/strong} and permanently delete {#strong}{deleted}{/strong}. Not undone."
+    module = load(module_text(("de", {"retention_archiveConfirm": text, "home_note": "Nur {#strong}wichtig{/strong}"})))
+
+    assert module.text("de", "home.note") == "Nur wichtig"
+    assert module.text("de", "retention.archiveConfirm", count=3, deleted="2") == (
+        "Archive 3 takes and permanently delete 2. Not undone."
+    )
+
+
+def test_text_returns_the_marked_sentence_of_a_family_without_its_markers(module_text, load):
+    module = load(
+        module_text(
+            (
+                "de",
+                {"table_seats_one": "{#b}{count}{/b} Platz {{x}}", "table_seats_other": "{#b}{count}{/b} Plätze {{x}}"},
+            )
+        )
+    )
+
+    assert [module.text("de", "table.seats", count=count) for count in (1, 2)] == ["1 Platz {x}", "2 Plätze {x}"]
+
+
+def test_the_words_of_a_marked_text_hold_the_sentence_without_its_markers(module_text, load):
+    module = load(module_text(("de", {"home_note": "Nur {#strong}wichtig{/strong}"})))
+
+    assert module.WORDS["de"] == {"home.note": "Nur wichtig"}
+
+
 @pytest.mark.parametrize(
     ("arguments", "sentence"),
     [

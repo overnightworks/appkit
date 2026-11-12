@@ -3,7 +3,17 @@
 import json
 from typing import TYPE_CHECKING
 
-from design.catalogs.catalog import COUNT, Entry, Family, PluralCategory, gap_names, pieces_of, words_of
+from design.catalogs.catalog import (
+    COUNT,
+    Entry,
+    Family,
+    Marker,
+    PluralCategory,
+    gap_names,
+    markers_of,
+    pieces_of,
+    words_of,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -58,30 +68,79 @@ def family_parameters(family: Family) -> str:
     return f"{COUNT}: number, {gap_parameter(further)}" if further else f"{COUNT}: number"
 
 
+def parts_type(markers: Iterable[str]) -> str:
+    """The list of parts of a marked text: a string or a marked part of one of the text's marker names."""
+    names = " | ".join(map(quoted, markers))
+    return f"readonly (string | {{ readonly marker: {names}; readonly text: string }})[]"
+
+
+def word_markers(word: Entry | Family) -> tuple[str, ...]:
+    return word.markers if isinstance(word, Family) else tuple(sorted(set(markers_of(pieces_of(word.text)))))
+
+
+def parts_expression(pieces: tuple[Piece, ...], *, family: bool = False) -> str:
+    """The list of a marked text's parts: its plain runs as strings, each marked part as `{ marker, text }`."""
+    runs: list[tuple[str | None, tuple[Piece, ...]]] = []
+    name: str | None = None
+    run: list[Piece] = []
+    for piece in pieces:
+        if not isinstance(piece, Marker):
+            run.append(piece)
+            continue
+        if run:
+            runs.append((name, tuple(run)))
+        run = []
+        name = None if piece.closing else piece.name
+    if run:
+        runs.append((name, tuple(run)))
+    parts = (
+        expression(found, family=family)
+        if marker is None
+        else f"{{ marker: {quoted(marker)}, text: {expression(found, family=family)} }}"
+        for marker, found in runs
+    )
+    return f"[{', '.join(parts)}]"
+
+
 def word_type(word: Entry | Family) -> str:
+    markers = word_markers(word)
+    result = parts_type(markers) if markers else "string"
     if isinstance(word, Family):
-        return f"({family_parameters(word)}) => string"
+        return f"({family_parameters(word)}) => {result}"
     names = sorted(gap_names(pieces_of(word.text)))
-    return f"({gap_parameter(names)}) => string" if names else "string"
+    return f"({gap_parameter(names)}) => {result}" if names else result
 
 
 def family_value(family: Family) -> str:
     """The function choosing the sentence of the category `Intl.PluralRules` gives the count.
 
     Every category has a row, so a category the family lacks falls back to its `other` sentence without a branch.
+    A marked family returns the parts of the row, which `as const` keeps from widening the marker names.
     """
     texts = family.texts
+    marked = bool(family.markers)
+    render_row = parts_expression if marked else expression
     rows = "".join(
-        f"        {category}: {expression(pieces_of(texts.get(category, texts[PluralCategory.OTHER])), family=True)},\n"
+        f"        {category}: {render_row(pieces_of(texts.get(category, texts[PluralCategory.OTHER])), family=True)},\n"
         for category in PluralCategory
     )
-    return f"({family_parameters(family)}) => ({{\n{rows}    }})[{PLURAL_RULES}.select({COUNT})]"
+    result = f": {parts_type(family.markers)}" if marked else ""
+    return (
+        f"({family_parameters(family)}){result} => ({{\n{rows}    }}{' as const' if marked else ''})"
+        f"[{PLURAL_RULES}.select({COUNT})]"
+    )
 
 
 def word_value(word: Entry | Family) -> str:
     if isinstance(word, Family):
         return family_value(word)
     pieces = pieces_of(word.text)
+    markers = word_markers(word)
+    if markers:
+        parts = parts_expression(pieces)
+        if gap_names(pieces):
+            return f"({gap_parameter(sorted(gap_names(pieces)))}): {parts_type(markers)} => {parts}"
+        return f"{parts} as {parts_type(markers)}"
     if gap_names(pieces):
         return f"({gap_parameter(sorted(gap_names(pieces)))}) => {expression(pieces)}"
     return quoted("".join(piece for piece in pieces if isinstance(piece, str)))
@@ -122,8 +181,9 @@ def render(catalog: SourceCatalog) -> str:
 
 
 def words_declaration(words: tuple[Entry | Family, ...]) -> str:
-    """The words typed as `Words`; where a word is a function, also checked for a gap it leaves out."""
-    if any(isinstance(word, Family) or gap_names(pieces_of(word.text)) for word in words):
+    """The words typed as `Words`; where a word is a function or a list of parts, also checked for a gap or a marker
+    it leaves out."""
+    if any(isinstance(word, Family) or gap_names(pieces_of(word.text)) or word_markers(word) for word in words):
         return (
             f"const {TRANSLATED} = {{\n{word_lines(words)}}} satisfies Words;\n"
             f"{GAP_SET_CHECK}\n"

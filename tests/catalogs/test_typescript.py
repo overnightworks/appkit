@@ -413,3 +413,143 @@ def test_the_loader_names_the_languages_and_the_source_language(run_loader):
     probe = "process.stdout.write(JSON.stringify([loader.languages, loader.sourceLanguage]));"
 
     assert run_loader(probe) == [["de", "pl"], "de"]
+
+
+PARTS = 'readonly (string | { readonly marker: "strong"; readonly text: string })[]'
+
+
+def test_render_writes_a_marked_text_without_gaps_as_a_constant_list_of_parts_with_an_explicit_type(source_catalog):
+    module = render(source_catalog(home_note="Nur {#strong}wichtig{/strong} hier", app_name="Skat"))
+
+    assert f'    readonly "home.note": {PARTS};\n' in module
+    assert f'    "home.note": ["Nur ", {{ marker: "strong", text: "wichtig" }}, " hier"] as {PARTS},\n' in module
+    assert '    "app.name": "Skat",\n' in module
+
+
+def test_render_writes_a_marked_text_with_gaps_as_a_function_returning_parts_with_an_explicit_type(source_catalog):
+    module = render(source_catalog(home_confirm="Lösche {#strong}{count} Takes{/strong} von {name}"))
+
+    gaps = "gaps: { readonly count: number; readonly name: string }"
+    assert f'    readonly "home.confirm": ({gaps}) => {PARTS};\n' in module
+    assert (
+        f'    "home.confirm": ({gaps}): {PARTS} =>'
+        ' ["Lösche ", { marker: "strong", text: numberFormat.format(gaps.count) + " Takes" }, " von " + gaps.name],\n'
+    ) in module
+
+
+def test_render_writes_a_marked_family_as_a_function_of_the_count_returning_the_parts_of_its_category(source_catalog):
+    module = render(
+        source_catalog(
+            table_seats_one="{#strong}{count}{/strong} Platz", table_seats_other="{#strong}{count}{/strong} Plätze"
+        )
+    )
+
+    assert f'    readonly "table.seats": (count: number) => {PARTS};\n' in module
+    assert (
+        f'    "table.seats": (count: number): {PARTS} => ({{\n'
+        '        zero: [{ marker: "strong", text: numberFormat.format(count) }, " Plätze"],\n'
+        '        one: [{ marker: "strong", text: numberFormat.format(count) }, " Platz"],\n'
+    ) in module
+    assert "    } as const)[pluralRules.select(count)],\n" in module
+
+
+def test_render_types_the_marker_of_a_text_as_the_union_of_its_marker_names(source_catalog):
+    module = render(source_catalog(home_note="{#code}a{/code} und {#strong}b{/strong} und {#code}c{/code}"))
+
+    union = '"code" | "strong"'
+    assert (
+        f'    readonly "home.note": readonly (string | {{ readonly marker: {union}; readonly text: string }})[];\n'
+        in module
+    )
+
+
+def test_render_translation_gives_a_marked_text_its_own_explicit_type_and_checks_it_in_both_directions():
+    catalog = TranslationCatalog(
+        language=LanguageTag("pl"), entries=(Entry(Key("home.note"), "Tylko {#strong}wazne{/strong}"),)
+    )
+
+    module = render_translation(catalog, LanguageTag("de"))
+
+    assert f'    "home.note": ["Tylko ", {{ marker: "strong", text: "wazne" }}] as {PARTS},\n' in module
+    assert "} satisfies Words;\n" in module
+    assert "({} as Words) satisfies typeof translated;\n" in module
+
+
+def evaluated(evaluate, source_catalog, call, **texts):
+    """What the call (an expression over `words`) returns for a de module of the texts."""
+    probe = f'import {{ words }} from "./de.ts"; process.stdout.write(JSON.stringify({call}));'
+    return evaluate({"de.ts": render(source_catalog(**texts))}, probe)
+
+
+@pytest.mark.parametrize(
+    ("text", "parts"),
+    [
+        pytest.param(
+            "Nur {#strong}wichtig{/strong}", ["Nur ", {"marker": "strong", "text": "wichtig"}], id="at the end"
+        ),
+        pytest.param(
+            "{#strong}Wichtig{/strong} nur", [{"marker": "strong", "text": "Wichtig"}, " nur"], id="at the start"
+        ),
+        pytest.param(
+            "{#a}x{/a}{#b}y{/b}",
+            [{"marker": "a", "text": "x"}, {"marker": "b", "text": "y"}],
+            id="adjacent parts with no empty string between",
+        ),
+        pytest.param(
+            "Use {{braces}} {#a}{{x}}{/a} too",
+            ["Use {braces} ", {"marker": "a", "text": "{x}"}, " too"],
+            id="doubled braces merge into the literal around them",
+        ),
+    ],
+)
+def test_a_marked_text_without_gaps_evaluates_to_its_parts(evaluate, source_catalog, text, parts):
+    assert evaluated(evaluate, source_catalog, 'words["home.note"]', home_note=text) == parts
+
+
+@pytest.mark.parametrize(
+    "literal", ['say "hi"', "back\\slash", "two\nlines", '"; process.exit(1); "', "</script>", "line\u2028separator"]
+)
+def test_a_marked_text_keeps_every_literal_inside_its_string(evaluate, source_catalog, literal):
+    escaped = literal.replace("{", "{{").replace("}", "}}")
+
+    assert evaluated(evaluate, source_catalog, 'words["home.note"]', home_note=f"{escaped} {{#a}}{escaped}{{/a}}") == [
+        f"{literal} ",
+        {"marker": "a", "text": literal},
+    ]
+
+
+def test_a_marked_text_with_gaps_evaluates_to_its_parts_with_the_gaps_filled(evaluate, source_catalog):
+    text = "Archive {#strong}{count} takes{/strong} and delete {#strong}{deleted}{/strong}. {name}"
+    call = 'words["home.note"]({ count: 1234, deleted: "2", name: "Eva" })'
+
+    assert evaluated(evaluate, source_catalog, call, home_note=text) == [
+        "Archive ",
+        {"marker": "strong", "text": "1.234 takes"},
+        " and delete ",
+        {"marker": "strong", "text": "2"},
+        ". Eva",
+    ]
+
+
+def test_a_gap_alone_outside_a_part_is_a_string_part(evaluate, source_catalog):
+    call = 'words["home.note"]({ name: "Eva" })'
+
+    assert evaluated(evaluate, source_catalog, call, home_note="{name}{#a}x{/a}") == [
+        "Eva",
+        {"marker": "a", "text": "x"},
+    ]
+
+
+def test_a_marked_family_evaluates_to_the_parts_of_the_category_of_the_count(evaluate, source_catalog):
+    call = '[1, 2].map((count) => words["table.seats"](count, { name: "Eva" }))'
+
+    assert evaluated(
+        evaluate,
+        source_catalog,
+        call,
+        table_seats_one="{name}: {#strong}{count}{/strong} Platz",
+        table_seats_other="{name}: {#strong}{count}{/strong} Plätze",
+    ) == [
+        ["Eva: ", {"marker": "strong", "text": "1"}, " Platz"],
+        ["Eva: ", {"marker": "strong", "text": "2"}, " Plätze"],
+    ]
