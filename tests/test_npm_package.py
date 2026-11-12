@@ -399,7 +399,9 @@ def test_a_consumer_imports_the_kit_words_loader_and_both_types_from_the_package
 def test_a_consumer_imports_the_kit_words_from_the_words_export_without_allowing_ts_import_endings(consumer):
     consumer.check(
         f"import {{ loadKitWords, type KitLanguage, type KitWords }} from '{consumer.name}/words';\n"
-        "export const loaded: (language: KitLanguage) => Promise<KitWords> = loadKitWords;\n",
+        "export const loaded: (language: KitLanguage) => Promise<KitWords> = loadKitWords;\n"
+        "// @ts-expect-error the kit ships no pl words\n"
+        "export const polish = loadKitWords('pl');\n",
         TSC_WITHOUT_TS_ENDINGS,
     )
 
