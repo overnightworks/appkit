@@ -478,9 +478,10 @@ MARKED_PAGE = """<script lang="ts">
   const note: readonly (string | { readonly marker: "strong" | "link"; readonly text: string })[] = [];
   const snippets = { strong, link, code };
 </script>
-{#snippet strong(text: string)}<strong>{text}</strong>{/snippet}
-{#snippet link(text: string)}<a href="/more">{text}</a>{/snippet}
-{#snippet code(text: string)}<code>{text}</code>{/snippet}
+{#snippet strong({ text }: { text: string })}<strong>{text}</strong>{/snippet}
+{#snippet link({ text }: { text: string })}<a href="/more">{text}</a>{/snippet}
+{#snippet code({ text }: { text: string })}<code>{text}</code>{/snippet}
+{#snippet plain(text: string)}<b>{text}</b>{/snippet}
 %s
 """
 
@@ -509,6 +510,11 @@ def test_a_consumer_page_renders_a_marked_sentence_and_an_unused_snippet_in_a_va
             "<Marked parts={note} marked={{ strong, link, code }} />",
             "'code' does not exist",
             id="a snippet for a marker the sentence lacks",
+        ),
+        pytest.param(
+            "<Marked parts={note} marked={{ strong, link: plain }} />",
+            "is not assignable to type 'string'",
+            id="a snippet taking a string",
         ),
         pytest.param("<Marked marked={{ strong, link }} />", "Property 'parts' is missing", id="no parts"),
     ],

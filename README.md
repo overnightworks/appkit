@@ -96,8 +96,10 @@ action; an app that lets people send agents away passes the handler.
 A sentence with a part the page sets apart, as `design-catalogs` generates it
 ([Catalogs](#catalogs)), is a list of parts. `Marked` renders the list in place, with
 no element and no white space of its own: the app gives one snippet for each marker
-name, which receives the part's text and chooses the element. A missing snippet, and
-a snippet written in place for a name the sentence lacks, is a type error.
+name, which receives the part, `{ text }`, and chooses the element. A missing snippet,
+a snippet written in place for a name the sentence lacks and a snippet that takes the
+text as a string are type errors. A parameter written as a plain name would leave a
+default value no call reaches: a branch an app that measures with istanbul counts.
 
 ```svelte
 <script lang="ts">
@@ -107,8 +109,8 @@ a snippet written in place for a name the sentence lacks, is a type error.
   const parts = words['retention.archiveConfirm']({ count: 3, deleted: '2' });
 </script>
 
-{#snippet strong(text: string)}<strong>{text}</strong>{/snippet}
-{#snippet help(text: string)}<a href="/help">{text}</a>{/snippet}
+{#snippet strong({ text }: { text: string })}<strong>{text}</strong>{/snippet}
+{#snippet help({ text }: { text: string })}<a href="/help">{text}</a>{/snippet}
 
 <p><Marked {parts} marked={{ strong, help }} /></p>
 ```
