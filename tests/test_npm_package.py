@@ -106,9 +106,7 @@ def catalog_languages():
 def kit_words_files():
     """The generated words: the loader and one module with its declaration per catalog."""
     return {
-        f"svelte-dist/words/{stem}{ending}"
-        for stem in ["index", *catalog_languages()]
-        for ending in (".js", ".d.ts")
+        f"svelte-dist/words/{stem}{ending}" for stem in ["index", *catalog_languages()] for ending in (".js", ".d.ts")
     }
 
 

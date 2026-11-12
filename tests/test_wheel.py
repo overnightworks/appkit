@@ -269,7 +269,7 @@ def test_wheel_holds_the_kit_words_module(installed_package):
 
 @pytest.fixture
 def kit_words_probe(installed_package, tmp_path):
-    """Runs a snippet against the wheel's `design.words` alone; -S keeps Babel, and so the extra, out of the import path."""
+    """Runs a snippet against the wheel's `design.words` alone; -S keeps Babel out of the import path."""
     wheel, _ = installed_package
 
     def run(snippet: str) -> subprocess.CompletedProcess[str]:
