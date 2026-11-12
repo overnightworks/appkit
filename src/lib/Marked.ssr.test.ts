@@ -3,7 +3,13 @@ import { describe, expect, it } from 'vitest';
 import Page, { type sentences } from './Marked.test.svelte';
 
 const markup = (parts: (typeof sentences)[number]['parts']) => render(Page, { props: { parts } }).body;
-const withoutAnchors = (body: string) => body.replace(/<!--.*?-->/g, '');
+function withoutAnchors(body: string): string {
+	let rest = body;
+	for (let start = rest.indexOf('<!--'); start !== -1; start = rest.indexOf('<!--')) {
+		rest = rest.slice(0, start) + rest.slice(rest.indexOf('-->', start) + 3);
+	}
+	return rest;
+}
 
 describe('Marked server-rendered', () => {
 	it('writes the parts in order without a wrapper element or a space of its own', () => {
