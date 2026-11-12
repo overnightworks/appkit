@@ -55,8 +55,9 @@ flowchart TB
   and both render `LegalLinks`. `AgentControl` is the panel of rows with which a
   person calls an agent and asks it to leave; each row leads with `AiMark`, the
   "AI" pill before an agent's name, which takes no props. The app owns the
-  trigger and the popover, and the control holds no state of the call. All three take
-  the kit's words as the required prop `words`, which the app loads with
+  trigger and the popover, and the control holds no state of the call. `SignInPage`,
+  `AccountMenu`, `AgentControl` and `LegalLinks` take the kit's words as the
+  required prop `words` (`AiMark` takes none), which the app loads with
   `loadKitWords` for its page's language; no component holds an English default or
   reads a language. Each prop's meaning is a docstring in
   [`src/lib/types.ts`](../src/lib/types.ts).
