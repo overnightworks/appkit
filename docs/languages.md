@@ -273,27 +273,17 @@ flowchart LR
   msgid "Archive {#strong}{count} takes{/strong} and delete {#strong}{deleted}{/strong}. {#help}Learn more{/help}"
   ```
 
-  A Svelte page gives `Marked` the list and one snippet per marker name; the snippet chooses
-  the element and gets the part's text, which it writes as text interpolation only:
+  A Svelte page renders the parts with the kit's `Marked` component, one snippet per marker
+  name ([README](../README.md#marked)). It does what this each block does, with text
+  interpolation only, but writes it on one line so that it adds no white space:
 
   ```svelte
   <script lang="ts">
-    import { Marked } from "overnightworks-design";
     import { words } from "./de";
 
     const parts = words["retention.archiveConfirm"]({ count: 3, deleted: "2" });
   </script>
 
-  {#snippet strong(text: string)}<strong>{text}</strong>{/snippet}
-  {#snippet help(text: string)}<a href="/help">{text}</a>{/snippet}
-
-  <p><Marked {parts} marked={{ strong, help }} /></p>
-  ```
-
-  `Marked` is what a page without it writes by hand, an each block with text interpolation
-  only; it adds no element and no white space between the parts:
-
-  ```svelte
   <p>
     {#each parts as part}
       {#if typeof part === "string"}

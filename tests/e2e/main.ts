@@ -13,6 +13,7 @@ import {
 	type SignInState,
 	type ThemeChoice
 } from 'overnightworks-design';
+import MarkedSentence from './MarkedSentence.svelte';
 
 declare global {
 	interface Window {
@@ -118,6 +119,8 @@ if (query.has('words')) {
 		target: document.getElementById('component')!,
 		props: { links: legalLinks, words }
 	});
+} else if (query.has('marked')) {
+	mount(MarkedSentence, { target: document.body });
 } else if (query.has('agents')) {
 	mountAgentControl(query.get('agents') ?? '', await loadKitWords(pageLanguage));
 } else if (query.has('menu')) {
