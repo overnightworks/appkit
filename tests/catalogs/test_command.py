@@ -47,6 +47,22 @@ def test_main_writes_a_text_with_gaps_as_a_function_in_the_source_module(
     assert evaluate({"de.ts": module_path.read_text(encoding="utf-8")}, probe) == "Hallo Eva, 1.000 Nachrichten"
 
 
+def test_main_writes_a_marked_text_as_a_list_of_parts_in_the_source_module(
+    write_source, catalog_text, block, module_path, evaluate
+):
+    write_source(catalog_text(block("home.note", "Nur {#strong}wichtig{/strong}")))
+    probe = 'import { words } from "./de.ts"; process.stdout.write(JSON.stringify(words["home.note"]));'
+
+    assert main(["--check"]) == 1
+    assert main([]) == 0
+
+    assert evaluate({"de.ts": module_path.read_text(encoding="utf-8")}, probe) == [
+        "Nur ",
+        {"marker": "strong", "text": "wichtig"},
+    ]
+    assert main(["--check"]) == 0
+
+
 def test_main_run_again_gives_the_same_bytes(clean_source, module_path):
     main([])
     first = module_path.read_bytes()
@@ -234,6 +250,18 @@ def test_main_fails_naming_file_and_line_of_a_malformed_catalog_and_writes_nothi
             "pl",
             ["pl.po", "table.seatFree", "{name:>5}"],
             id="malformed gap",
+        ),
+        pytest.param(
+            [("table.seatFree", "Frei", "{#strong}Wolne{/strong}"), ("app.name", "Skat", "Skat")],
+            "pl",
+            ["pl.po", "table.seatFree", "{#strong}", "the source has no markers"],
+            id="markers the source lacks",
+        ),
+        pytest.param(
+            [("table.seatFree", "Frei", "{#strong}Wolne"), ("app.name", "Skat", "Skat")],
+            "pl",
+            ["pl.po", "table.seatFree", "{#strong}", "never closed"],
+            id="malformed marker",
         ),
         pytest.param(
             [("table.seatFree", "Frei", "Wolne"), ("app.name", "Skat", "Skat")],

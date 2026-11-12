@@ -135,7 +135,8 @@ are quality's to name.
 **Trust of the generator.** It runs in an app's build on that app's own committed
 catalogs, which are as trusted as its code. It reads no network and no secret.
 A catalog text is quoted into the modules, as a JSON string in TypeScript and with
-`repr` in Python, so no text can leave its literal.
+`repr` in Python, so no text can leave its literal. A translation holds only text and
+marker names; the page owns every element and target.
 
 **Ownership of the components.** A component owns its markup and look. The app
 owns what needs a decision about its product: routes, the trigger and popover

@@ -1,4 +1,7 @@
+import json
+import re
 import subprocess
+import textwrap
 from pathlib import Path
 
 import pytest
@@ -324,3 +327,168 @@ def test_a_consumer_loading_a_language_no_catalog_has_fails_tsc_strict(tmp_path)
 
     assert result.returncode != 0
     assert '"fr"' in result.stdout
+
+
+def marked(first: str | None, second: str | None, *, gaps: bool) -> str:
+    """A sentence of two parts named `first` and `second`; a name of None leaves that part as plain words."""
+
+    def part(name: str | None, content: str) -> str:
+        return content if name is None else f"{{#{name}}}{content}{{/{name}}}"
+
+    return f"{part(first, '{count}' if gaps else 'A')} z {part(second, '{name}' if gaps else 'B')}"
+
+
+MARKED_SHAPES = {
+    "plain": ((Entry(Key("home.note"), marked("strong", "code", gaps=False)),), ("home.note",)),
+    "gaps": ((Entry(Key("home.note"), marked("strong", "code", gaps=True)),), ("home.note",)),
+    "family": (
+        (
+            Entry(Key("home.note.one"), marked("strong", "code", gaps=True)),
+            Entry(Key("home.note.other"), marked("strong", "code", gaps=True)),
+        ),
+        ("home.note.one", "home.note.few", "home.note.many", "home.note.other"),
+    ),
+}
+CALLS = {
+    "plain": 'words["home.note"]',
+    "gaps": 'words["home.note"]({ count: 3, name: "Eva" })',
+    "family": 'words["home.note"](3, { name: "Eva" })',
+}
+READ_PARTS = (
+    'import { words } from "./MODULE";\n'
+    "export const text: string ="
+    " CALL.map((part) => (typeof part === 'string' ? part : part.marker + part.text)).join('');\n"
+)
+
+
+def marked_check(directory: Path, shape: str, consumer: str, target: str | None = None):
+    """Type checks the consumer (CALL stands for the shape's call) against the de module of the shape and, given
+    the text of a Polish translation, its module."""
+    entries, keys = MARKED_SHAPES[shape]
+    module = ""
+    if target is not None:
+        translated = TranslationCatalog(
+            language=LanguageTag("pl"), entries=tuple(Entry(Key(key), target) for key in keys)
+        )
+        module = render_translation(translated, LanguageTag("de"))
+    source = SourceCatalog(language=LanguageTag("de"), entries=entries)
+    return type_check(directory, consumer.replace("CALL", CALLS[shape]), module, source)
+
+
+@pytest.mark.parametrize("shape", MARKED_SHAPES)
+def test_a_consumer_reading_the_parts_of_a_marked_text_passes_tsc_strict(tmp_path, shape):
+    result = marked_check(tmp_path, shape, READ_PARTS.replace("MODULE", "de"))
+
+    assert result.returncode == 0, result.stdout
+
+
+@pytest.mark.parametrize("shape", MARKED_SHAPES)
+@pytest.mark.parametrize(
+    ("statement", "named"),
+    [
+        pytest.param("CALL.push('x');", "push", id="changing the list"),
+        pytest.param(
+            "export const same = CALL.some((part) => typeof part !== 'string' && part.marker === 'em');",
+            "no overlap",
+            id="a marker the text lacks",
+        ),
+        pytest.param("export const text: string = CALL;", "not assignable to type 'string'", id="a list as a string"),
+    ],
+)
+def test_a_consumer_misusing_the_parts_of_a_marked_text_fails_tsc_strict(tmp_path, shape, statement, named):
+    probe = f'import {{ words }} from "./de";\n{statement}\n'
+
+    result = marked_check(tmp_path, shape, probe)
+
+    assert result.returncode != 0
+    assert "consumer.ts" in result.stdout
+    assert named in result.stdout
+
+
+@pytest.mark.parametrize("shape", MARKED_SHAPES)
+def test_a_target_module_with_the_markers_of_the_source_passes_tsc_strict_in_both_directions(tmp_path, shape):
+    target = marked("code", "strong", gaps=shape != "plain")
+
+    result = marked_check(tmp_path, shape, READ_PARTS.replace("MODULE", "pl"), target)
+
+    assert result.returncode == 0, result.stdout
+
+
+@pytest.mark.parametrize("shape", MARKED_SHAPES)
+@pytest.mark.parametrize(
+    ("names", "named"),
+    [
+        pytest.param(("strong", "em"), "em", id="a marker the source lacks"),
+        pytest.param(("strong", None), "code", id="a marker of the source left out"),
+    ],
+)
+def test_a_target_module_whose_markers_differ_from_the_sources_fails_tsc_strict(tmp_path, shape, names, named):
+    target = marked(*names, gaps=shape != "plain")
+
+    result = marked_check(tmp_path, shape, READ_PARTS.replace("MODULE", "pl"), target)
+
+    assert result.returncode != 0
+    assert "pl.ts" in result.stdout
+    assert named in result.stdout
+
+
+def documented_block(language: str) -> str:
+    """The one fenced block of `language` in the languages standard, without its indentation."""
+    document = (REPOSITORY / "docs" / "languages.md").read_text(encoding="utf-8")
+    (block,) = re.findall(rf"^ *```{language}\n(.*?)^ *```$", document, flags=re.DOTALL | re.MULTILINE)
+    return textwrap.dedent(block)
+
+
+def svelte_check(directory: Path, page: str) -> subprocess.CompletedProcess[str]:
+    """Type checks the documented marked text's module and the page against each other."""
+    text = re.search(r'^msgid "(.*)"$', documented_block("po"), flags=re.MULTILINE)
+    assert text
+    catalog = SourceCatalog(language=LanguageTag("de"), entries=(Entry(Key("retention.archiveConfirm"), text[1]),))
+    (directory / "de.ts").write_text(render(catalog), encoding="utf-8")
+    (directory / "Page.svelte").write_text(page, encoding="utf-8")
+    (directory / "tsconfig.json").write_text(
+        json.dumps(
+            {
+                "compilerOptions": {
+                    "strict": True,
+                    "target": "ES2022",
+                    "module": "ESNext",
+                    "moduleResolution": "bundler",
+                    "noEmit": True,
+                    "skipLibCheck": True,
+                    "verbatimModuleSyntax": True,
+                },
+                "include": ["*.ts", "*.svelte"],
+            }
+        ),
+        encoding="utf-8",
+    )
+    return subprocess.run(
+        [
+            *("pnpm", "exec", "svelte-check", "--workspace", str(directory)),
+            *("--tsconfig", str(directory / "tsconfig.json"), "--threshold", "error"),
+        ],
+        cwd=REPOSITORY,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def test_the_page_of_the_languages_standard_renders_the_parts_of_a_marked_text_under_svelte_check(tmp_path):
+    page = documented_block("svelte")
+
+    result = svelte_check(tmp_path, page)
+
+    assert result.returncode == 0, result.stdout
+    assert "{@html" not in page
+
+
+def test_a_page_choosing_the_element_of_a_marker_the_text_lacks_fails_svelte_check(tmp_path):
+    page = documented_block("svelte").replace('"help"', '"terms"')
+
+    result = svelte_check(tmp_path, page)
+
+    assert result.returncode != 0
+    assert "Page.svelte" in result.stdout
+    assert "no overlap" in result.stdout

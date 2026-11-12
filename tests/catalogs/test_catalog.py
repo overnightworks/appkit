@@ -1,4 +1,5 @@
 import pytest
+from support.builders import entry, family
 
 from design.catalogs.catalog import (
     Entry,
@@ -6,9 +7,9 @@ from design.catalogs.catalog import (
     Gap,
     Key,
     LanguageTag,
+    Marker,
     PluralCategory,
     RawCatalog,
-    RawEntry,
     SourceCatalog,
     gap_names,
     pieces_of,
@@ -90,9 +91,25 @@ def test_language_tag_rejects_anything_else(value):
         pytest.param("{name} und {name}", (Gap("name"), " und ", Gap("name")), id="a gap used twice"),
         pytest.param("Use {{braces}}", ("Use {braces}",), id="doubled braces are literal braces"),
         pytest.param("{{{name}}}", ("{", Gap("name"), "}"), id="doubled braces around a gap"),
+        pytest.param(
+            "Hi {#strong}{name} dort{/strong}!",
+            ("Hi ", Marker("strong"), Gap("name"), " dort", Marker("strong", closing=True), "!"),
+            id="a marked part holding a gap and words",
+        ),
+        pytest.param(
+            "{#a}x{/a}{#a}y{/a}",
+            (Marker("a"), "x", Marker("a", closing=True), Marker("a"), "y", Marker("a", closing=True)),
+            id="two parts of one name",
+        ),
+        pytest.param("{{#strong}}", ("{#strong}",), id="doubled braces around a marker are literal"),
+        pytest.param(
+            "{#a}{{ }}{/a}",
+            (Marker("a"), "{ }", Marker("a", closing=True)),
+            id="white space with a brace is no empty part",
+        ),
     ],
 )
-def test_pieces_of_splits_a_text_into_literals_and_gaps(text, pieces):
+def test_pieces_of_splits_a_text_into_literals_gaps_and_markers(text, pieces):
     assert pieces_of(text) == pieces
 
 
@@ -132,10 +149,6 @@ def test_pieces_of_refuses_a_gap_named_proto_and_says_why():
 def test_pieces_of_refuses_an_unbalanced_brace(text):
     with pytest.raises(ValueError, match="unbalanced brace"):
         pieces_of(text)
-
-
-def entry(context, text, translation="", *, fuzzy=False, plural=False):
-    return RawEntry(context=context, text=text, translation=translation, fuzzy=fuzzy, plural=plural)
 
 
 def test_read_source_turns_clean_entries_into_a_catalog_in_file_order():
@@ -392,11 +405,6 @@ def test_read_translation_says_so_when_the_source_has_no_gaps(source):
     )
 
     assert [finding.problem for finding in findings] == ["has the gaps {name}; the source has no gaps"]
-
-
-def family(key, **texts):
-    """The entries of one plural family as the source catalog writes them, by category."""
-    return tuple(entry(f"{key}.{category}", text) for category, text in texts.items())
 
 
 SEATS = {"one": "{count} Platz", "other": "{count} Plätze"}

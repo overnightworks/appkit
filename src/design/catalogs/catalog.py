@@ -105,14 +105,64 @@ class Gap:
     name: str
 
 
-Piece = str | Gap
+@dataclass(frozen=True)
+class Marker:
+    """A `{#name}` that opens or a `{/name}` that closes a part the page sets apart."""
+
+    name: str
+    closing: bool = False
+
+    def __str__(self) -> str:
+        return f"{{{'/' if self.closing else '#'}{self.name}}}"
+
+
+Piece = str | Gap | Marker
+CLOSING_SIGN = "/"
+MARKER_SIGNS = f"#{CLOSING_SIGN}"
+
+
+def _gap(field: str, piece: str) -> Gap:
+    if not field.isidentifier() or piece != "{" + field + "}":
+        raise ValueError(f"gap {piece} is not a plain name")
+    if field == PROTOTYPE_GAP:
+        raise ValueError(f"gap {piece} is refused: in an object literal {PROTOTYPE_GAP} sets the prototype, not a gap")
+    return Gap(field)
+
+
+def _marker(piece: str) -> Marker:
+    name = piece[2:-1]
+    if not name.isidentifier():
+        raise ValueError(f"marker {piece} is not a plain name")
+    return Marker(name, closing=piece[1] == CLOSING_SIGN)
+
+
+def _check_parts(pieces: tuple[Piece, ...]) -> None:
+    """Every marked part is opened, closed by its own marker, not empty and holds no other marker."""
+    opened: Marker | None = None
+    content: list[Piece] = []
+    for piece in pieces:
+        if not isinstance(piece, Marker):
+            content.append(piece)
+        elif opened is None:
+            if piece.closing:
+                raise ValueError(f"marker {piece} closes no part")
+            opened, content = piece, []
+        elif piece.closing and piece.name == opened.name:
+            if not any(isinstance(item, Gap) or item.strip() for item in content):
+                raise ValueError(f"the part {opened} is empty")
+            opened = None
+        else:
+            raise ValueError(f"marker {piece} comes inside the part {opened}; parts do not nest or cross")
+    if opened is not None:
+        raise ValueError(f"the part {opened} is never closed")
 
 
 def pieces_of(text: str) -> tuple[Piece, ...]:
-    """A text as its literals and gaps in order; `{{` and `}}` are literal braces, as in `str.format`.
+    """A text as its literals, gaps and markers in order; `{{` and `}}` are literal braces, as in `str.format`.
 
-    Only `{name}` with a plain identifier is a gap: a format spec, a conversion, a number, an attribute or an
-    item is refused, naming the piece.
+    Only `{name}` with a plain identifier is a gap and only `{#name}` and `{/name}` are markers, each part closed
+    by its own marker: a format spec, a conversion, a number, an attribute, an item, an option, a standalone marker
+    or a marker out of place is refused, naming the piece.
     """
     try:
         parsed = tuple(Formatter().parse(text))
@@ -128,19 +178,15 @@ def pieces_of(text: str) -> tuple[Piece, ...]:
             continue
         # The parser reports an empty format spec like none, so the written piece itself is compared.
         piece = text[position : text.index("}", position) + 1]
-        if not field.isidentifier() or piece != "{" + field + "}":
-            raise ValueError(f"gap {piece} is not a plain name")
-        if field == PROTOTYPE_GAP:
-            raise ValueError(
-                f"gap {piece} is refused: in an object literal {PROTOTYPE_GAP} sets the prototype, not a gap"
-            )
+        found = _marker(piece) if piece[1] in MARKER_SIGNS else _gap(field, piece)
         position += len(piece)
         if literal:
             pieces.append(literal)
             literal = ""
-        pieces.append(Gap(field))
+        pieces.append(found)
     if literal:
         pieces.append(literal)
+    _check_parts(tuple(pieces))
     return tuple(pieces)
 
 
@@ -148,8 +194,26 @@ def gap_names(pieces: tuple[Piece, ...]) -> frozenset[str]:
     return frozenset(piece.name for piece in pieces if isinstance(piece, Gap))
 
 
+def markers_of(pieces: tuple[Piece, ...]) -> tuple[str, ...]:
+    """The names of the marked parts of a text, sorted, a name once for every part that carries it."""
+    return tuple(sorted(piece.name for piece in pieces if isinstance(piece, Marker) and not piece.closing))
+
+
+def without_markers(text: str) -> str:
+    """The text as it reads with its marked parts unmarked, everything else as written."""
+    return "".join(
+        piece.replace("{", "{{").replace("}", "}}") if isinstance(piece, str) else f"{{{piece.name}}}"
+        for piece in pieces_of(text)
+        if not isinstance(piece, Marker)
+    )
+
+
 def _gaps_text(names: frozenset[str]) -> str:
     return f"the gaps {{{', '.join(sorted(names))}}}" if names else "no gaps"
+
+
+def _markers_text(names: tuple[str, ...]) -> str:
+    return f"the markers {{{', '.join(f'#{name}' for name in names)}}}" if names else "no markers"
 
 
 def _family_gaps(names: frozenset[str]) -> frozenset[str]:
@@ -161,18 +225,26 @@ def _same_gaps(left: frozenset[str], right: frozenset[str], *, family: bool) -> 
     return _family_gaps(left) == _family_gaps(right) if family else left == right
 
 
-def _gap_problems(text: str, source_text: str | None = None, *, family: bool = False) -> list[str]:
-    """What is wrong with the gaps of `text`: a malformed gap and, given the source's text, a gap set that differs."""
+def _piece_problems(text: str, source_text: str | None = None, *, family: bool = False) -> list[str]:
+    """What is wrong with the gaps and markers of `text`: a malformed one and, given the source's text, a gap set
+    or a marker multiset that differs, both in one problem so that the text gets one finding."""
     try:
-        names = gap_names(pieces_of(text))
+        pieces = pieces_of(text)
     except ValueError as error:
         return [f"is malformed: {error}"]
     if source_text is None:
         return []
-    source_names = gap_names(pieces_of(source_text))
-    if _same_gaps(source_names, names, family=family):
-        return []
-    return [f"has {_gaps_text(names)}; the source has {_gaps_text(source_names)}"]
+    source_pieces = pieces_of(source_text)
+    differences: list[str] = []
+    if not _same_gaps(gap_names(source_pieces), gap_names(pieces), family=family):
+        differences.append(
+            f"has {_gaps_text(gap_names(pieces))}; the source has {_gaps_text(gap_names(source_pieces))}"
+        )
+    if markers_of(source_pieces) != markers_of(pieces):
+        differences.append(
+            f"has {_markers_text(markers_of(pieces))}; the source has {_markers_text(markers_of(source_pieces))}"
+        )
+    return [", and ".join(differences)] if differences else []
 
 
 @dataclass(frozen=True)
@@ -220,6 +292,11 @@ class Family:
     @property
     def gaps(self) -> frozenset[str]:
         return frozenset().union(*(gap_names(pieces_of(entry.text)) for entry in self.entries))
+
+    @property
+    def markers(self) -> tuple[str, ...]:
+        """The marker names of the family's entries, sorted, a name once: its entries carry the same markers."""
+        return tuple(sorted(set().union(*(markers_of(pieces_of(entry.text)) for entry in self.entries))))
 
 
 def words_of(entries: tuple[Entry, ...]) -> tuple[Entry | Family, ...]:
@@ -384,7 +461,7 @@ def read_source(
                 (raw.text == "", "has an empty msgid"),
             )
             if found
-        ] + _gap_problems(raw.text)
+        ] + _piece_problems(raw.text)
 
     valid, findings, present = _checked_entries(file, raw_entries, source_problems)
     entries = tuple(Entry(key, raw.text) for key, raw in valid)
@@ -404,20 +481,25 @@ def read_source(
         *findings,
         *_plain_key_findings(file, present),
         *family_findings,
-        *_gap_set_findings(file, entries),
+        *_family_findings(file, entries),
     )
 
 
-def _gap_set_findings(file: str, entries: tuple[Entry, ...]) -> list[Finding]:
-    """A finding for every family whose entries differ in a gap besides `count`, naming the gaps of each."""
+def _family_findings(file: str, entries: tuple[Entry, ...]) -> list[Finding]:
+    """A finding for every family whose entries differ in a gap besides `count` or in a marker, naming each set."""
     findings: list[Finding] = []
     for word in words_of(entries):
         if isinstance(word, Entry):
             continue
-        by_category = {entry.key.category: gap_names(pieces_of(entry.text)) for entry in word.entries}
-        if len({_family_gaps(names) for names in by_category.values()}) > 1:
-            named = ", ".join(f"{category} has {_gaps_text(names)}" for category, names in by_category.items())
+        pieces = {entry.key.category: pieces_of(entry.text) for entry in word.entries}
+        gaps = {category: gap_names(found) for category, found in pieces.items()}
+        if len({_family_gaps(names) for names in gaps.values()}) > 1:
+            named = ", ".join(f"{category} has {_gaps_text(names)}" for category, names in gaps.items())
             findings.append(Finding(file, word.key.value, f"has different gaps in its entries: {named}"))
+        markers = {category: markers_of(found) for category, found in pieces.items()}
+        if len(set(markers.values())) > 1:
+            named = ", ".join(f"{category} has {_markers_text(names)}" for category, names in markers.items())
+            findings.append(Finding(file, word.key.value, f"has different markers in its entries: {named}"))
     return findings
 
 
@@ -460,7 +542,7 @@ def read_translation(
             if found
         ]
         if raw.translation.strip():
-            problems.extend(_gap_problems(raw.translation, expected, family=key.category is not None))
+            problems.extend(_piece_problems(raw.translation, expected, family=key.category is not None))
         return problems
 
     valid, findings, present = _checked_entries(file, raw_entries, translation_problems)
