@@ -150,6 +150,22 @@ def test_read_translation_names_the_key_and_both_marker_multisets_of_a_translati
     ]
 
 
+def test_read_translation_reports_gaps_and_markers_that_both_differ_as_one_finding_for_the_key():
+    source = SourceCatalog(LanguageTag("de"), (Entry(Key("table.seatFree"), "{#strong}{name}{/strong}"),))
+
+    _, findings = read_translation(
+        TRANSLATION_FILE,
+        LanguageTag("pl"),
+        POLISH,
+        (entry("table.seatFree", "{#strong}{name}{/strong}", "{#code}{other}{/code}"),),
+        source,
+    )
+
+    assert [finding.key for finding in findings] == ["table.seatFree"]
+    assert "the gaps {other}" in findings[0].problem
+    assert "the markers {#code}" in findings[0].problem
+
+
 def test_read_translation_names_a_marker_the_source_lacks():
     source = SourceCatalog(LanguageTag("de"), (Entry(Key("table.seatFree"), "Frei"),))
 

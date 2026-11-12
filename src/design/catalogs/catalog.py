@@ -227,7 +227,7 @@ def _same_gaps(left: frozenset[str], right: frozenset[str], *, family: bool) -> 
 
 def _piece_problems(text: str, source_text: str | None = None, *, family: bool = False) -> list[str]:
     """What is wrong with the gaps and markers of `text`: a malformed one and, given the source's text, a gap set
-    or a marker multiset that differs."""
+    or a marker multiset that differs, both in one problem so that the text gets one finding."""
     try:
         pieces = pieces_of(text)
     except ValueError as error:
@@ -235,14 +235,16 @@ def _piece_problems(text: str, source_text: str | None = None, *, family: bool =
     if source_text is None:
         return []
     source_pieces = pieces_of(source_text)
-    problems: list[str] = []
+    differences: list[str] = []
     if not _same_gaps(gap_names(source_pieces), gap_names(pieces), family=family):
-        problems.append(f"has {_gaps_text(gap_names(pieces))}; the source has {_gaps_text(gap_names(source_pieces))}")
+        differences.append(
+            f"has {_gaps_text(gap_names(pieces))}; the source has {_gaps_text(gap_names(source_pieces))}"
+        )
     if markers_of(source_pieces) != markers_of(pieces):
-        problems.append(
+        differences.append(
             f"has {_markers_text(markers_of(pieces))}; the source has {_markers_text(markers_of(source_pieces))}"
         )
-    return problems
+    return [", and ".join(differences)] if differences else []
 
 
 @dataclass(frozen=True)
