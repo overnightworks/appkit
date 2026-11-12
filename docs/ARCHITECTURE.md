@@ -74,14 +74,17 @@ flowchart TB
   outputs, `src/lib/words` for the tarball and `src/design/words.py` for the wheel,
   which the kit's own `design-catalogs` generates and `--check` gates in CI. The
   catalogs belong to neither `src/lib` nor `src/design` and ship in neither
-  artefact. The package root exports the generated loader as `loadKitWords`, with
-  the types `KitWords` and `KitLanguage`; the loader takes the language its caller
-  passes and the kit reads none itself. The Python module is for an app's tests,
-  not its server, and needs no Babel.
+  artefact. The package root and the export `overnightworks-design/words` offer the
+  generated loader as `loadKitWords`, with the types `KitWords` and `KitLanguage`, from
+  one hand-written module of the kit; the export carries no component, so plain Node
+  loads it, which the root with its `.svelte` files does not. The loader takes the
+  language its caller passes and the kit reads none itself. The Python module is for an
+  app's tests, not its server, and needs no Babel.
 - **Wheel**: the stylesheet and fonts for apps without a JavaScript bundler, the
   generator and the kit's Python words. It holds no `.svelte`.
 - **Tarball**: the stylesheet, fonts, components and the kit's words per language,
-  each language its own chunk; `svelte` is its only dependency, as a peer.
+  each language its own chunk, also as the export `overnightworks-design/words`;
+  `svelte` is its only dependency, as a peer.
 - **Token list**: the sorted custom-property names of the stylesheet, from
   `scripts/list_tokens`.
 

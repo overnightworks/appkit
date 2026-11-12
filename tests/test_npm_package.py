@@ -51,9 +51,12 @@ SVELTE_TSCONFIG = json.dumps(
         "include": ["*.svelte", "*.ts"],
     }
 )
+TSC_WITHOUT_TS_ENDINGS = [argument for argument in TSC_ARGUMENTS if argument != "--allowImportingTsExtensions"]
 COMPONENT_FILES = {
     "svelte-dist/index.js",
     "svelte-dist/index.d.ts",
+    "svelte-dist/kitWords.js",
+    "svelte-dist/kitWords.d.ts",
     "svelte-dist/types.js",
     "svelte-dist/types.d.ts",
     "svelte-dist/AccountMenu.svelte",
@@ -95,15 +98,26 @@ class Consumer:
         self.name = name
         self.project = project
 
-    def check(self, source):
+    def check(self, source, arguments=TSC_ARGUMENTS):
         (self.project / "consumer.ts").write_text(source)
         result = subprocess.run(
-            [str(REPOSITORY / "node_modules/.bin/tsc"), *TSC_ARGUMENTS],
+            [str(REPOSITORY / "node_modules/.bin/tsc"), *arguments],
             cwd=self.project,
             capture_output=True,
             text=True,
         )
         assert result.returncode == 0, result.stdout
+
+    def run_node(self, source, *arguments):
+        """Runs an ES module source in a plain Node process of the project; returns its output."""
+        result = subprocess.run(
+            ["node", "--input-type=module", "--eval", source, *arguments],
+            cwd=self.project,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        return result.stdout
 
     def check_page(self, source):
         """Type-check a Svelte page the way an app's svelte-check sees it; returns the exit status and the findings."""
@@ -190,8 +204,9 @@ def test_manifest_is_private_and_exports_the_component_with_types_and_the_styles
     manifest = json.loads((tarball / "package.json").read_text())
     assert manifest["private"] is True
     exports = manifest["exports"]
-    assert set(exports) == {".", "./design.css"}
+    assert set(exports) == {".", "./design.css", "./words"}
     assert set(exports["."]) == {"types", "svelte"}
+    assert list(exports["./words"]) == ["types", "default"]
     assert exports["./design.css"] == f"./{STATIC}/design.css"
 
 
@@ -379,6 +394,32 @@ def test_a_consumer_imports_the_kit_words_loader_and_both_types_from_the_package
         f"import {{ loadKitWords, type KitLanguage, type KitWords }} from '{consumer.name}';\n"
         "export const loaded: (language: KitLanguage) => Promise<KitWords> = loadKitWords;\n"
     )
+
+
+def test_a_consumer_imports_the_kit_words_from_the_words_export_without_allowing_ts_import_endings(consumer):
+    consumer.check(
+        f"import {{ loadKitWords, type KitLanguage, type KitWords }} from '{consumer.name}/words';\n"
+        "export const loaded: (language: KitLanguage) => Promise<KitWords> = loadKitWords;\n"
+        "// @ts-expect-error the kit ships no pl words\n"
+        "export const polish = loadKitWords('pl');\n",
+        TSC_WITHOUT_TS_ENDINGS,
+    )
+
+
+def test_a_plain_node_process_loads_the_words_of_every_kit_language_from_the_words_export(consumer):
+    catalogs = REPOSITORY / "src" / "catalogs"
+    first_key = re.search(r'^msgctxt "(.+)"$', (catalogs / "de.po").read_text(), re.MULTILINE).group(1)
+    output = consumer.run_node(
+        f"import {{ loadKitWords }} from '{consumer.name}/words';"
+        "const keys = {};"
+        "for (const language of process.argv.slice(1)) keys[language] = Object.keys(await loadKitWords(language));"
+        "process.stdout.write(JSON.stringify(keys));",
+        *catalog_languages(),
+    )
+    keys = json.loads(output)
+    assert sorted(keys) == catalog_languages()
+    for language, loaded in keys.items():
+        assert first_key in loaded, language
 
 
 def test_a_consumer_cannot_load_kit_words_for_a_language_the_kit_lacks(consumer):

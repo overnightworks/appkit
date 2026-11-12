@@ -1,6 +1,6 @@
 {
   "name": "overnightworks-design",
-  "version": "0.26.0",
+  "version": "0.27.0",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -15,7 +15,11 @@
       "types": "./svelte-dist/index.d.ts",
       "svelte": "./svelte-dist/index.js"
     },
-    "./design.css": "./src/design/static/design.css"
+    "./design.css": "./src/design/static/design.css",
+    "./words": {
+      "types": "./svelte-dist/kitWords.d.ts",
+      "default": "./svelte-dist/kitWords.js"
+    }
   },
   "sideEffects": [
     "**/*.css"
