@@ -91,6 +91,7 @@ def test_wheel_holds_only_data_and_no_tests(installed_package):
     wheel, _ = installed_package
     names = zipfile.ZipFile(wheel).namelist()
     assert not [name for name in names if name.startswith("tests")]
+    assert not [name for name in names if name.endswith((".po", ".pot"))]
 
 
 def test_wheel_holds_no_svelte_component_and_no_component_build(installed_package):

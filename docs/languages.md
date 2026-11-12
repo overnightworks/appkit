@@ -201,7 +201,8 @@ flowchart LR
   and passes them to every kit component; a component reads no language itself. The app passes
   its generated `Language`, never a literal or a cast, and an app-owned module outside the
   generated words directory carries the line `languages satisfies readonly KitLanguage[]`, so
-  the app's type check fails when it offers a language the kit lacks. Switching the components to these words is the next slice.
+  the app's type check fails when it offers a language the kit lacks. Switching the components
+  to these words is the next slice.
 - **LANG-20** Content never follows the interface language: lyrics, slides, chat messages
   and names. Where an app needs content's own language (for example to mark a span with
   `lang`), the content carries a tag of its own. An agent's reply follows the message that
