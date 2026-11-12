@@ -1,8 +1,0 @@
-claim_id = "efb49cffd0664676ad3bbbc994a54079"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "f6bf26a3a03c84a89da7c5eaa13970a9ebdca38f"
-branch = "claude/issue-190-kit-words"
-scope = [".github/workflows/ci.yml", "AGENTS.md", "README.md", "docs/ARCHITECTURE.md", "docs/languages.md", "pyproject.toml", "sonar-project.properties", "src/catalogs", "src/design/words.py", "src/lib/index.ts", "src/lib/words", "tests/e2e", "tests/test_npm_package.py", "tests/test_wheel.py", "vitest.config.ts"]
-opened_commit = "be9ccf0c47974e8e2b7823e1b65e59b3adf94285"
-whole_reason = "One additive contract: the catalogs, their declaration, both generated outputs and the proofs in the tarball and the wheel only hold together."
