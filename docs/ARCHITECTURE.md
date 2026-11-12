@@ -35,7 +35,7 @@ get identical CSS and fonts. The components exist only in the tarball.
 flowchart TB
   subgraph source[src]
     css[design/static: design.css and fonts]
-    comp[lib: SignInPage, AccountMenu, AgentControl, LegalLinks, Marked, AiMark and types]
+    comp[lib: SignInPage, AccountMenu, AgentControl, HearingSwitch, LegalLinks, Marked, AiMark and types]
     gen[design/catalogs: the catalog generator]
     cat[catalogs: the kit's words, de source and en]
   end
@@ -55,11 +55,14 @@ flowchart TB
   and both render `LegalLinks`. `AgentControl` is the panel of rows with which a
   person calls an agent and asks it to leave; each row leads with `AiMark`, the
   "AI" pill before an agent's name, which takes no props. The app owns the
-  trigger and the popover, and the control holds no state of the call. `Marked`
+  trigger and the popover, and the control holds no state of the call.
+  `HearingSwitch` is one controlled chip with a switch for an agent's hearing; it
+  takes its on colour from the app's `--accent`, and the app owns where the chips
+  stand and what a switch does. `Marked`
   renders the list of parts that `design-catalogs` generates for a marked sentence:
   one snippet per marker name chooses the element, and the component adds no
   element, white space, words or styles. `SignInPage`, `AccountMenu`,
-  `AgentControl` and `LegalLinks` take the kit's words as the required prop
+  `AgentControl`, `HearingSwitch` and `LegalLinks` take the kit's words as the required prop
   `words`, which the app loads with `loadKitWords` for its page's language; no
   component holds an English default or reads a language. Each prop's meaning is a docstring in
   [`src/lib/types.ts`](../src/lib/types.ts).

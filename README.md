@@ -12,7 +12,7 @@ Distribution is a GitHub release. It carries:
   `design-catalogs` ([Catalogs](#catalogs)) and the kit's Python words
   ([The kit's words](#the-kits-words));
 - `overnightworks-design-<version>.tgz`: the same stylesheet and fonts, plus the
-  components `SignInPage`, `AccountMenu`, `AgentControl`, `LegalLinks`, `Marked` and `AiMark` and the
+  components `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `LegalLinks`, `Marked` and `AiMark` and the
   kit's words per language ([The kit's words](#the-kits-words)). It is the
   only npm distribution, and `svelte` ^5.20 is its only, peer, dependency;
 - `design-<version>-tokens.txt`: the sorted custom-property names `design.css`
@@ -89,6 +89,20 @@ action; an app that lets people send agents away passes the handler.
 
 ```svelte
 <AgentControl {rows} {onCall} {onSendAway} {refusal} words={kitWords} />
+```
+
+## HearingSwitch
+
+One chip with a switch for an agent's hearing, drawn on a video: `kind="hear"` is
+"Agent may hear me", `kind="listen"` is "I want to hear the agent". It is controlled: it
+shows `on` and, when pressed, calls `onChange` with the negated value, so the app sets `on`
+again or leaves it. The on colour is the app's `--accent`; the glass and the light ink are
+the chip's own, because the chip always sits on a video. Where the chips stand, their
+defaults and what a switch does stay with the app. Props and behaviour are documented in
+[`src/lib/types.ts`](src/lib/types.ts).
+
+```svelte
+<HearingSwitch kind="hear" on={agentMayHear} onChange={(on) => (agentMayHear = on)} words={kitWords} />
 ```
 
 ## Marked
@@ -250,9 +264,9 @@ The shape of the catalogs and the rules `--check` holds are in
 
 ## The kit's words
 
-The words of `SignInPage`, `AccountMenu`, `AgentControl` and `LegalLinks` come from the
+The words of `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch` and `LegalLinks` come from the
 kit's own catalogs, which the kit builds with `design-catalogs` like an app. Each of the
-four takes them as the required prop `words: KitWords`, holds no default and reads no
+five takes them as the required prop `words: KitWords`, holds no default and reads no
 language itself, so a page cannot show one language on another's page; the
 examples above get `kitWords` from the `load` below. To override one word, pass a
 spread typed as `KitWords`: `words={{ ...kitWords, "account.logOut": "Exit" }}`. The
