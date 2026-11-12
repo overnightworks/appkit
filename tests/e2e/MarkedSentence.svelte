@@ -11,8 +11,8 @@
 	];
 </script>
 
-{#snippet strong(text: string)}<strong>{text}</strong>{/snippet}
-{#snippet link(text: string)}<a href="/retention">{text}</a>{/snippet}
+{#snippet strong({ text }: { text: string })}<strong>{text}</strong>{/snippet}
+{#snippet link({ text }: { text: string })}<a href="/retention">{text}</a>{/snippet}
 
 <main>
 	<p id="sentence"><Marked {parts} marked={{ strong, link }} /></p>

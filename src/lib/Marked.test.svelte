@@ -39,7 +39,7 @@
 	let { parts }: { parts: Parts } = $props();
 </script>
 
-{#snippet strong(text: string)}<strong>{text}</strong>{/snippet}
-{#snippet link(text: string)}<a href="/more">{text}</a>{/snippet}
+{#snippet strong({ text }: { text: string })}<strong>{text}</strong>{/snippet}
+{#snippet link({ text }: { text: string })}<a href="/more">{text}</a>{/snippet}
 
 <p><Marked {parts} marked={{ strong, link }} /></p>

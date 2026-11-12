@@ -4,4 +4,4 @@
 	let { parts, marked }: MarkedProps<Marker> = $props();
 </script>
 
-{#each parts as part, index (index)}{#if typeof part === 'string'}{part}{:else}{@render marked[part.marker](part.text)}{/if}{/each}
+{#each parts as part, index (index)}{#if typeof part === 'string'}{part}{:else}{@render marked[part.marker](part)}{/if}{/each}
