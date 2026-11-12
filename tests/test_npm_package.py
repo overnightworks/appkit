@@ -129,10 +129,6 @@ def test_tarball_holds_exactly_the_manifest_readme_licence_stylesheet_fonts_font
     assert packed_files(tarball) == expected
 
 
-def test_tarball_holds_no_catalog(tarball):
-    assert not [name for name in packed_files(tarball) if name.endswith((".po", ".pot"))]
-
-
 def test_every_export_target_is_a_packed_file(tarball):
     exports = json.loads((tarball / "package.json").read_text())["exports"]
     assert exports
