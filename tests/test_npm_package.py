@@ -99,6 +99,19 @@ def consumer(tarball, tmp_path):
     return Consumer(name, tmp_path)
 
 
+def catalog_languages():
+    return sorted(path.stem for path in (REPOSITORY / "src" / "catalogs").glob("*.po"))
+
+
+def kit_words_files():
+    """The generated words: the loader and one module with its declaration per catalog."""
+    return {
+        f"svelte-dist/words/{stem}{ending}"
+        for stem in ["index", *catalog_languages()]
+        for ending in (".js", ".d.ts")
+    }
+
+
 def packed_files(package):
     return {path.relative_to(package).as_posix() for path in package.rglob("*") if path.is_file()}
 
@@ -113,9 +126,13 @@ def export_targets(exports):
 def test_tarball_holds_exactly_the_manifest_readme_licence_stylesheet_fonts_font_licences_and_component(
     tarball, font_files, licences
 ):
-    expected = {"package.json", "README.md", "LICENSE", f"{STATIC}/design.css"} | COMPONENT_FILES
+    expected = {"package.json", "README.md", "LICENSE", f"{STATIC}/design.css"} | COMPONENT_FILES | kit_words_files()
     expected |= {f"{STATIC}/fonts/{name}" for name in font_files | licences}
     assert packed_files(tarball) == expected
+
+
+def test_tarball_holds_no_catalog(tarball):
+    assert not [name for name in packed_files(tarball) if name.endswith((".po", ".pot"))]
 
 
 def test_every_export_target_is_a_packed_file(tarball):
@@ -314,6 +331,31 @@ def test_a_consumer_imports_both_words_types_from_the_package_root_and_gives_eac
         "export const partialPage: SignInPageWords = { logIn: 'b' };\n"
         "// @ts-expect-error the no-access sentence is a function of the app name\n"
         "export const textSentence: SignInPageWords = { ...pageWords, noAccessSentence: 'f' };\n"
+    )
+
+
+def test_a_consumer_imports_the_kit_words_loader_and_both_types_from_the_package_root(consumer):
+    consumer.check(
+        f"import {{ loadKitWords, type KitLanguage, type KitWords }} from '{consumer.name}';\n"
+        "export const loaded: (language: KitLanguage) => Promise<KitWords> = loadKitWords;\n"
+    )
+
+
+def test_a_consumer_cannot_load_kit_words_for_a_language_the_kit_lacks(consumer):
+    consumer.check(
+        f"import {{ loadKitWords }} from '{consumer.name}';\n"
+        "// @ts-expect-error the kit ships no pl words\n"
+        "export const polish = loadKitWords('pl');\n"
+    )
+
+
+def test_a_consumer_list_of_the_kit_languages_satisfies_kit_language_and_one_with_a_missing_language_does_not(consumer):
+    covered = ", ".join(f"'{language}'" for language in catalog_languages())
+    consumer.check(
+        f"import type {{ KitLanguage }} from '{consumer.name}';\n"
+        f"export const covered = [{covered}] as const satisfies readonly KitLanguage[];\n"
+        "// @ts-expect-error the kit lacks pl\n"
+        "export const lacking = ['de', 'pl'] as const satisfies readonly KitLanguage[];\n"
     )
 
 

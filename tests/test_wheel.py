@@ -3,6 +3,7 @@ import email
 import functools
 import hashlib
 import http.server
+import json
 import re
 import subprocess
 import sys
@@ -259,6 +260,51 @@ def test_wheel_holds_the_catalogs_package(installed_package):
         f"design/catalogs/{name}.py"
         for name in ("__init__", "catalog", "command", "declaration", "po_file", "python_module", "sync", "typescript")
     } <= names
+
+
+def test_wheel_holds_the_kit_words_module(installed_package):
+    wheel, _ = installed_package
+    assert "design/words.py" in zipfile.ZipFile(wheel).namelist()
+
+
+@pytest.fixture
+def kit_words_probe(installed_package, tmp_path):
+    """Runs a snippet against the wheel's `design.words` alone; -S keeps Babel, and so the extra, out of the import path."""
+    wheel, _ = installed_package
+
+    def run(snippet: str) -> subprocess.CompletedProcess[str]:
+        probe = f"import json, sys; sys.path.insert(0, sys.argv[1]); from design import words; {snippet}"
+        return subprocess.run(
+            [sys.executable, "-I", "-S", "-c", probe, str(wheel.parent / "site")],
+            cwd=tmp_path,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+    return run
+
+
+def test_kit_words_import_without_the_catalogs_extra_and_list_the_catalogs_languages(kit_words_probe):
+    result = kit_words_probe("print(json.dumps(sorted(words.LANGUAGES)))")
+
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout) == sorted(path.stem for path in (REPOSITORY / "src" / "catalogs").glob("*.po"))
+
+
+def test_kit_words_give_the_german_log_out_of_the_account_menu(kit_words_probe):
+    result = kit_words_probe("print(words.text('de', 'account.logOut'))")
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == "Abmelden"
+
+
+def test_kit_words_refuse_an_unknown_key(kit_words_probe):
+    result = kit_words_probe("words.text('de', 'account.noSuchWord')")
+
+    assert result.returncode != 0
+    assert "KeyError" in result.stderr
+    assert "account.noSuchWord" in result.stderr
 
 
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
