@@ -1,8 +1,0 @@
-claim_id = "b6fd51c878e448e6b50bcec7f5499bb3"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "11907cfc0106ff3ff8d2d76c6195df76908759c9"
-branch = "claude/issue-207-marked-passes-part"
-scope = ["README.md", "package.json", "pyproject.toml", "src/lib", "tests/e2e", "tests/test_npm_package.py", "uv.lock"]
-opened_commit = "3abb5fd4e36936514ec8f5f0a064f75c1487538d"
-whole_reason = "The component, its type, its tests and the documented example change together or the kit's own check is red."
