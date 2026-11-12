@@ -5,6 +5,7 @@ import { dirname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import type { BrowserContext, Page } from '@playwright/test';
+import type { KitLanguage, KitWords } from 'overnightworks-design';
 import { build, createServer } from 'vite';
 
 const consumersRoot = dirname(fileURLToPath(import.meta.url));
@@ -75,7 +76,7 @@ export async function routeTo(target: Page | BrowserContext, outDir: string): Pr
 }
 
 /** What a prerendering `load` does under Node: the package root loaded through Vite's server-side module graph, then the words of one language. */
-export async function loadKitWordsUnderNode(language: string): Promise<Record<string, unknown>> {
+export async function loadKitWordsUnderNode(language: KitLanguage): Promise<KitWords> {
 	installPackage();
 	const server = await createServer({
 		root: join(consumersRoot, 'imported'),

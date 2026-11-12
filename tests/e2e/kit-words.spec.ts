@@ -29,7 +29,7 @@ test.describe('the kit words in a production consumer', () => {
 	for (const [language, logOut] of [
 		['de', 'Abmelden'],
 		['en', 'Log out']
-	]) {
+	] as const) {
 		test(`load the ${language} words in the browser`, async ({ page }) => {
 			await routeTo(page, outDir);
 			await page.goto(`${origin}/?words=${language}`);
