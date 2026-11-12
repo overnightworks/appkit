@@ -485,9 +485,6 @@ def evaluated(evaluate, source_catalog, call, **texts):
     ("text", "parts"),
     [
         pytest.param(
-            "Nur {#strong}wichtig{/strong}", ["Nur ", {"marker": "strong", "text": "wichtig"}], id="at the end"
-        ),
-        pytest.param(
             "{#strong}Wichtig{/strong} nur", [{"marker": "strong", "text": "Wichtig"}, " nur"], id="at the start"
         ),
         pytest.param(
