@@ -208,15 +208,22 @@ The wheel's `design.words` is the same words in Python, for an app's tests and
 not for its server; it needs no Babel and no extra.
 
 An app loads the kit's words for the page's language as it loads its own. A
-prerendering `load` serves each language once; the app's words module checks that
-the kit ships every language the app offers:
+prerendering `load` serves each language once; an app-owned module beside the
+generated words directory checks that the kit ships every language the app offers:
 
 ```ts
-// src/lib/words/languages.ts
+// src/lib/languages.ts
 import type { KitLanguage } from "overnightworks-design";
-import { languages } from "./index";
+import { languages } from "./words";
 
 languages satisfies readonly KitLanguage[]; // a language the kit lacks fails the type check
+```
+
+```ts
+// src/routes/[language]/+page.ts
+import { languages } from "$lib/words";
+
+export const entries = () => languages.map((language) => ({ language }));
 ```
 
 ```ts
@@ -225,7 +232,6 @@ import { loadKitWords } from "overnightworks-design";
 import { languages, loadWords } from "$lib/words";
 
 export const prerender = true;
-export const entries = () => languages.map((language) => ({ language }));
 
 export const load = async ({ params }) => {
   const language = languages.find((candidate) => candidate === params.language) ?? languages[0];
