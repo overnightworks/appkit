@@ -96,8 +96,12 @@ flowchart LR
   in quality. The libraries and the rejected alternatives stay proposed.
 - **LANG-9** A catalog key is a neutral identifier that names what the text is for, never the
   sentence: one namespace level, the surface, then a camelCase name (`table.seatFree`). A
-  text on two surfaces gets two keys. The kit's words never enter an app catalog. Renaming a
-  key changes every catalog. Rejected: flat keys, which collide at a thousand texts. A value
+  text on two surfaces gets two keys: that means words that merely coincide in the source
+  language. A destination's own name (a settings section, a room) is one text owned by the
+  destination and gets one key, read wherever the app points to it, as a label as is or as a
+  gap value of a whole sentence. Where a language needs another form of the name on one
+  surface, that surface gets its own key. The kit's words never enter an app catalog.
+  Renaming a key changes every catalog. Rejected: flat keys, which collide at a thousand texts. A value
   is a whole sentence, never assembled from fragments: where it varies, it names its gaps
   (`{name}`), and the typed module types each gap. An entry of a plural family adds a dot and
   its CLDR plural category (`table.seats.one`); a family's key is its entries' `msgctxt`
@@ -201,8 +205,7 @@ flowchart LR
   and passes them to every kit component; a component reads no language itself. The app passes
   its generated `Language`, never a literal or a cast, and an app-owned module outside the
   generated words directory carries the line `languages satisfies readonly KitLanguage[]`, so
-  the app's type check fails when it offers a language the kit lacks. Switching the components
-  to these words is the next slice.
+  the app's type check fails when it offers a language the kit lacks.
 - **LANG-20** Content never follows the interface language: lyrics, slides, chat messages
   and names. Where an app needs content's own language (for example to mark a span with
   `lang`), the content carries a tag of its own. An agent's reply follows the message that

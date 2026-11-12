@@ -35,18 +35,20 @@ The fail colour (`--fail` and `--fail-soft`) marks only two things: that somethi
 
 The sentences in this section are ruled.
 
-Sign-in wording is identical in every app. Each catalog carries these strings verbatim; no button names Keycloak:
+Sign-in wording is identical in every app. The kit's catalogs carry these strings verbatim; no button names Keycloak:
 
 - en: "Log in", "Log out", "You are logged out.", "No access", "Login failed", "Try again", "Legal"
 - de: "Anmelden", "Abmelden", "Du bist abgemeldet.", "Kein Zugang", "Anmeldung fehlgeschlagen", "Erneut versuchen"
 
 ## The components' words
 
-The tarball's `SignInPage` component takes its words from the app's catalog (the `words` prop, see the [`types.ts`](../src/lib/types.ts)); [Languages](languages.md) requires that the kit ships its words per language. The list above binds the sign-in words in every catalog. Without `words` it renders its en defaults: the strings above and the sentences "Sign-in did not work. Please try again." (login failed), "You are signed in, but this account has no access to <app name>." (no access) and "Sign-in did not finish." (signed out after a sign-in that did not finish), and the words of the signing-in state: "Signing in", "In the other window" and "Open in a tab", and of the window-blocked state: "Window blocked" and "Your browser blocked the sign-in window." The de strings of these words are not ruled.
+The tarball's `SignInPage`, `AccountMenu` and `AgentControl` components take their words from the kit's catalogs: the app loads them with `loadKitWords` for the page's language and passes them as the required prop `words`, see the [README](../README.md#the-kits-words); [Languages](languages.md) requires that the kit ships its words per language.
 
-The tarball's `AccountMenu` component takes its words from the app's catalog (see the [`types.ts`](../src/lib/types.ts)): "Theme", "Follow system", "Light", "Dark" and "Log out". Without `words` it renders those en words as its defaults. The de strings of the theme rows are not ruled.
+`SignInPage` shows the strings above, the failure banner of a login that failed, the sentence of no access, which names the app, the sentence of a sign-in that did not finish, the words of the signing-in state and the words of the window-blocked state. The list above binds the sign-in words in the kit's catalogs; the de strings of the other words are not ruled.
 
-The tarball's `AgentControl` component takes its words from the app's catalog (see the [`types.ts`](../src/lib/types.ts)): the three action words, the two accessible-name patterns (which include the agent's name), the empty sentence and the five refusal sentences. Without `words` it renders its en defaults: "Call", "Calling…" and "Ask to leave"; the names "Call Mozart" and "Ask Mozart to leave"; the empty sentence "No agent is reachable right now."; and the refusals "You may not call this agent." (`not-allowed`), "Its owner is not here." (`owner-absent`), "There is no room here for another agent." (`place-full`), "The agent is not reachable right now." (`agent-unavailable`) and "That did not work. Please try again." (`try-again`). The de words are ruled: "Rufen", "Wird gerufen…", "Bitten zu gehen", "Mozart rufen", "Mozart bitten zu gehen", "Gerade ist kein Agent erreichbar." and the refusals "Du darfst diesen Agenten nicht rufen.", "Sein Besitzer ist nicht hier.", "Hier ist kein Platz für einen weiteren Agenten.", "Der Agent ist gerade nicht erreichbar." and "Das hat nicht geklappt. Versuch es noch einmal." A `here` row draws its ask-to-leave button only when the app passes `onSendAway`; without it the row shows the AI mark and the name.
+`AccountMenu` shows the name of the theme row, its three choices and "Log out". The de strings of the theme rows are not ruled.
+
+`AgentControl` shows the three action words, the two accessible-name patterns (which include the agent's name), the empty sentence and the five refusal sentences, one for each of `not-allowed`, `owner-absent`, `place-full`, `agent-unavailable` and `try-again`. The de words are ruled: "Rufen", "Wird gerufen…", "Bitten zu gehen", "Mozart rufen", "Mozart bitten zu gehen", "Gerade ist kein Agent erreichbar." and the refusals "Du darfst diesen Agenten nicht rufen.", "Sein Besitzer ist nicht hier.", "Hier ist kein Platz für einen weiteren Agenten.", "Der Agent ist gerade nicht erreichbar." and "Das hat nicht geklappt. Versuch es noch einmal." A `here` row draws its ask-to-leave button only when the app passes `onSendAway`; without it the row shows the AI mark and the name.
 
 The tarball's `AiMark` component takes no words: its text is "AI" in every language, so a caller passes nothing. Its size is fixed, not relative to the place it stands in.
 
@@ -89,7 +91,7 @@ hal's [docs/keycloak.md](https://github.com/overnightworks/hal/blob/main/docs/ke
 
 ## What it leaves to each product
 
-- **Wording.** Catalogs carry every string; the stylesheet has none. Only the sign-in and AgentControl wording lists above are ruled here.
+- **Wording.** The kit's catalogs carry the components' words and the app's catalogs every other string; the stylesheet has none. Only the sign-in and AgentControl wording lists above are ruled here.
 - **Page layout and markup.** App bar, page structure, forms and any markup outside the components stay in the product, as do the legal row's spacing and placement around it. A product keeps its own selectors off the legal row: a rule that reaches the row or its links through an ancestor (`.top nav a`, say) can change the kit's look.
 - **The app colour.** `--primary`, `--accent` and `--on-accent`; `design.css` defines none of them.
 - **Meaning that differs.** State words (reachable vs ready vs active) and which state a domain shows.
