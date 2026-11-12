@@ -1,7 +1,7 @@
 # design
 
 The family look that overnightworks products share (tokens, fonts, two classes
-and seven Svelte components), for the engineers of those products.
+and eight Svelte components), for the engineers of those products.
 
 ## Quick start
 
@@ -12,7 +12,7 @@ Distribution is a GitHub release. It carries:
   `design-catalogs` ([Catalogs](#catalogs)) and the kit's Python words
   ([The kit's words](#the-kits-words));
 - `overnightworks-design-<version>.tgz`: the same stylesheet and fonts, plus the
-  components `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `LegalLinks`, `Marked` and `AiMark` and the
+  components `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `EarMark`, `LegalLinks`, `Marked` and `AiMark` and the
   kit's words per language ([The kit's words](#the-kits-words)). It is the
   only npm distribution, and `svelte` ^5.20 is its only, peer, dependency;
 - `design-<version>-tokens.txt`: the sorted custom-property names `design.css`
@@ -103,6 +103,22 @@ defaults and what a switch does stay with the app. Props and behaviour are docum
 
 ```svelte
 <HearingSwitch kind="hear" on={agentMayHear} onChange={(on) => (agentMayHear = on)} words={kitWords} />
+```
+
+## EarMark
+
+The round ear that shows an agent hears a person, drawn on a video: the ear in a glass disc
+ringed in the app's `--accent`, and the agent's name in a small pill beside it. Its accessible
+name and title read "Mozart hears you" on the person's own tile (no `person`) and "Mozart hears
+Anna" on another person's tile (`person="Anna"`), in the page's language. It is one image and
+holds no state: the app mounts it only while the agent hears that person, places it on the
+tile and stacks the marks of several agents (the marks stack cleanly in a column). The glass
+and the light ink are the mark's own, because the mark always sits on a video; a long agent
+name ends in an ellipsis within the width the app gives it. Props and behaviour are documented
+in [`src/lib/types.ts`](src/lib/types.ts).
+
+```svelte
+<EarMark agent="Mozart" person="Anna" words={kitWords} />
 ```
 
 ## Marked
@@ -264,9 +280,9 @@ The shape of the catalogs and the rules `--check` holds are in
 
 ## The kit's words
 
-The words of `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch` and `LegalLinks` come from the
+The words of `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `EarMark` and `LegalLinks` come from the
 kit's own catalogs, which the kit builds with `design-catalogs` like an app. Each of the
-five takes them as the required prop `words: KitWords`, holds no default and reads no
+six takes them as the required prop `words: KitWords`, holds no default and reads no
 language itself, so a page cannot show one language on another's page; the
 examples above get `kitWords` from the `load` below. To override one word, pass a
 spread typed as `KitWords`: `words={{ ...kitWords, "account.logOut": "Exit" }}`. The
