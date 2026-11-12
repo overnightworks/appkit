@@ -96,7 +96,6 @@ const pageLanguages = ['de', 'en'] as const satisfies readonly KitLanguage[];
 const query = new URLSearchParams(location.search);
 /** The app's side of the kit's words: the loader called with the language the page names, `?lang=`, or en. */
 const pageLanguage = pageLanguages.find((candidate) => candidate === query.get('lang')) ?? 'en';
-// The page declares the language it shows.
 document.documentElement.lang = pageLanguage;
 
 if (query.has('words')) {
