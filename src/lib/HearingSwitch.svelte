@@ -49,8 +49,9 @@
 		font-weight: 600;
 		white-space: nowrap;
 		cursor: pointer;
-		backdrop-filter: blur(12px);
+		/* The standard property comes last: lightningcss keeps only the last of the pair. */
 		-webkit-backdrop-filter: blur(12px);
+		backdrop-filter: blur(12px);
 	}
 	.hearing-switch:hover {
 		background: rgba(255, 255, 255, 0.15);

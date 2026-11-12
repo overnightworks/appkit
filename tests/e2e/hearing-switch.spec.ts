@@ -35,6 +35,11 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			await expect(chipOf(page, 'hear', language)).toBeVisible();
 		}
 
+		test('blurs the video behind the chip, so the built CSS keeps the standard backdrop-filter', async ({ page }) => {
+			await open(page);
+			await expect(chipOf(page, 'hear')).not.toHaveCSS('backdrop-filter', 'none');
+		});
+
 		for (const colorScheme of colorSchemes) {
 			for (const width of widths) {
 				test(`paints an on chip in the app accent and an off chip softened, on its own glass, in ${colorScheme} at ${width} px`, async ({
