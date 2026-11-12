@@ -15,6 +15,7 @@ from pathlib import Path
 import pytest
 
 from design.catalogs.command import MISSING_EXTRA
+from design.catalogs.po_file import read_catalog
 
 REPOSITORY = Path(__file__).resolve().parent.parent
 FAMILY_TOKENS = {
@@ -293,11 +294,12 @@ def test_kit_words_import_without_the_catalogs_extra_and_list_the_catalogs_langu
     assert json.loads(result.stdout) == sorted(path.stem for path in (REPOSITORY / "src" / "catalogs").glob("*.po"))
 
 
-@pytest.mark.parametrize(
-    ("key", "german"),
-    [("account.logOut", "Abmelden"), ("legalLinks.name", "Rechtliches")],
-)
-def test_kit_words_give_the_german_text_of_a_key(kit_words_probe, key, german):
+@pytest.mark.parametrize("key", ["account.logOut", "legalLinks.name"])
+def test_kit_words_give_the_german_text_of_a_key(kit_words_probe, key):
+    german = next(
+        entry.text for entry in read_catalog(REPOSITORY / "src" / "catalogs" / "de.po").entries if entry.context == key
+    )
+
     result = kit_words_probe(f"print(words.text('de', '{key}'))")
 
     assert result.returncode == 0, result.stderr
