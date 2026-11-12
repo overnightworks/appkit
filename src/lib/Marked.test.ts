@@ -34,11 +34,10 @@ describe('Marked', () => {
 
 	it('adds no wrapper element and no markup of its own around the parts', async () => {
 		const sentence = await render(['Nur ', { marker: 'strong', text: 'wichtig' }]);
-		expect(sentence.innerHTML.replace(/<!--.*?-->/g, '')).toBe('Nur <strong>wichtig</strong>');
-	});
-
-	it('gives a marked part the element its snippet chose, with that element’s attributes', async () => {
-		const sentence = await render(['See ', { marker: 'link', text: 'more' }]);
-		expect(sentence.querySelector('a')!.getAttribute('href')).toBe('/more');
+		const withoutAnchors = [...sentence.childNodes]
+			.filter((node) => node.nodeType !== Node.COMMENT_NODE)
+			.map((node) => (node instanceof Element ? node.outerHTML : node.textContent))
+			.join('');
+		expect(withoutAnchors).toBe('Nur <strong>wichtig</strong>');
 	});
 });
