@@ -1,7 +1,0 @@
-claim_id = "517fc4be5a6446639f97bdc38817c7a8"
-agent = "Claude 019c230b-7e16-4294-87f3-af95e9827632"
-role = "builder"
-base = "d97bcda850807ba55766d66ff00acaa1571dd024"
-branch = "claude/issue-209-quality-v0-12-0-pins"
-scope = [".github/workflows/ci.yml", ".github/workflows/code-scanning.yml", ".github/workflows/release.yml"]
-opened_commit = "231255ef111a6eea82a25e5006dcffc62b530d55"
