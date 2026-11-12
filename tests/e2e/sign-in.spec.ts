@@ -1,14 +1,21 @@
 import { expect, test, type Locator } from '@playwright/test';
-import { buildConsumer, origin, routeTo, type ConsumerName } from './build-consumer.ts';
+import type { KitLanguage, KitWords } from 'overnightworks-design';
+import { buildConsumer, loadKitWordsUnderNode, origin, routeTo, type ConsumerName } from './build-consumer.ts';
 import { resolveStyle } from './probe.ts';
 
 const colorSchemes = ['light', 'dark'] as const;
+const widths = [390, 1280] as const;
+const languages = ['de', 'en'] as const satisfies readonly KitLanguage[];
 
 for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[]) {
 	test.describe(`a production consumer that ${consumer === 'imported' ? 'imports' : 'statically links'} design.css`, () => {
 		let outDir: string;
+		let en: KitWords;
+		let wordsOf: Record<KitLanguage, KitWords>;
 		test.beforeAll(async () => {
 			outDir = await buildConsumer(consumer);
+			wordsOf = { de: await loadKitWordsUnderNode('de'), en: await loadKitWordsUnderNode('en') };
+			en = wordsOf.en;
 		});
 
 		for (const colorScheme of colorSchemes) {
@@ -48,7 +55,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			await routeTo(page, outDir);
 			await page.goto(`${origin}/?on-sign-in`);
 
-			await page.getByRole('link', { name: 'Log in' }).click();
+			await page.getByRole('link', { name: en['signIn.logIn'] }).click();
 			expect(page.url()).toBe(`${origin}/?on-sign-in`);
 			expect(await page.evaluate(() => window.reports)).toEqual(['sign-in']);
 			await expect(page.getByRole('link')).toHaveCount(3);
@@ -59,11 +66,11 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			['a Meta-click', (link: Locator) => link.click({ modifiers: ['Meta'] }), true],
 			['a middle click', (link: Locator) => link.click({ button: 'middle' }), false]
 		] as const) {
-			test(`leaves ${name} on Log in to the browser`, async ({ page }) => {
+			test(`leaves ${name} on the sign-in link to the browser`, async ({ page }) => {
 				await routeTo(page, outDir);
 				await page.goto(`${origin}/?on-sign-in`);
 
-				await click(page.getByRole('link', { name: 'Log in' }));
+				await click(page.getByRole('link', { name: en['signIn.logIn'] }));
 				// Meta on Linux is no new-tab modifier: the browser follows the link in this page.
 				if (navigatesThisPage) await expect(page).toHaveURL(`${origin}/login`);
 				expect((await page.evaluate(() => window.reports)) ?? []).toEqual([]);
@@ -82,7 +89,41 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			await expect(dot).toHaveCSS('animation-name', 'none');
 		});
 
-		for (const width of [390, 1280]) {
+		for (const language of languages) {
+			for (const width of widths) {
+				test(`shows every state in the ${language} words at ${width} px and keeps the page within the viewport`, async ({
+					page
+				}) => {
+					await page.setViewportSize({ width, height: 800 });
+					await routeTo(page, outDir);
+					const kit = wordsOf[language];
+					for (const [variant, heading, action, alert] of [
+						['', kit['signIn.loggedOut'], kit['signIn.logIn'], undefined],
+						['unfinished', kit['signIn.loggedOut'], kit['signIn.logIn'], kit['signIn.signInUnfinished']],
+						['signing-in', kit['signIn.signingIn'], kit['signIn.openInTab'], undefined],
+						['window-blocked', kit['signIn.windowBlocked'], kit['signIn.openInTab'], undefined],
+						['login-failed', kit['signIn.loginFailed'], kit['signIn.tryAgain'], kit['signIn.loginFailedBanner']],
+						['no-access', kit['signIn.noAccess'], kit['signIn.logOut'], undefined]
+					] as const) {
+						await page.goto(`${origin}/?${variant}&lang=${language}`);
+						await expect(page.locator('html')).toHaveAttribute('lang', language);
+						const card = page.getByRole('main');
+						await expect(card.getByRole('heading')).toHaveText(heading);
+						await expect(card.getByRole('link').or(card.getByRole('button'))).toHaveText(action);
+						if (alert) await expect(card.getByRole('alert')).toHaveText(alert);
+						else await expect(card.getByRole('alert')).toHaveCount(0);
+						if (variant === 'no-access') {
+							await expect(card.getByText(kit['signIn.noAccessSentence']({ appName: 'Probe' }))).toBeVisible();
+						}
+						expect(
+							await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
+						).toBe(true);
+					}
+				});
+			}
+		}
+
+		for (const width of widths) {
 			for (const colorScheme of colorSchemes) {
 				for (const variant of ['signing-in', 'window-blocked', 'unfinished']) {
 					test(`fits the ${variant} card at ${width} px in ${colorScheme}`, async ({ page }) => {

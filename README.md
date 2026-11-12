@@ -47,6 +47,7 @@ The sign-in page in its five states: signed out, signing in (in a separate windo
 	appName="Hallucinai"
 	state={{ page: 'signed-out', signInHref }}
 	{legalLinks}
+	words={kitWords}
 />
 ```
 
@@ -64,6 +65,7 @@ components render.
 	appRows={[{ label: 'Settings', onSelect: openSettings }]}
 	{legalLinks}
 	{onLogOut}
+	words={kitWords}
 />
 ```
 
@@ -76,7 +78,7 @@ behaviour are documented in [`src/lib/types.ts`](src/lib/types.ts). Without
 action; an app that lets people send agents away passes the handler.
 
 ```svelte
-<AgentControl {rows} {onCall} {onSendAway} {refusal} />
+<AgentControl {rows} {onCall} {onSendAway} {refusal} words={kitWords} />
 ```
 
 ## Catalogs
@@ -196,8 +198,13 @@ The shape of the catalogs and the rules `--check` holds are in
 ## The kit's words
 
 The words of `SignInPage`, `AccountMenu` and `AgentControl` come from the kit's own
-catalogs, which the kit builds with `design-catalogs` like an app. The tarball
-ships them per language, each as its own chunk, and the package root exports:
+catalogs, which the kit builds with `design-catalogs` like an app. Each of the three
+takes them as the required prop `words: KitWords`, holds no default and reads no
+language itself, so a page cannot show one language on another's page; the
+examples above get `kitWords` from the `load` below. To override one word, pass a
+spread typed as `KitWords`: `words={{ ...kitWords, "account.logOut": "Exit" }}`. The
+tarball ships the words per language, each as its own chunk, and the package root
+exports:
 
 - `loadKitWords(language)`: the words of one language, as a promise. The kit reads
   no language itself; the caller passes it.

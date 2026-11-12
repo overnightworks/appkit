@@ -55,7 +55,10 @@ flowchart TB
   and both render `LegalLinks`. `AgentControl` is the panel of rows with which a
   person calls an agent and asks it to leave; each row leads with `AiMark`, the
   "AI" pill before an agent's name, which takes no props. The app owns the
-  trigger and the popover, and the control holds no state of the call. Each prop's meaning is a docstring in
+  trigger and the popover, and the control holds no state of the call. All three take
+  the kit's words as the required prop `words`, which the app loads with
+  `loadKitWords` for its page's language; no component holds an English default or
+  reads a language. Each prop's meaning is a docstring in
   [`src/lib/types.ts`](../src/lib/types.ts).
 - **Catalog generator** (`design.catalogs`, [`languages.md`](languages.md)): the
   command `design-catalogs` reads an app's gettext catalogs and writes a typed
@@ -192,9 +195,10 @@ cover them.
   translation is current when its `msgid` equals the source's text for its key.
 - Every language bundled in the components behind a `language` prop: every app
   would ship all languages, and a component would choose one itself.
-- Per-language records under the components' `*Words` props, a Svelte context
-  and a component that loads its own words: each hides where the app's language
-  is decided, which the app owns (LANG-17).
+- An optional `words` prop with an English default, a Svelte context and a
+  component that loads its own words: the default shows one language on another
+  language's page, and each hides where the app's language is decided, which the
+  app owns (LANG-17).
 - The app's generator merging the kit's words from the installed wheel into the
   app's modules: one load call and no pin skew, but an app build coupled to the
   wheel version, a rule against key collisions and the generator as a

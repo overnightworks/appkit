@@ -9,6 +9,7 @@ import {
 	loadKitWords,
 	type AgentRow,
 	type KitLanguage,
+	type KitWords,
 	type SignInState,
 	type ThemeChoice
 } from 'overnightworks-design';
@@ -52,7 +53,7 @@ function themeHolder(takesChoice: boolean) {
 	};
 }
 
-function mountMenu(variant: string): void {
+function mountMenu(variant: string, words: KitWords): void {
 	window.reports = [];
 	const report = (what: string) => () => void window.reports.push(what);
 	const common = {
@@ -65,7 +66,7 @@ function mountMenu(variant: string): void {
 	const logOut =
 		variant === 'action' ? { logOutAction: '/logout' } : { onLogOut: report('logout') };
 	const theme = variant === 'no-theme' ? undefined : themeHolder(variant !== 'ignore');
-	mount(AccountMenu, { target: document.body, props: { ...common, ...logOut, theme } });
+	mount(AccountMenu, { target: document.body, props: { ...common, ...logOut, theme, words } });
 }
 
 /** A long name shows how a row keeps its action in the panel. */
@@ -75,7 +76,7 @@ const agentRows: AgentRow[] = [
 	{ key: 'key-leonardo', name: 'Leonardo da Vinci, the long-named painter and inventor', state: 'here' }
 ];
 
-function mountAgentControl(variant: string): void {
+function mountAgentControl(variant: string, words: KitWords): void {
 	window.reports = [];
 	mount(AgentControl, {
 		target: document.body,
@@ -83,7 +84,8 @@ function mountAgentControl(variant: string): void {
 			rows: variant === 'empty' ? [] : agentRows,
 			refusal: variant === 'refusal' ? 'owner-absent' : undefined,
 			onCall: (key: string) => void window.reports.push(`call:${key}`),
-			onSendAway: (key: string) => void window.reports.push(`leave:${key}`)
+			onSendAway: (key: string) => void window.reports.push(`leave:${key}`),
+			words
 		}
 	});
 }
@@ -91,17 +93,21 @@ function mountAgentControl(variant: string): void {
 /** The languages this page offers; the type check fails when the kit lacks one. */
 const pageLanguages = ['de', 'en'] as const satisfies readonly KitLanguage[];
 
-if (location.search.startsWith('?words=')) {
-	// The app's side of the kit's words: the loader called with a language of the app's own list.
-	const tag = new URLSearchParams(location.search).get('words');
+const query = new URLSearchParams(location.search);
+/** The app's side of the kit's words: the loader called with the language the page names, `?lang=`, or en. */
+const pageLanguage = pageLanguages.find((candidate) => candidate === query.get('lang')) ?? 'en';
+document.documentElement.lang = pageLanguage;
+
+if (query.has('words')) {
+	const tag = query.get('words');
 	const language = pageLanguages.find((candidate) => candidate === tag) ?? pageLanguages[0];
 	void loadKitWords(language).then((words) => {
 		document.body.innerHTML = `<p role="status">${words['account.logOut']}</p>`;
 	});
-} else if (location.search === '?typed') {
+} else if (query.has('typed')) {
 	// A person typed the name; the app wrote the words around it.
 	document.body.innerHTML = '<main><h1>Source <span class="as-typed">talks</span></h1></main>';
-} else if (location.search === '?legal') {
+} else if (query.has('legal')) {
 	// The markup contract of a page that cannot render Svelte, beside the component's own row.
 	document.body.innerHTML = `<div id="written"><nav class="legal" aria-label="Legal">${legalLinks
 		.map((link) => `<a href="${link.href}">${link.label}</a>`)
@@ -110,29 +116,32 @@ if (location.search.startsWith('?words=')) {
 		target: document.getElementById('component')!,
 		props: { links: legalLinks }
 	});
-} else if (location.search.startsWith('?agents')) {
-	mountAgentControl(new URLSearchParams(location.search).get('agents') ?? '');
-} else if (location.search.startsWith('?menu')) {
-	mountMenu(new URLSearchParams(location.search).get('menu') ?? '');
+} else if (query.has('agents')) {
+	mountAgentControl(query.get('agents') ?? '', await loadKitWords(pageLanguage));
+} else if (query.has('menu')) {
+	mountMenu(query.get('menu') ?? '', await loadKitWords(pageLanguage));
 } else {
 	window.reports = [];
-	const variant = location.search;
-	const state: SignInState =
-		variant === '?signing-in'
-			? { page: 'signing-in', tabHref: '/app' }
-			: variant === '?window-blocked'
-				? { page: 'window-blocked', tabHref: '/app' }
-				: variant === '?unfinished'
-					? { page: 'signed-out', signInHref: '/login', unfinished: true }
-					: variant === '?on-sign-in'
-						? { page: 'signed-out', signInHref: '/login', onSignIn: () => void window.reports.push('sign-in') }
-						: { page: 'signed-out', signInHref: '/login' };
+	const state: SignInState = query.has('signing-in')
+		? { page: 'signing-in', tabHref: '/app' }
+		: query.has('window-blocked')
+			? { page: 'window-blocked', tabHref: '/app' }
+			: query.has('unfinished')
+				? { page: 'signed-out', signInHref: '/login', unfinished: true }
+				: query.has('login-failed')
+					? { page: 'login-failed', signInHref: '/login' }
+					: query.has('no-access')
+						? { page: 'no-access', logOutAction: '/logout' }
+						: query.has('on-sign-in')
+							? { page: 'signed-out', signInHref: '/login', onSignIn: () => void window.reports.push('sign-in') }
+							: { page: 'signed-out', signInHref: '/login' };
 	mount(SignInPage, {
 		target: document.body,
 		props: {
 			appName: 'Probe',
 			state,
-			legalLinks: legalLinks.slice(0, 2)
+			legalLinks: legalLinks.slice(0, 2),
+			words: await loadKitWords(pageLanguage)
 		}
 	});
 }

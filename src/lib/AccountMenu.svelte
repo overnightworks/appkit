@@ -1,15 +1,7 @@
 <script lang="ts">
 	import { flushSync } from 'svelte';
 	import LegalLinks from './LegalLinks.svelte';
-	import type { AccountMenuProps, AccountMenuWords, ThemeChoice } from './types.ts';
-
-	const english: AccountMenuWords = {
-		theme: 'Theme',
-		followSystem: 'Follow system',
-		light: 'Light',
-		dark: 'Dark',
-		logOut: 'Log out'
-	};
+	import type { AccountMenuProps, ThemeChoice } from './types.ts';
 
 	let {
 		name,
@@ -21,14 +13,14 @@
 		onLogOut,
 		logOutFailure,
 		logOutAction,
-		words = english
+		words
 	}: AccountMenuProps = $props();
 
 	const group = $props.id();
 	const choices: readonly { value: ThemeChoice; label: string }[] = $derived([
-		{ value: 'follow-system', label: words.followSystem },
-		{ value: 'light', label: words.light },
-		{ value: 'dark', label: words.dark }
+		{ value: 'follow-system', label: words['account.followSystem'] },
+		{ value: 'light', label: words['account.light'] },
+		{ value: 'dark', label: words['account.dark'] }
 	]);
 	let radios: HTMLInputElement[] = [];
 
@@ -49,7 +41,7 @@
 			><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5" /><path
 				d="M21 12H9"
 			/></svg
-		>{words.logOut}
+		>{words['account.logOut']}
 	</button>
 {/snippet}
 
@@ -78,7 +70,7 @@
 					d="M12 3a9 9 0 0 1 0 18"
 					fill="currentColor"
 				/></svg
-			>{words.theme}
+			>{words['account.theme']}
 		</div>
 		<div role="radiogroup" aria-labelledby="{group}-theme">
 			{#each choices as choice, index (choice.value)}

@@ -1,35 +1,30 @@
 <script lang="ts">
 	import AiMark from './AiMark.svelte';
-	import type { AgentControlProps, AgentControlWords } from './types.ts';
+	import type { AgentControlProps, AgentControlRefusal } from './types.ts';
 
-	const english: AgentControlWords = {
-		call: 'Call',
-		calling: 'Calling…',
-		askToLeave: 'Ask to leave',
-		callLabel: (name) => `Call ${name}`,
-		askToLeaveLabel: (name) => `Ask ${name} to leave`,
-		empty: 'No agent is reachable right now.',
-		refusals: {
-			'not-allowed': 'You may not call this agent.',
-			'owner-absent': 'Its owner is not here.',
-			'place-full': 'There is no room here for another agent.',
-			'agent-unavailable': 'The agent is not reachable right now.',
-			'try-again': 'That did not work. Please try again.'
-		}
+	const refusalKeys: Record<
+		AgentControlRefusal,
+		'agent.notAllowed' | 'agent.ownerAbsent' | 'agent.placeFull' | 'agent.agentUnavailable' | 'agent.tryAgain'
+	> = {
+		'not-allowed': 'agent.notAllowed',
+		'owner-absent': 'agent.ownerAbsent',
+		'place-full': 'agent.placeFull',
+		'agent-unavailable': 'agent.agentUnavailable',
+		'try-again': 'agent.tryAgain'
 	};
 
-	let { rows, onCall, onSendAway, refusal, words = english }: AgentControlProps = $props();
+	let { rows, onCall, onSendAway, refusal, words }: AgentControlProps = $props();
 </script>
 
 <div class="agent-control">
 	{#if refusal}
 		<div class="banner" role="alert">
 			<span class="fail-shape"><i></i></span>
-			<span>{words.refusals[refusal]}</span>
+			<span>{words[refusalKeys[refusal]]}</span>
 		</div>
 	{/if}
 	{#if rows.length === 0}
-		<p class="empty">{words.empty}</p>
+		<p class="empty">{words['agent.empty']}</p>
 	{:else}
 		<ul>
 			{#each rows as row (row.key)}
@@ -37,24 +32,29 @@
 					<AiMark />
 					<span class="name">{row.name}</span>
 					{#if row.state === 'available'}
-						<button class="act" type="button" aria-label={words.callLabel(row.name)} onclick={() => onCall(row.key)}>
-							<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>{words.call}
+						<button
+							class="act"
+							type="button"
+							aria-label={words['agent.callLabel']({ name: row.name })}
+							onclick={() => onCall(row.key)}
+						>
+							<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>{words['agent.call']}
 						</button>
 					{:else if row.state === 'inviting'}
 						<span class="pending" role="status">
-							<span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>{words.calling}
+							<span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>{words['agent.calling']}
 						</span>
 					{:else if onSendAway}
 						{@const sendAway = onSendAway}
 						<button
 							class="act"
 							type="button"
-							aria-label={words.askToLeaveLabel(row.name)}
+							aria-label={words['agent.askToLeaveLabel']({ name: row.name })}
 							onclick={() => sendAway(row.key)}
 						>
 							<svg viewBox="0 0 24 24" aria-hidden="true"
 								><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M9 16l-4-4 4-4M5 12h10" /></svg
-							>{words.askToLeave}
+							>{words['agent.askToLeave']}
 						</button>
 					{/if}
 				</li>

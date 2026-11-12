@@ -226,27 +226,28 @@ def test_a_consumer_gives_the_no_access_state_at_most_one_log_out_form_and_a_rel
 
 def test_a_consumer_gives_each_sign_in_state_only_its_own_props(consumer):
     consumer.check(
-        f"import type {{ SignInPageProps }} from '{consumer.name}';\n"
+        f"import type {{ KitWords, SignInPageProps }} from '{consumer.name}';\n"
+        "declare const words: KitWords;\n"
         "export const starting: SignInPageProps = {\n"
         "  appName: 'A', state: { page: 'signed-out', signInHref: '/in', onSignIn: () => {}, unfinished: true },\n"
-        "  legalLinks: [],\n"
+        "  legalLinks: [], words,\n"
         "};\n"
         "export const waiting: SignInPageProps = {\n"
-        "  appName: 'A', state: { page: 'signing-in', tabHref: '/t' }, legalLinks: [],\n"
+        "  appName: 'A', state: { page: 'signing-in', tabHref: '/t' }, legalLinks: [], words,\n"
         "};\n"
         "export const waitingWithoutLink: SignInPageProps = {\n"
         "  appName: 'A',\n"
         "  // @ts-expect-error signing-in needs tabHref\n"
         "  state: { page: 'signing-in' },\n"
-        "  legalLinks: [],\n"
+        "  legalLinks: [], words,\n"
         "};\n"
         "export const waitingWithSignInHref: SignInPageProps = {\n"
         "  appName: 'A',\n"
         "  // @ts-expect-error signing-in refuses signInHref\n"
         "  state: { page: 'signing-in', tabHref: '/t', signInHref: '/in' },\n"
-        "  legalLinks: [],\n"
+        "  legalLinks: [], words,\n"
         "};\n"
-        "const frame = { appName: 'A', legalLinks: [] };\n"
+        "const frame = { appName: 'A', legalLinks: [], words };\n"
         "export const blocked: SignInPageProps = { ...frame, state: { page: 'window-blocked', tabHref: '/t' } };\n"
         "// @ts-expect-error window-blocked needs tabHref\n"
         "export const blockedWithoutLink: SignInPageProps = { ...frame, state: { page: 'window-blocked' } };\n"
@@ -258,21 +259,24 @@ def test_a_consumer_gives_each_sign_in_state_only_its_own_props(consumer):
         "  appName: 'A',\n"
         "  // @ts-expect-error onSignIn exists only on signed-out\n"
         "  state: { page: 'login-failed', signInHref: '/in', onSignIn: () => {} },\n"
-        "  legalLinks: [],\n"
+        "  legalLinks: [], words,\n"
         "};\n"
         "export const failedUnfinished: SignInPageProps = {\n"
         "  appName: 'A',\n"
         "  // @ts-expect-error unfinished exists only on signed-out\n"
         "  state: { page: 'login-failed', signInHref: '/in', unfinished: true },\n"
-        "  legalLinks: [],\n"
+        "  legalLinks: [], words,\n"
         "};\n"
     )
 
 
 def test_a_consumer_gives_the_account_menu_one_log_out_form_and_a_typed_theme_choice(consumer):
     consumer.check(
-        f"import {{ AccountMenu, type AccountMenuProps, type ThemeChoice }} from '{consumer.name}';\n"
-        "const common = { name: 'F', accountHref: '/a', onAccountOpen: () => {}, appRows: [], legalLinks: [] };\n"
+        f"import {{ AccountMenu, type AccountMenuProps, type KitWords, type ThemeChoice }} from '{consumer.name}';\n"
+        "declare const words: KitWords;\n"
+        "const common = {\n"
+        "  name: 'F', accountHref: '/a', onAccountOpen: () => {}, appRows: [], legalLinks: [], words,\n"
+        "};\n"
         "export const component: typeof AccountMenu = AccountMenu;\n"
         "export const callback: AccountMenuProps = { ...common, onLogOut: () => {}, logOutFailure: 'x' };\n"
         "export const action: AccountMenuProps = { ...common, logOutAction: '/logout' };\n"
@@ -298,33 +302,34 @@ def test_a_consumer_gives_the_account_menu_one_log_out_form_and_a_typed_theme_ch
     )
 
 
-def test_a_consumer_imports_both_words_types_from_the_package_root_and_gives_each_whole(consumer):
+COMPONENT_PROPS = {
+    "AccountMenuProps": (
+        "{ name: 'F', accountHref: '/a', onAccountOpen: () => {}, appRows: [], legalLinks: [], logOutAction: '/l'"
+    ),
+    "SignInPageProps": "{ appName: 'A', state: { page: 'signed-out', signInHref: '/in' }, legalLinks: []",
+    "AgentControlProps": "{ rows: [], onCall: (key: string) => void key",
+}
+
+
+@pytest.mark.parametrize("props_type", COMPONENT_PROPS)
+def test_a_consumer_passes_the_kit_words_to_each_component_and_fails_its_type_check_without_them(consumer, props_type):
+    props = COMPONENT_PROPS[props_type]
     consumer.check(
-        "import type { AccountMenuProps, AccountMenuWords, SignInPageProps, SignInPageWords } "
-        f"from '{consumer.name}';\n"
-        "const menuWords: AccountMenuWords = { theme: 'T', followSystem: 'F', light: 'L', dark: 'D', logOut: 'O' };\n"
-        "const pageWords: SignInPageWords = {\n"
-        "  loggedOut: 'a', logIn: 'b', loginFailed: 'c', loginFailedBanner: 'd',\n"
-        "  tryAgain: 'e', noAccess: 'f', noAccessSentence: (appName: string) => appName, logOut: 'g',\n"
-        "  signingIn: 'h', inOtherWindow: 'i', openInTab: 'j', windowBlocked: 'l', windowBlockedSentence: 'm',\n"
-        "  signInUnfinished: 'k',\n"
-        "};\n"
-        "export const menu: AccountMenuProps = {\n"
-        "  name: 'F', accountHref: '/a', onAccountOpen: () => {}, appRows: [], legalLinks: [],\n"
-        "  logOutAction: '/l', words: menuWords,\n"
-        "};\n"
-        "export const page: SignInPageProps = {\n"
-        "  appName: 'A', state: { page: 'signed-out', signInHref: '/in' }, legalLinks: [], words: pageWords,\n"
-        "};\n"
-        "type OptionalKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? K : never }[keyof T];\n"
-        "export const menuHasNoOptionalWord: [OptionalKeys<AccountMenuWords>] extends [never] ? true : false = true;\n"
-        "export const pageHasNoOptionalWord: [OptionalKeys<SignInPageWords>] extends [never] ? true : false = true;\n"
-        "// @ts-expect-error a record of menu words is whole\n"
-        "export const partialMenu: AccountMenuWords = { theme: 'T' };\n"
-        "// @ts-expect-error a record of page words is whole\n"
-        "export const partialPage: SignInPageWords = { logIn: 'b' };\n"
-        "// @ts-expect-error the no-access sentence is a function of the app name\n"
-        "export const textSentence: SignInPageWords = { ...pageWords, noAccessSentence: 'f' };\n"
+        f"import type {{ {props_type}, KitWords }} from '{consumer.name}';\n"
+        "declare const words: KitWords;\n"
+        f"export const worded: {props_type} = {props}, words }};\n"
+        f"export const overridden: {props_type} = {props}, words: {{ ...words, 'account.logOut': 'Exit' }} }};\n"
+        "// @ts-expect-error the words are required\n"
+        f"export const unworded: {props_type} = {props} }};\n"
+        "// @ts-expect-error the words are not optional\n"
+        f"export const undefinedWords: {props_type} = {props}, words: undefined }};\n"
+    )
+
+
+@pytest.mark.parametrize("removed", ["AccountMenuWords", "SignInPageWords", "AgentControlWords"])
+def test_the_package_root_exports_no_per_component_words_type(consumer, removed):
+    consumer.check(
+        f"// @ts-expect-error the package exports no such type\nimport type {{ {removed} }} from '{consumer.name}';\n"
     )
 
 
@@ -357,39 +362,26 @@ def test_a_consumer_imports_the_ai_mark_from_the_package_root(consumer):
     consumer.check(f"import {{ AiMark }} from '{consumer.name}';\nexport const component: typeof AiMark = AiMark;\n")
 
 
-def test_a_consumer_imports_the_agent_control_with_its_types_from_the_package_root_and_gives_the_words_whole(
+def test_a_consumer_imports_the_agent_control_with_its_types_from_the_package_root(
     consumer,
 ):
     consumer.check(
-        f"import {{ AgentControl, type AgentControlProps, type AgentControlRefusal, type AgentControlWords, "
-        f"type AgentRow }} from '{consumer.name}';\n"
+        f"import {{ AgentControl, type AgentControlProps, type AgentControlRefusal, type AgentRow, "
+        f"type KitWords }} from '{consumer.name}';\n"
         "export const component: typeof AgentControl = AgentControl;\n"
-        "const common = { onCall: (key: string) => void key, onSendAway: (key: string) => void key };\n"
+        "declare const words: KitWords;\n"
+        "const common = { onCall: (key: string) => void key, onSendAway: (key: string) => void key, words };\n"
         "const rows: AgentRow[] = [\n"
         "  { key: 'k1', name: 'Mozart', state: 'available' },\n"
         "  { key: 'k2', name: 'Bach', state: 'inviting' },\n"
         "  { key: 'k3', name: 'Leonardo', state: 'here' },\n"
         "];\n"
         "export const plain: AgentControlProps = { ...common, rows };\n"
-        "export const withoutSendAway: AgentControlProps = { onCall: (key: string) => void key, rows };\n"
+        "export const withoutSendAway: AgentControlProps = { onCall: (key: string) => void key, rows, words };\n"
         "export const refused: AgentControlProps = { ...common, rows, refusal: 'place-full' };\n"
         "export const reasons: AgentControlRefusal[] = [\n"
         "  'not-allowed', 'owner-absent', 'place-full', 'agent-unavailable', 'try-again',\n"
         "];\n"
-        "const words: AgentControlWords = {\n"
-        "  call: 'a', calling: 'b', askToLeave: 'c', callLabel: (name: string) => name,\n"
-        "  askToLeaveLabel: (name: string) => name, empty: 'd',\n"
-        "  refusals: {\n"
-        "    'not-allowed': 'e', 'owner-absent': 'f', 'place-full': 'g', 'agent-unavailable': 'h', 'try-again': 'i',\n"
-        "  },\n"
-        "};\n"
-        "export const worded: AgentControlProps = { ...common, rows, words };\n"
-        "type OptionalKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? K : never }[keyof T];\n"
-        "export const noOptionalWord: [OptionalKeys<AgentControlWords>] extends [never] ? true : false = true;\n"
-        "// @ts-expect-error the words are whole\n"
-        "export const partialWords: AgentControlWords = { call: 'a' };\n"
-        "// @ts-expect-error a refusal sentence is missing\n"
-        "export const missingRefusal: AgentControlWords = { ...words, refusals: { 'not-allowed': 'e' } };\n"
         "// @ts-expect-error a refusal outside the five reasons\n"
         "export const unknownRefusal: AgentControlProps = { ...common, rows, refusal: 'sorry' };\n"
         "// @ts-expect-error a state outside the three\n"

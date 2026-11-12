@@ -1,24 +1,37 @@
 import { expect, test, type Page } from '@playwright/test';
-import { buildConsumer, origin, routeTo, type ConsumerName } from './build-consumer.ts';
+import type { KitLanguage, KitWords } from 'overnightworks-design';
+import { buildConsumer, loadKitWordsUnderNode, origin, routeTo, type ConsumerName } from './build-consumer.ts';
 import { resolveStyle } from './probe.ts';
 
 const colorSchemes = ['light', 'dark'] as const;
 const widths = [390, 1280] as const;
 const touchRowFloor = 44;
+const languages = ['de', 'en'] as const satisfies readonly KitLanguage[];
+/** The names of the consumer page's rows. */
+const mozart = 'Mozart';
+const leonardo = 'Leonardo da Vinci, the long-named painter and inventor';
 
 const reportsOf = (page: Page) => page.evaluate(() => window.reports);
 
 for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[]) {
 	test.describe(`the agent control in a production consumer that ${consumer === 'imported' ? 'imports' : 'statically links'} design.css`, () => {
 		let outDir: string;
+		let wordsOf: Record<KitLanguage, KitWords>;
+		let en: KitWords;
+		let callMozart: string;
+		let askLeonardoToLeave: string;
 		test.beforeAll(async () => {
 			outDir = await buildConsumer(consumer);
+			wordsOf = { de: await loadKitWordsUnderNode('de'), en: await loadKitWordsUnderNode('en') };
+			en = wordsOf.en;
+			callMozart = en['agent.callLabel']({ name: mozart });
+			askLeonardoToLeave = en['agent.askToLeaveLabel']({ name: leonardo });
 		});
 
-		async function open(page: Page, variant = ''): Promise<void> {
+		async function open(page: Page, variant = '', language: KitLanguage = 'en'): Promise<void> {
 			await routeTo(page.context(), outDir);
-			await page.goto(`${origin}/?agents=${variant}`);
-			await expect(page.getByRole('button', { name: 'Call Mozart' })).toBeVisible();
+			await page.goto(`${origin}/?agents=${variant}${language === 'en' ? '' : `&lang=${language}`}`);
+			await expect(page.getByRole('button', { name: wordsOf[language]['agent.callLabel']({ name: mozart }) })).toBeVisible();
 		}
 
 		for (const colorScheme of colorSchemes) {
@@ -40,7 +53,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 						['border-top-color', 'background-color', 'color']
 					);
 					const alert = page.getByRole('alert');
-					await expect(alert).toHaveText('Its owner is not here.');
+					await expect(alert).toHaveText(en['agent.ownerAbsent']);
 					await expect(alert).toHaveCSS('border-top-color', tokens['border-top-color']);
 					await expect(alert).toHaveCSS('background-color', tokens['background-color']);
 
@@ -51,7 +64,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 						await expect(mark).toHaveCSS('border-top-style', 'solid');
 					}
 					await expect(page.getByRole('status').locator('i').first()).toBeVisible();
-					await expect(page.getByRole('button', { name: 'Call Mozart' })).toHaveCSS(
+					await expect(page.getByRole('button', { name: callMozart })).toHaveCSS(
 						'border-top-style',
 						'solid'
 					);
@@ -63,7 +76,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			test(`keeps every action inside the viewport with a long name at ${width} px`, async ({ page }) => {
 				await page.setViewportSize({ width, height: 800 });
 				await open(page);
-				for (const name of ['Call Mozart', /^Ask Leonardo/]) {
+				for (const name of [callMozart, askLeonardoToLeave]) {
 					const box = (await page.getByRole('button', { name }).boundingBox())!;
 					expect(box.x).toBeGreaterThanOrEqual(0);
 					expect(box.x + box.width).toBeLessThanOrEqual(width);
@@ -112,9 +125,9 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 
 		test('reports the key of a call and of a send-away once each and keeps the page', async ({ page }) => {
 			await open(page);
-			await page.getByRole('button', { name: 'Call Mozart' }).click();
+			await page.getByRole('button', { name: callMozart }).click();
 			expect(await reportsOf(page)).toEqual(['call:key-mozart']);
-			await page.getByRole('button', { name: /^Ask Leonardo.* to leave$/ }).click();
+			await page.getByRole('button', { name: askLeonardoToLeave }).click();
 			expect(await reportsOf(page)).toEqual(['call:key-mozart', 'leave:key-leonardo']);
 			await expect(page.getByRole('dialog')).toHaveCount(0);
 			expect(page.url()).toBe(`${origin}/?agents=`);
@@ -123,7 +136,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 		test('gives the waiting row no button and keeps the dots still under reduced motion', async ({ page }) => {
 			await open(page);
 			const waiting = page.getByRole('status');
-			await expect(waiting).toHaveText('Calling…');
+			await expect(waiting).toHaveText(en['agent.calling']);
 			await expect(waiting.getByRole('button')).toHaveCount(0);
 			const dot = waiting.locator('i').first();
 			await page.emulateMedia({ reducedMotion: 'no-preference' });
@@ -135,17 +148,46 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 		test('is operable by keyboard in reading order', async ({ page }) => {
 			await open(page);
 			await page.keyboard.press('Tab');
-			await expect(page.getByRole('button', { name: 'Call Mozart' })).toBeFocused();
+			await expect(page.getByRole('button', { name: callMozart })).toBeFocused();
 			await page.keyboard.press('Tab');
-			await expect(page.getByRole('button', { name: /^Ask Leonardo/ })).toBeFocused();
+			await expect(page.getByRole('button', { name: askLeonardoToLeave })).toBeFocused();
 			await page.keyboard.press('Enter');
 			expect(await reportsOf(page)).toEqual(['leave:key-leonardo']);
 		});
 
+		for (const language of languages) {
+			for (const width of widths) {
+				test(`draws the ${language} words in every row, the refusal and the empty sentence at ${width} px`, async ({
+					page
+				}) => {
+					await page.setViewportSize({ width, height: 800 });
+					await open(page, 'refusal', language);
+					await expect(page.locator('html')).toHaveAttribute('lang', language);
+					const kit = wordsOf[language];
+					await expect(page.getByRole('alert')).toHaveText(kit['agent.ownerAbsent']);
+					await expect(page.getByRole('status')).toHaveText(kit['agent.calling']);
+					for (const name of [
+						kit['agent.callLabel']({ name: mozart }),
+						kit['agent.askToLeaveLabel']({ name: leonardo })
+					]) {
+						const box = (await page.getByRole('button', { name }).boundingBox())!;
+						expect(box.x).toBeGreaterThanOrEqual(0);
+						expect(box.x + box.width).toBeLessThanOrEqual(width);
+					}
+					expect(
+						await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
+					).toBe(true);
+					await routeTo(page.context(), outDir);
+					await page.goto(`${origin}/?agents=empty&lang=${language}`);
+					await expect(page.getByText(kit['agent.empty'])).toBeVisible();
+				});
+			}
+		}
+
 		test('draws only the empty sentence when no agent is listed', async ({ page }) => {
 			await routeTo(page.context(), outDir);
 			await page.goto(`${origin}/?agents=empty`);
-			await expect(page.getByText('No agent is reachable right now.')).toBeVisible();
+			await expect(page.getByText(en['agent.empty'])).toBeVisible();
 			await expect(page.getByRole('button')).toHaveCount(0);
 			await expect(page.getByRole('list')).toHaveCount(0);
 		});

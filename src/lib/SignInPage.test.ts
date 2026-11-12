@@ -1,7 +1,11 @@
 import { mount, tick, unmount } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import SignInPage from './SignInPage.svelte';
-import type { SignInPageProps, SignInPageWords } from './types.ts';
+import type { SignInPageProps } from './types.ts';
+import { loadWords } from './words/index.ts';
+
+const en = await loadWords('en');
+const de = await loadWords('de');
 
 const mounted: { target: HTMLElement; component: ReturnType<typeof mount> }[] = [];
 
@@ -12,6 +16,7 @@ async function render(overrides: Partial<SignInPageProps> = {}): Promise<HTMLEle
 		appName: 'Hallucinai',
 		state: { page: 'signed-out', signInHref: '/auth/login' },
 		legalLinks: [],
+		words: en,
 		...overrides
 	};
 	mounted.push({ target, component: mount(SignInPage, { target, props }) });
@@ -30,11 +35,11 @@ afterEach(async () => {
 describe('signed-out', () => {
 	it('tells the user they are logged out and offers one Log in link that reloads the page', async () => {
 		const page = await render();
-		expect(page.querySelector('h1')?.textContent).toBe('You are logged out.');
+		expect(page.querySelector('h1')?.textContent).toBe(en['signIn.loggedOut']);
 		const actions = page.querySelectorAll('a, button');
 		expect(actions).toHaveLength(1);
 		expect(actions[0].tagName).toBe('A');
-		expect(actions[0].textContent).toBe('Log in');
+		expect(actions[0].textContent).toBe(en['signIn.logIn']);
 		expect(actions[0].getAttribute('href')).toBe('/auth/login');
 		expect(actions[0].hasAttribute('data-sveltekit-reload')).toBe(true);
 	});
@@ -81,9 +86,9 @@ describe('signed-out, unfinished', () => {
 		const page = await render({
 			state: { page: 'signed-out', signInHref: '/auth/login', unfinished: true, onSignIn }
 		});
-		expect(page.querySelector('h1')?.textContent).toBe('You are logged out.');
+		expect(page.querySelector('h1')?.textContent).toBe(en['signIn.loggedOut']);
 		const alert = page.querySelector('[role="alert"]')!;
-		expect(alert.textContent).toContain('Sign-in did not finish.');
+		expect(alert.textContent).toContain(en['signIn.signInUnfinished']);
 		const actions = page.querySelectorAll('a, button');
 		expect(actions).toHaveLength(1);
 		expect(alert.compareDocumentPosition(actions[0]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -95,14 +100,14 @@ describe('signed-out, unfinished', () => {
 describe('signing-in', () => {
 	it('names the wait, hides its shape and offers only a link that opens the app in a tab', async () => {
 		const page = await render({ state: { page: 'signing-in', tabHref: '/app' } });
-		expect(page.querySelector('h1')?.textContent).toBe('Signing in');
-		expect(page.textContent).toContain('In the other window');
+		expect(page.querySelector('h1')?.textContent).toBe(en['signIn.signingIn']);
+		expect(page.textContent).toContain(en['signIn.inOtherWindow']);
 		expect(page.querySelector('[role="alert"]')).toBeNull();
 		const shape = page.querySelector('main [aria-hidden="true"]:not(a *)');
 		expect(shape).not.toBeNull();
 		const actions = page.querySelectorAll('a, button');
 		expect(actions).toHaveLength(1);
-		expect(actions[0].textContent?.trim()).toBe('Open in a tab');
+		expect(actions[0].textContent?.trim()).toBe(en['signIn.openInTab']);
 		expect(actions[0].getAttribute('href')).toBe('/app');
 		expect(actions[0].getAttribute('target')).toBe('_blank');
 		expect(actions[0].getAttribute('rel')).toBe('noopener');
@@ -112,13 +117,13 @@ describe('signing-in', () => {
 describe('window-blocked', () => {
 	it('says the window was blocked, shows no wait and offers only a link that opens the app in a tab', async () => {
 		const page = await render({ state: { page: 'window-blocked', tabHref: '/app' } });
-		expect(page.querySelector('h1')?.textContent).toBe('Window blocked');
-		expect(page.textContent).toContain('Your browser blocked the sign-in window.');
+		expect(page.querySelector('h1')?.textContent).toBe(en['signIn.windowBlocked']);
+		expect(page.textContent).toContain(en['signIn.windowBlockedSentence']);
 		expect(page.querySelector('main [aria-hidden="true"]:not(a *)')).toBeNull();
 		expect(page.querySelector('[role="alert"], button')).toBeNull();
 		const actions = page.querySelectorAll('a, button');
 		expect(actions).toHaveLength(1);
-		expect(actions[0].textContent?.trim()).toBe('Open in a tab');
+		expect(actions[0].textContent?.trim()).toBe(en['signIn.openInTab']);
 		expect(actions[0].getAttribute('href')).toBe('/app');
 		expect(actions[0].getAttribute('target')).toBe('_blank');
 		expect(actions[0].getAttribute('rel')).toBe('noopener');
@@ -128,13 +133,11 @@ describe('window-blocked', () => {
 describe('login-failed', () => {
 	it('shows the failure banner as an alert and offers one Try again link that reloads the page', async () => {
 		const page = await render({ state: { page: 'login-failed', signInHref: '/auth/login?retry' } });
-		expect(page.querySelector('h1')?.textContent).toBe('Login failed');
-		expect(page.querySelector('[role="alert"]')?.textContent).toContain(
-			'Sign-in did not work. Please try again.'
-		);
+		expect(page.querySelector('h1')?.textContent).toBe(en['signIn.loginFailed']);
+		expect(page.querySelector('[role="alert"]')?.textContent).toContain(en['signIn.loginFailedBanner']);
 		const actions = page.querySelectorAll('a, button');
 		expect(actions).toHaveLength(1);
-		expect(actions[0].textContent).toBe('Try again');
+		expect(actions[0].textContent).toBe(en['signIn.tryAgain']);
 		expect(actions[0].getAttribute('href')).toBe('/auth/login?retry');
 		expect(actions[0].hasAttribute('data-sveltekit-reload')).toBe(true);
 	});
@@ -144,17 +147,15 @@ describe('no-access', () => {
 	it('names the app, shows no alert, and offers one Log out button that calls onLogOut once', async () => {
 		const onLogOut = vi.fn();
 		const page = await render({ state: { page: 'no-access', onLogOut } });
-		expect(page.querySelector('h1')?.textContent).toBe('No access');
-		expect(page.textContent).toContain(
-			'You are signed in, but this account has no access to Hallucinai.'
-		);
+		expect(page.querySelector('h1')?.textContent).toBe(en['signIn.noAccess']);
+		expect(page.textContent).toContain(en['signIn.noAccessSentence']({ appName: 'Hallucinai' }));
 		expect(page.querySelector('[role="alert"]')).toBeNull();
 		const actions = page.querySelectorAll('a, button');
 		expect(actions).toHaveLength(1);
 		const button = actions[0] as HTMLButtonElement;
 		expect(button.tagName).toBe('BUTTON');
 		expect(button.type).toBe('button');
-		expect(button.textContent).toBe('Log out');
+		expect(button.textContent).toBe(en['signIn.logOut']);
 		expect(page.textContent).not.toContain('Back');
 		button.click();
 		expect(onLogOut).toHaveBeenCalledTimes(1);
@@ -162,10 +163,8 @@ describe('no-access', () => {
 
 	it('shows only the heading and the sentence when the app passes no log-out form', async () => {
 		const page = await render({ state: { page: 'no-access' } });
-		expect(page.querySelector('h1')?.textContent).toBe('No access');
-		expect(page.textContent).toContain(
-			'You are signed in, but this account has no access to Hallucinai.'
-		);
+		expect(page.querySelector('h1')?.textContent).toBe(en['signIn.noAccess']);
+		expect(page.textContent).toContain(en['signIn.noAccessSentence']({ appName: 'Hallucinai' }));
 		expect(page.querySelector('form, button, a, [role="alert"]')).toBeNull();
 	});
 
@@ -256,79 +255,98 @@ describe('state shape', () => {
 });
 
 describe('words from the app', () => {
-	const german: SignInPageWords = {
-		loggedOut: 'Du bist abgemeldet.',
-		logIn: 'Anmelden',
-		loginFailed: 'Anmeldung fehlgeschlagen',
-		loginFailedBanner: 'Die Anmeldung hat nicht geklappt. Bitte versuche es erneut.',
-		tryAgain: 'Erneut versuchen',
-		noAccess: 'Kein Zugang',
-		noAccessSentence: (appName) => `Du bist angemeldet, aber dieses Konto hat keinen Zugang zu ${appName}.`,
-		logOut: 'Abmelden',
-		signingIn: 'Anmeldung läuft',
-		inOtherWindow: 'Im anderen Fenster',
-		openInTab: 'Tab öffnen',
-		windowBlocked: 'Fenster blockiert',
-		windowBlockedSentence: 'Dein Browser hat das Anmeldefenster blockiert.',
-		signInUnfinished: 'Anmeldung nicht beendet'
-	};
+	const appName = 'Hallucinai';
+	const noAccessSentence = de['signIn.noAccessSentence']({ appName });
+
 	function visibleTexts(page: HTMLElement): string[] {
-		return [...page.querySelectorAll('h1, p, a, button, [role="alert"]')].map((element) => element.textContent ?? '');
+		return [...page.querySelectorAll('h1, p, a, button, [role="alert"]')].map(
+			(element) => element.textContent?.trim() ?? ''
+		);
 	}
 
 	it.each([
-		[
-			'signed-out',
-			{ page: 'signed-out', signInHref: '/auth/login' },
-			['Du bist abgemeldet.', 'Anmelden']
-		],
+		['signed-out', { page: 'signed-out', signInHref: '/auth/login' }, ['Du bist abgemeldet.', 'Anmelden']],
 		[
 			'signed-out, unfinished',
 			{ page: 'signed-out', signInHref: '/auth/login', unfinished: true },
-			['Du bist abgemeldet.', 'Anmeldung nicht beendet', 'Anmelden']
+			['Du bist abgemeldet.', de['signIn.signInUnfinished'], 'Anmelden']
 		],
 		[
 			'signing-in',
 			{ page: 'signing-in', tabHref: '/app' },
-			['Anmeldung läuft', 'Im anderen Fenster', 'Tab öffnen']
+			[de['signIn.signingIn'], de['signIn.inOtherWindow'], de['signIn.openInTab']]
 		],
 		[
 			'window-blocked',
 			{ page: 'window-blocked', tabHref: '/app' },
-			['Fenster blockiert', 'Dein Browser hat das Anmeldefenster blockiert.', 'Tab öffnen']
+			[de['signIn.windowBlocked'], de['signIn.windowBlockedSentence'], de['signIn.openInTab']]
 		],
 		[
 			'login-failed',
 			{ page: 'login-failed', signInHref: '/auth/login' },
-			[
-				'Anmeldung fehlgeschlagen',
-				'Die Anmeldung hat nicht geklappt. Bitte versuche es erneut.',
-				'Erneut versuchen'
-			]
+			['Anmeldung fehlgeschlagen', de['signIn.loginFailedBanner'], 'Erneut versuchen']
 		],
 		[
 			'no-access with a callback',
 			{ page: 'no-access', onLogOut: () => {} },
-			['Kein Zugang', 'Du bist angemeldet, aber dieses Konto hat keinen Zugang zu Hallucinai.', 'Abmelden']
+			['Kein Zugang', noAccessSentence, 'Abmelden']
 		],
 		[
 			'no-access with a form action',
 			{ page: 'no-access', logOutAction: '/logout' },
-			['Kein Zugang', 'Du bist angemeldet, aber dieses Konto hat keinen Zugang zu Hallucinai.', 'Abmelden']
-		]
-	] as const)('shows the given words and no default word in %s', async (_name, state, shown) => {
-		const page = await render({ words: german, state });
+			['Kein Zugang', noAccessSentence, 'Abmelden']
+		],
+		['no-access without a log-out form', { page: 'no-access' }, ['Kein Zugang', noAccessSentence]]
+	] as const)('shows the given words and no en word in %s', async (_name, state, shown) => {
+		const page = await render({ words: de, state });
+		expect(visibleTexts(page)).toEqual(shown);
 		const text = page.textContent ?? '';
-		for (const phrase of shown) expect(text).toContain(phrase);
-		const defaultTexts = visibleTexts(await render({ state }));
-		for (const defaultText of defaultTexts) expect(text).not.toContain(defaultText);
+		for (const enText of visibleTexts(await render({ state }))) expect(text).not.toContain(enText);
 		const alert = page.querySelector('[role="alert"]');
-		if (state.page === 'login-failed') expect(alert?.textContent?.trim()).toBe(german.loginFailedBanner);
-		else if ('unfinished' in state) expect(alert?.textContent?.trim()).toBe(german.signInUnfinished);
+		if (state.page === 'login-failed') expect(alert?.textContent?.trim()).toBe(de['signIn.loginFailedBanner']);
+		else if ('unfinished' in state) expect(alert?.textContent?.trim()).toBe(de['signIn.signInUnfinished']);
 		else expect(alert).toBeNull();
-		const headline = page.querySelector('h1')?.textContent;
-		expect(headline).toBe(shown[0]);
-		const action = page.querySelector('a, button')!;
-		expect(action.textContent).toBe(shown[shown.length - 1]);
+	});
+});
+
+describe('en words', () => {
+	it.each([
+		['signed-out', { page: 'signed-out', signInHref: '/auth/login' }, ['You are logged out.', 'Log in']],
+		[
+			'signed-out, unfinished',
+			{ page: 'signed-out', signInHref: '/auth/login', unfinished: true },
+			['You are logged out.', 'Sign-in did not finish.', 'Log in']
+		],
+		[
+			'signing-in',
+			{ page: 'signing-in', tabHref: '/app' },
+			['Signing in', 'In the other window', 'Open in a tab']
+		],
+		[
+			'window-blocked',
+			{ page: 'window-blocked', tabHref: '/app' },
+			['Window blocked', 'Your browser blocked the sign-in window.', 'Open in a tab']
+		],
+		[
+			'login-failed',
+			{ page: 'login-failed', signInHref: '/auth/login' },
+			['Login failed', 'Sign-in did not work. Please try again.', 'Try again']
+		],
+		[
+			'no-access with a callback',
+			{ page: 'no-access', onLogOut: () => {} },
+			['No access', 'You are signed in, but this account has no access to Hallucinai.', 'Log out']
+		],
+		[
+			'no-access with a form action',
+			{ page: 'no-access', logOutAction: '/logout' },
+			['No access', 'You are signed in, but this account has no access to Hallucinai.', 'Log out']
+		]
+	] as const)('renders the en texts of the kit in %s', async (_name, state, shown) => {
+		const page = await render({ state });
+		const texts = [...page.querySelectorAll('h1, p, [role="alert"] span:last-child, a, button')].map((element) =>
+			element.textContent?.trim()
+		);
+		expect(texts).toEqual(shown);
 	});
 });

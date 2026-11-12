@@ -1,25 +1,8 @@
 <script lang="ts">
 	import LegalLinks from './LegalLinks.svelte';
-	import type { SignInPageProps, SignInPageWords } from './types.ts';
+	import type { SignInPageProps } from './types.ts';
 
-	const english: SignInPageWords = {
-		loggedOut: 'You are logged out.',
-		logIn: 'Log in',
-		loginFailed: 'Login failed',
-		loginFailedBanner: 'Sign-in did not work. Please try again.',
-		tryAgain: 'Try again',
-		noAccess: 'No access',
-		noAccessSentence: (appName) => `You are signed in, but this account has no access to ${appName}.`,
-		logOut: 'Log out',
-		signingIn: 'Signing in',
-		inOtherWindow: 'In the other window',
-		openInTab: 'Open in a tab',
-		windowBlocked: 'Window blocked',
-		windowBlockedSentence: 'Your browser blocked the sign-in window.',
-		signInUnfinished: 'Sign-in did not finish.'
-	};
-
-	let { appName, state, legalLinks, legalLinksNewTab = false, words = english }: SignInPageProps = $props();
+	let { appName, state, legalLinks, legalLinksNewTab = false, words }: SignInPageProps = $props();
 
 	/** A plain primary click starts the app's own sign-in; any modified or non-primary click keeps the browser's behaviour. */
 	function startSignIn(event: MouseEvent, onSignIn: () => void): void {
@@ -42,7 +25,7 @@
 			><path d="M14 4h6v6M20 4l-8 8" /><path
 				d="M19 13v6a1.5 1.5 0 0 1-1.5 1.5h-12A1.5 1.5 0 0 1 4 19V7a1.5 1.5 0 0 1 1.5-1.5H11"
 			/></svg
-		>{words.openInTab}
+		>{words['signIn.openInTab']}
 	</a>
 {/snippet}
 
@@ -57,45 +40,45 @@
 	<main class="card">
 		<span class="wordmark" data-text={appName}>{appName}</span>
 		{#if state.page === 'signed-out'}
-			<h1>{words.loggedOut}</h1>
+			<h1>{words['signIn.loggedOut']}</h1>
 			{#if state.unfinished}
-				{@render banner(words.signInUnfinished)}
+				{@render banner(words['signIn.signInUnfinished'])}
 			{/if}
 			{@const onSignIn = state.onSignIn}
 			<a
 				class="action primary"
 				href={state.signInHref}
 				data-sveltekit-reload
-				onclick={onSignIn && ((event) => startSignIn(event, onSignIn))}>{words.logIn}</a
+				onclick={onSignIn && ((event) => startSignIn(event, onSignIn))}>{words['signIn.logIn']}</a
 			>
 		{:else if state.page === 'signing-in'}
-			<h1>{words.signingIn}</h1>
-			<p>{words.inOtherWindow}</p>
+			<h1>{words['signIn.signingIn']}</h1>
+			<p>{words['signIn.inOtherWindow']}</p>
 			<div class="wait" aria-hidden="true">
 				<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2" /><path d="M3.5 9.5h17" /></svg>
 				<span class="dots"><i></i><i></i><i></i></span>
 			</div>
 			{@render tabLink(state.tabHref)}
 		{:else if state.page === 'window-blocked'}
-			<h1>{words.windowBlocked}</h1>
-			<p>{words.windowBlockedSentence}</p>
+			<h1>{words['signIn.windowBlocked']}</h1>
+			<p>{words['signIn.windowBlockedSentence']}</p>
 			{@render tabLink(state.tabHref)}
 		{:else if state.page === 'login-failed'}
-			<h1>{words.loginFailed}</h1>
-			{@render banner(words.loginFailedBanner)}
-			<a class="action primary" href={state.signInHref} data-sveltekit-reload>{words.tryAgain}</a>
+			<h1>{words['signIn.loginFailed']}</h1>
+			{@render banner(words['signIn.loginFailedBanner'])}
+			<a class="action primary" href={state.signInHref} data-sveltekit-reload>{words['signIn.tryAgain']}</a>
 		{:else}
-			<h1>{words.noAccess}</h1>
-			<p>{words.noAccessSentence(appName)}</p>
+			<h1>{words['signIn.noAccess']}</h1>
+			<p>{words['signIn.noAccessSentence']({ appName })}</p>
 			{#if state.logOutAction !== undefined}
 				<form class="log-out" method="post" action={state.logOutAction}>
-					<button class="action secondary" type="submit">{words.logOut}</button>
+					<button class="action secondary" type="submit">{words['signIn.logOut']}</button>
 				</form>
 			{:else if state.onLogOut !== undefined}
 				{#if state.logOutFailure}
 					<p role="alert">{state.logOutFailure}</p>
 				{/if}
-				<button class="action secondary" type="button" onclick={state.onLogOut}>{words.logOut}</button>
+				<button class="action secondary" type="button" onclick={state.onLogOut}>{words['signIn.logOut']}</button>
 			{/if}
 		{/if}
 	</main>
