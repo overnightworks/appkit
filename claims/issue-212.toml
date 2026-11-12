@@ -1,8 +1,0 @@
-claim_id = "4ccacd9b551846fba7d2305eddedf3d5"
-agent = "Claude 019c230b-7e16-4294-87f3-af95e9827632"
-role = "builder"
-base = "1b4cd3f7e68c9043e3129e25a81cd4df299e0964"
-branch = "claude/issue-212-ear-mark"
-scope = ["README.md", "docs/ARCHITECTURE.md", "docs/stylesheet.md", "package.json", "pyproject.toml", "src/catalogs", "src/design/words.py", "src/lib/EarMark.ssr.test.ts", "src/lib/EarMark.svelte", "src/lib/EarMark.test.ts", "src/lib/index.ts", "src/lib/types.ts", "src/lib/words", "tests/e2e", "tests/test_npm_package.py", "uv.lock"]
-opened_commit = "8bdc63f25f191ec83334bd4e24aed2908aa8bc1e"
-whole_reason = "A component, its words, the words generated from them, its proofs, its documentation and the release that ships it with the switch go together."
