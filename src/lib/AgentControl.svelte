@@ -1,9 +1,11 @@
 <script lang="ts">
 	import AiMark from './AiMark.svelte';
 	import type { AgentControlProps, AgentControlRefusal } from './types.ts';
-	import type { Words } from './words/de.ts';
 
-	const refusalKeys: Record<AgentControlRefusal, keyof Words> = {
+	const refusalKeys: Record<
+		AgentControlRefusal,
+		'agent.notAllowed' | 'agent.ownerAbsent' | 'agent.placeFull' | 'agent.agentUnavailable' | 'agent.tryAgain'
+	> = {
 		'not-allowed': 'agent.notAllowed',
 		'owner-absent': 'agent.ownerAbsent',
 		'place-full': 'agent.placeFull',
