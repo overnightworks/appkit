@@ -5,7 +5,6 @@ import { resolveStyle } from './probe.ts';
 
 const colorSchemes = ['light', 'dark'] as const;
 const widths = [390, 1280] as const;
-const touchFloor = 44;
 const languages = ['de', 'en'] as const satisfies readonly KitLanguage[];
 
 const reportsOf = (page: Page) => page.evaluate(() => window.reports);
@@ -96,36 +95,19 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 		test.describe('with a finger at 390 px', () => {
 			test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 800 } });
 
-			test('reaches the touch floor by the hit area above the upper chip and below the lower chip', async ({ page }) => {
+			test('lets the visible body of each chip belong to that chip at the edges that face each other', async ({ page }) => {
 				await open(page);
 				expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true);
-				const hits = async (chip: Locator, edge: 'above' | 'below') => {
+				const lands = async (chip: Locator, edge: 'bottom' | 'top') => {
 					const box = (await chip.boundingBox())!;
-					const margin = (touchFloor - box.height) / 2 - 1;
-					const y = edge === 'above' ? box.y - margin : box.y + box.height + margin;
+					const y = edge === 'bottom' ? box.y + box.height - 2 : box.y + 2;
 					return chip.evaluate((node, point) => node.contains(document.elementFromPoint(point.x, point.y)), {
 						x: box.x + box.width / 2,
 						y
 					});
 				};
-				expect(await hits(chipOf(page, 'hear'), 'above')).toBe(true);
-				expect(await hits(chipOf(page, 'listen'), 'below')).toBe(true);
-			});
-		});
-
-		test.describe('with a mouse at 390 px', () => {
-			test.use({ hasTouch: false, viewport: { width: 390, height: 800 } });
-
-			test('leaves the hit area at the chip', async ({ page }) => {
-				await open(page);
-				expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(false);
-				const chip = chipOf(page, 'hear');
-				const box = (await chip.boundingBox())!;
-				const above = await chip.evaluate(
-					(node, point) => node.contains(document.elementFromPoint(point.x, point.y)),
-					{ x: box.x + box.width / 2, y: box.y - 4 }
-				);
-				expect(above).toBe(false);
+				expect(await lands(chipOf(page, 'hear'), 'bottom')).toBe(true);
+				expect(await lands(chipOf(page, 'listen'), 'top')).toBe(true);
 			});
 		});
 

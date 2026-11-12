@@ -116,11 +116,4 @@
 			transition: transform 0.2s;
 		}
 	}
-	@media (any-pointer: coarse) {
-		.hearing-switch::after {
-			content: '';
-			position: absolute;
-			inset: -8px -4px;
-		}
-	}
 </style>
