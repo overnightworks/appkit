@@ -1,8 +1,0 @@
-claim_id = "5f28deabb9204c53b1f7348f1f6d6751"
-agent = "Claude 019c230b-7e16-4294-87f3-af95e9827632"
-role = "builder"
-base = "dab8d4828d3bf738a38d8233a446ec8c6a0c8d1c"
-branch = "claude/issue-203-hearing-switch"
-scope = ["README.md", "docs/ARCHITECTURE.md", "docs/stylesheet.md", "src/catalogs", "src/design/words.py", "src/lib/HearingSwitch.ssr.test.ts", "src/lib/HearingSwitch.svelte", "src/lib/HearingSwitch.test.ts", "src/lib/index.ts", "src/lib/types.ts", "src/lib/words", "tests/e2e", "tests/test_npm_package.py"]
-opened_commit = "de02741835bd2cc25a8aa0f719928ce4900eaffc"
-whole_reason = "A component, its words, the words generated from them, its proofs in both consumers and its documentation ship only together."
