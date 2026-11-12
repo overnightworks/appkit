@@ -1,7 +1,7 @@
 # design
 
 The family look that overnightworks products share (tokens, fonts, two classes
-and six Svelte components), for the engineers of those products.
+and seven Svelte components), for the engineers of those products.
 
 ## Quick start
 
