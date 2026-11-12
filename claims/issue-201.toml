@@ -1,8 +1,0 @@
-claim_id = "b2ccecec68754a15b9129193f9cbe37c"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "333a829798d0302add711ecd7ee68e94a8846e16"
-branch = "claude/issue-201-words-export-node"
-scope = ["README.md", "docs/ARCHITECTURE.md", "docs/languages.md", "package.json", "pyproject.toml", "src/design/catalogs", "src/lib", "tests/catalogs", "tests/e2e", "tests/test_npm_package.py", "uv.lock"]
-opened_commit = "c6d6f8ba8d80d664783ddbe2d10bf19b583fd713"
-whole_reason = "The generator's specifiers, the kit's regenerated modules, the export and the tests that hold the generated text change together or the tarball is broken in between."
