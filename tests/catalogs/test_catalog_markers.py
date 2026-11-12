@@ -143,14 +143,11 @@ def test_read_translation_takes_markers_moved_and_gaps_moved_into_or_out_of_a_pa
 def test_read_translation_names_the_key_and_both_marker_multisets_of_a_translation_whose_markers_differ(
     marked_source, translation, markers
 ):
-    catalog, findings = read_translation(
-        TRANSLATION_FILE, LanguageTag("pl"), POLISH, powered(translation), marked_source
-    )
+    _, findings = read_translation(TRANSLATION_FILE, LanguageTag("pl"), POLISH, powered(translation), marked_source)
 
-    assert [(finding.file, finding.key) for finding in findings] == [(TRANSLATION_FILE, "home.powered")]
-    assert markers in findings[0].problem
-    assert "the source has the markers {#code, #strong, #strong}" in findings[0].problem
-    assert catalog.entries == ()
+    assert [(finding.file, finding.key, finding.problem) for finding in findings] == [
+        (TRANSLATION_FILE, "home.powered", f"has {markers}; the source has the markers {{#code, #strong, #strong}}")
+    ]
 
 
 def test_read_translation_names_a_marker_the_source_lacks():
@@ -172,16 +169,14 @@ MARKED_SEATS = {"one": "{#strong}{count}{/strong} Platz", "other": "{#strong}{co
 
 
 def test_read_source_refuses_a_family_whose_entries_carry_different_markers_and_names_each_set():
-    _, findings = read_source(
-        FILE,
-        LanguageTag("de"),
-        GERMAN,
-        family("table.seats", one="{#strong}{count}{/strong} Platz", other="{count} Plätze"),
-    )
+    texts = {"one": "{#strong}{count}{/strong} Platz", "other": "{count} Plätze"}
 
-    assert [(finding.file, finding.key) for finding in findings] == [(FILE, "table.seats")]
-    assert "one has the markers {#strong}" in findings[0].problem
-    assert "other has no markers" in findings[0].problem
+    _, findings = read_source(FILE, LanguageTag("de"), GERMAN, family("table.seats", **texts))
+
+    assert [str(finding) for finding in findings] == [
+        f"{FILE}: table.seats has different markers in its entries:"
+        " one has the markers {#strong}, other has no markers"
+    ]
 
 
 def test_read_source_takes_a_family_whose_entries_carry_the_same_markers():
