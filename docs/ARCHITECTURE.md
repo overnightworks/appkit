@@ -67,9 +67,10 @@ flowchart TB
   command `design-catalogs` reads an app's gettext catalogs and writes a typed
   TypeScript module per language and, if the app declares one, a Python module;
   `--check` fails on a broken catalog or a module that is stale. The optional table
-  `[tool.design-catalogs]` in the app's root `pyproject.toml` names the source
-  language and the paths. It is in the wheel only, behind the extra `catalogs`
-  (Babel), and runs at build time, never in a server or a browser.
+  `[tool.design-catalogs]` in the `pyproject.toml` of the shipped unit's directory
+  (the root for an app of one unit) names the source language and the paths. It is
+  in the wheel only, behind the extra `catalogs` (Babel), and runs at build time,
+  never in a server or a browser.
 - **The kit's words** (`src/catalogs`): the catalogs are the one source of two
   outputs, `src/lib/words` for the tarball and `src/design/words.py` for the wheel,
   which the kit's own `design-catalogs` generates and `--check` gates in CI. The

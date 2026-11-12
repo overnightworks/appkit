@@ -22,7 +22,7 @@ class DeclarationError(Exception):
 
 @dataclass(frozen=True)
 class Declaration:
-    """The source language and the paths, relative to the repository root, the command works with."""
+    """The source language and the paths the command works with, relative to the directory of the declaration."""
 
     source: LanguageTag
     catalogs: Path
