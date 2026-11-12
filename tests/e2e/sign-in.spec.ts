@@ -106,6 +106,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 						['no-access', kit['signIn.noAccess'], kit['signIn.logOut'], undefined]
 					] as const) {
 						await page.goto(`${origin}/?${variant}&lang=${language}`);
+						await expect(page.locator('html')).toHaveAttribute('lang', language);
 						const card = page.getByRole('main');
 						await expect(card.getByRole('heading')).toHaveText(heading);
 						await expect(card.getByRole('link').or(card.getByRole('button'))).toHaveText(action);

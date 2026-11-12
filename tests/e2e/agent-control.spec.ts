@@ -162,6 +162,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 				}) => {
 					await page.setViewportSize({ width, height: 800 });
 					await open(page, 'refusal', language);
+					await expect(page.locator('html')).toHaveAttribute('lang', language);
 					const kit = wordsOf[language];
 					await expect(page.getByRole('alert')).toHaveText(kit['agent.ownerAbsent']);
 					await expect(page.getByRole('status')).toHaveText(kit['agent.calling']);
