@@ -37,11 +37,15 @@ flowchart TB
     css[design/static: design.css and fonts]
     comp[lib: SignInPage, AccountMenu, AgentControl, LegalLinks, AiMark and types]
     gen[design/catalogs: the catalog generator]
+    cat[catalogs: the kit's words, de source and en]
   end
+  cat -- design-catalogs --> words[generated words: lib/words and design/words.py]
   css --> wheel[wheel: import design]
   gen --> wheel
+  words --> wheel
   css --> tgz[tarball: design.css and fonts]
   comp --> tgz
+  words --> tgz
   tokens[tokens.txt] -. listed from .-> css
 ```
 
@@ -60,10 +64,18 @@ flowchart TB
   `[tool.design-catalogs]` in the app's root `pyproject.toml` names the source
   language and the paths. It is in the wheel only, behind the extra `catalogs`
   (Babel), and runs at build time, never in a server or a browser.
-- **Wheel**: the stylesheet and fonts for apps without a JavaScript bundler, and
-  the generator. It holds no `.svelte`.
-- **Tarball**: the stylesheet, fonts and components; `svelte` is its only
-  dependency, as a peer.
+- **The kit's words** (`src/catalogs`): the catalogs are the one source of two
+  outputs, `src/lib/words` for the tarball and `src/design/words.py` for the wheel,
+  which the kit's own `design-catalogs` generates and `--check` gates in CI. The
+  catalogs belong to neither `src/lib` nor `src/design` and ship in neither
+  artefact. The package root exports the generated loader as `loadKitWords`, with
+  the types `KitWords` and `KitLanguage`; the loader takes the language its caller
+  passes and the kit reads none itself. The Python module is for an app's tests,
+  not its server, and needs no Babel.
+- **Wheel**: the stylesheet and fonts for apps without a JavaScript bundler, the
+  generator and the kit's Python words. It holds no `.svelte`.
+- **Tarball**: the stylesheet, fonts, components and the kit's words per language,
+  each language its own chunk; `svelte` is its only dependency, as a peer.
 - **Token list**: the sorted custom-property names of the stylesheet, from
   `scripts/list_tokens`.
 
@@ -178,6 +190,15 @@ cover them.
   matches entries by text across keys and drops plural categories the source lacks,
   and a hash records what a translation's `msgid` already holds, readably. A
   translation is current when its `msgid` equals the source's text for its key.
+- Every language bundled in the components behind a `language` prop: every app
+  would ship all languages, and a component would choose one itself.
+- Per-language records under the components' `*Words` props, a Svelte context
+  and a component that loads its own words: each hides where the app's language
+  is decided, which the app owns (LANG-17).
+- The app's generator merging the kit's words from the installed wheel into the
+  app's modules: one load call and no pin skew, but an app build coupled to the
+  wheel version, a rule against key collisions and the generator as a
+  precondition for taking the kit.
 - Git pins (`github:overnightworks/design#vX.Y.Z`) instead of release assets for
   the npm package and the wheel as a runtime dependency: a git pin loses the
   content hash a consumer's lock checks, sha256 in the wheel URL and sha512 in

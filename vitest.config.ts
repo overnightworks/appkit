@@ -7,7 +7,8 @@ export default defineConfig({
 			provider: 'v8',
 			reporter: ['lcov', 'text-summary'],
 			include: ['src/lib/**'],
-			exclude: ['**/*.test.ts']
+			// The generated words hold data and one loader line; the consumer build proves them.
+			exclude: ['**/*.test.ts', 'src/lib/words/**']
 		},
 		projects: [
 			{

@@ -3,6 +3,9 @@ export { default as AgentControl } from './AgentControl.svelte';
 export { default as AiMark } from './AiMark.svelte';
 export { default as LegalLinks } from './LegalLinks.svelte';
 export { default as SignInPage } from './SignInPage.svelte';
+export { loadWords as loadKitWords } from './words/index.js';
+export type { Language as KitLanguage } from './words/index.ts';
+export type { Words as KitWords } from './words/de.ts';
 export type {
 	AccountMenuProps,
 	AccountMenuWords,

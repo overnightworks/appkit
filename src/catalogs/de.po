@@ -1,0 +1,124 @@
+msgid ""
+msgstr ""
+"Language: de\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgctxt "signIn.loggedOut"
+msgid "Du bist abgemeldet."
+msgstr ""
+
+msgctxt "signIn.logIn"
+msgid "Anmelden"
+msgstr ""
+
+msgctxt "signIn.loginFailed"
+msgid "Anmeldung fehlgeschlagen"
+msgstr ""
+
+msgctxt "signIn.loginFailedBanner"
+msgid "Die Anmeldung hat nicht geklappt. Bitte versuch es noch einmal."
+msgstr ""
+
+msgctxt "signIn.tryAgain"
+msgid "Erneut versuchen"
+msgstr ""
+
+msgctxt "signIn.noAccess"
+msgid "Kein Zugang"
+msgstr ""
+
+msgctxt "signIn.noAccessSentence"
+msgid "Du bist angemeldet, aber dieses Konto hat keinen Zugang zu {appName}."
+msgstr ""
+
+msgctxt "signIn.logOut"
+msgid "Abmelden"
+msgstr ""
+
+msgctxt "signIn.signingIn"
+msgid "Anmeldung läuft"
+msgstr ""
+
+msgctxt "signIn.inOtherWindow"
+msgid "Im anderen Fenster"
+msgstr ""
+
+msgctxt "signIn.openInTab"
+msgid "In einem Tab öffnen"
+msgstr ""
+
+msgctxt "signIn.windowBlocked"
+msgid "Fenster blockiert"
+msgstr ""
+
+msgctxt "signIn.windowBlockedSentence"
+msgid "Dein Browser hat das Anmeldefenster blockiert."
+msgstr ""
+
+msgctxt "signIn.signInUnfinished"
+msgid "Die Anmeldung wurde nicht abgeschlossen."
+msgstr ""
+
+msgctxt "account.theme"
+msgid "Darstellung"
+msgstr ""
+
+msgctxt "account.followSystem"
+msgid "System"
+msgstr ""
+
+msgctxt "account.light"
+msgid "Hell"
+msgstr ""
+
+msgctxt "account.dark"
+msgid "Dunkel"
+msgstr ""
+
+msgctxt "account.logOut"
+msgid "Abmelden"
+msgstr ""
+
+msgctxt "agent.call"
+msgid "Rufen"
+msgstr ""
+
+msgctxt "agent.calling"
+msgid "Wird gerufen…"
+msgstr ""
+
+msgctxt "agent.askToLeave"
+msgid "Bitten zu gehen"
+msgstr ""
+
+msgctxt "agent.callLabel"
+msgid "{name} rufen"
+msgstr ""
+
+msgctxt "agent.askToLeaveLabel"
+msgid "{name} bitten zu gehen"
+msgstr ""
+
+msgctxt "agent.empty"
+msgid "Gerade ist kein Agent erreichbar."
+msgstr ""
+
+msgctxt "agent.notAllowed"
+msgid "Du darfst diesen Agenten nicht rufen."
+msgstr ""
+
+msgctxt "agent.ownerAbsent"
+msgid "Sein Besitzer ist nicht hier."
+msgstr ""
+
+msgctxt "agent.placeFull"
+msgid "Hier ist kein Platz für einen weiteren Agenten."
+msgstr ""
+
+msgctxt "agent.agentUnavailable"
+msgid "Der Agent ist gerade nicht erreichbar."
+msgstr ""
+
+msgctxt "agent.tryAgain"
+msgid "Das hat nicht geklappt. Versuch es noch einmal."
+msgstr ""
