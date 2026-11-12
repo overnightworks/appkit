@@ -141,7 +141,6 @@ describe('refusal', () => {
 		const control = await render({ rows, refusal: 'place-full' });
 		expect(buttonsOf(control)).toHaveLength(1);
 	});
-
 });
 
 describe('empty face', () => {

@@ -6,7 +6,7 @@ import { loadWords, type Language } from './words/index.ts';
 const languages: Language[] = ['en', 'de'];
 
 describe.each(languages)('AgentControl server-rendered in the %s words', (language) => {
-	it('renders the rows, their buttons and a refusal without a script', async () => {
+	it('renders the rows and their buttons without a script', async () => {
 		const words = await loadWords(language);
 		const { body } = render(AgentControl, {
 			props: {
@@ -17,7 +17,6 @@ describe.each(languages)('AgentControl server-rendered in the %s words', (langua
 				],
 				onCall: () => {},
 				onSendAway: () => {},
-				refusal: 'try-again',
 				words
 			}
 		});
@@ -28,9 +27,23 @@ describe.each(languages)('AgentControl server-rendered in the %s words', (langua
 			new RegExp(`<button\\b[^>]*aria-label="${words['agent.askToLeaveLabel']({ name: 'Leonardo' })}"[^>]*>`)
 		);
 		expect(body).toMatch(new RegExp(`role="status"[^>]*>.*${words['agent.calling']}`, 's'));
-		expect(body).toMatch(new RegExp(`role="alert"[^>]*>.*${words['agent.tryAgain']}`, 's'));
 		expect(body).toContain(words['agent.call']);
 		expect(body).toContain(words['agent.askToLeave']);
+		expect(body).not.toMatch(/<script\b/);
+	});
+
+	it.each([
+		['not-allowed', 'agent.notAllowed'],
+		['owner-absent', 'agent.ownerAbsent'],
+		['place-full', 'agent.placeFull'],
+		['agent-unavailable', 'agent.agentUnavailable'],
+		['try-again', 'agent.tryAgain']
+	] as const)('renders the %s refusal as an alert without a script', async (refusal, key) => {
+		const words = await loadWords(language);
+		const { body } = render(AgentControl, {
+			props: { rows: [], onCall: () => {}, onSendAway: () => {}, refusal, words }
+		});
+		expect(body).toMatch(new RegExp(`role="alert"[^>]*>.*${words[key]}`, 's'));
 		expect(body).not.toMatch(/<script\b/);
 	});
 

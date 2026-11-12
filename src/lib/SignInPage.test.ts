@@ -295,7 +295,8 @@ describe('words from the app', () => {
 			'no-access with a form action',
 			{ page: 'no-access', logOutAction: '/logout' },
 			['Kein Zugang', noAccessSentence, 'Abmelden']
-		]
+		],
+		['no-access without a log-out form', { page: 'no-access' }, ['Kein Zugang', noAccessSentence]]
 	] as const)('shows the given words and no en word in %s', async (_name, state, shown) => {
 		const page = await render({ words: de, state });
 		expect(visibleTexts(page)).toEqual(shown);

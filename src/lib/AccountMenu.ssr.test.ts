@@ -27,7 +27,9 @@ describe('AccountMenu server-rendered', () => {
 				new RegExp(`<button\\b[^>]*type="submit"[^>]*>.*${words['account.logOut']}</button>`, 's')
 			);
 			expect(form?.[2]).not.toMatch(/<input\b/);
-			expect(body).toContain(words['account.theme']);
+			for (const key of ['account.theme', 'account.followSystem', 'account.light', 'account.dark'] as const) {
+				expect(body).toContain(words[key]);
+			}
 			expect(body).not.toMatch(/<script\b|onclick/);
 			expect(head).not.toMatch(/<script\b/);
 			expect(body).not.toMatch(/role="alert"/);
