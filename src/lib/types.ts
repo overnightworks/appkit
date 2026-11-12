@@ -166,6 +166,22 @@ export interface HearingSwitchProps {
 	words: KitWords;
 }
 
+/**
+ * The round ear that shows an agent hears a person, drawn on a video: the ear in a glass disc ringed in
+ * the app's `--accent`, and the agent's name in a small pill beside it. It is one image whose name and
+ * title read "<agent> hears you" on the person's own tile and "<agent> hears <person>" on another's.
+ * The kit holds no state: the app mounts a mark only while the agent hears that person, stacks the marks
+ * of several agents and places them on the tile.
+ */
+export interface EarMarkProps {
+	/** The agent's name; shown in the pill and named in the accessible name. A long name ends in an ellipsis. */
+	agent: string;
+	/** The heard person's name on another person's tile; absent on one's own tile. */
+	person?: string;
+	/** The kit's words in the page's language, from `loadKitWords`. */
+	words: KitWords;
+}
+
 /** One part of a marked sentence, as `design-catalogs` generates it: plain text, or text under a marker name. */
 export type MarkedPart<Marker extends string> = string | { readonly marker: Marker; readonly text: string };
 

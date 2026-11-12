@@ -1,6 +1,7 @@
 export { default as AccountMenu } from './AccountMenu.svelte';
 export { default as AgentControl } from './AgentControl.svelte';
 export { default as AiMark } from './AiMark.svelte';
+export { default as EarMark } from './EarMark.svelte';
 export { default as HearingSwitch } from './HearingSwitch.svelte';
 export { default as LegalLinks } from './LegalLinks.svelte';
 export { default as Marked } from './Marked.svelte';
@@ -13,6 +14,7 @@ export type {
 	AgentControlRefusal,
 	AgentRow,
 	AppRow,
+	EarMarkProps,
 	HearingKind,
 	HearingSwitchProps,
 	LegalLink,
