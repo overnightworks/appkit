@@ -8,10 +8,8 @@ export type { Language as KitLanguage } from './words/index.ts';
 export type { Words as KitWords } from './words/de.ts';
 export type {
 	AccountMenuProps,
-	AccountMenuWords,
 	AgentControlProps,
 	AgentControlRefusal,
-	AgentControlWords,
 	AgentRow,
 	AppRow,
 	LegalLink,
@@ -19,7 +17,6 @@ export type {
 	LegalLinksProps,
 	LogOut,
 	SignInPageProps,
-	SignInPageWords,
 	SignInState,
 	ThemeChoice,
 	ThemeRows

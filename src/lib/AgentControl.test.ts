@@ -1,12 +1,16 @@
 import { mount, tick, unmount } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import AgentControl from './AgentControl.svelte';
-import type { AgentControlProps, AgentControlRefusal, AgentControlWords } from './types.ts';
+import type { AgentControlProps, AgentControlRefusal } from './types.ts';
+import { loadWords } from './words/index.ts';
+
+const en = await loadWords('en');
+const de = await loadWords('de');
 
 const mounted: { target: HTMLElement; component: ReturnType<typeof mount> }[] = [];
 
 function baseProps(overrides: Partial<AgentControlProps> = {}): AgentControlProps {
-	return { rows: [], onCall: () => {}, onSendAway: () => {}, ...overrides };
+	return { rows: [], onCall: () => {}, onSendAway: () => {}, words: en, ...overrides };
 }
 
 async function render(overrides: Partial<AgentControlProps> = {}): Promise<HTMLElement> {
@@ -27,22 +31,6 @@ afterEach(async () => {
 const rowsOf = (control: HTMLElement) => [...control.querySelectorAll('li')];
 const buttonsOf = (control: HTMLElement) => [...control.querySelectorAll('button')];
 
-const german: AgentControlWords = {
-	call: 'Rufen',
-	calling: 'Wird gerufen…',
-	askToLeave: 'Bitten zu gehen',
-	callLabel: (name) => `${name} rufen`,
-	askToLeaveLabel: (name) => `${name} bitten zu gehen`,
-	empty: 'Gerade ist kein Agent erreichbar.',
-	refusals: {
-		'not-allowed': 'Du darfst diesen Agenten nicht rufen.',
-		'owner-absent': 'Sein Besitzer ist nicht hier.',
-		'place-full': 'Hier ist kein Platz für einen weiteren Agenten.',
-		'agent-unavailable': 'Der Agent ist gerade nicht erreichbar.',
-		'try-again': 'Das hat nicht geklappt. Versuch es noch einmal.'
-	}
-};
-
 describe('rows', () => {
 	it('leads every row with the AI mark and shows the name as given', async () => {
 		const control = await render({
@@ -61,8 +49,8 @@ describe('rows', () => {
 		const control = await render({ rows: [{ key: 'k1', name: 'Mozart', state: 'available' }] });
 		const buttons = buttonsOf(control);
 		expect(buttons).toHaveLength(1);
-		expect(buttons[0].textContent?.trim()).toBe('Call');
-		expect(buttons[0].getAttribute('aria-label')).toBe('Call Mozart');
+		expect(buttons[0].textContent?.trim()).toBe(en['agent.call']);
+		expect(buttons[0].getAttribute('aria-label')).toBe(en['agent.callLabel']({ name: 'Mozart' }));
 		expect(buttons[0].type).toBe('button');
 	});
 
@@ -70,15 +58,15 @@ describe('rows', () => {
 		const control = await render({ rows: [{ key: 'k1', name: 'Mozart', state: 'inviting' }] });
 		expect(buttonsOf(control)).toHaveLength(0);
 		const status = control.querySelector('[role="status"]')!;
-		expect(status.textContent?.trim()).toBe('Calling…');
+		expect(status.textContent?.trim()).toBe(en['agent.calling']);
 	});
 
 	it('offers an agent that is here one Ask to leave button named after the agent', async () => {
 		const control = await render({ rows: [{ key: 'k1', name: 'Mozart', state: 'here' }] });
 		const buttons = buttonsOf(control);
 		expect(buttons).toHaveLength(1);
-		expect(buttons[0].textContent?.trim()).toBe('Ask to leave');
-		expect(buttons[0].getAttribute('aria-label')).toBe('Ask Mozart to leave');
+		expect(buttons[0].textContent?.trim()).toBe(en['agent.askToLeave']);
+		expect(buttons[0].getAttribute('aria-label')).toBe(en['agent.askToLeaveLabel']({ name: 'Mozart' }));
 	});
 
 	it('shows a here row without the send-away handler as the mark and the name, with no action', async () => {
@@ -135,16 +123,16 @@ describe('refusal', () => {
 		expect(control.querySelector('[role="alert"]')).toBeNull();
 	});
 
-	it.each<[AgentControlRefusal, string]>([
-		['not-allowed', 'You may not call this agent.'],
-		['owner-absent', 'Its owner is not here.'],
-		['place-full', 'There is no room here for another agent.'],
-		['agent-unavailable', 'The agent is not reachable right now.'],
-		['try-again', 'That did not work. Please try again.']
-	])('draws the %s sentence as an alert above the rows', async (refusal, sentence) => {
+	it.each<[AgentControlRefusal, keyof typeof en]>([
+		['not-allowed', 'agent.notAllowed'],
+		['owner-absent', 'agent.ownerAbsent'],
+		['place-full', 'agent.placeFull'],
+		['agent-unavailable', 'agent.agentUnavailable'],
+		['try-again', 'agent.tryAgain']
+	])('draws the %s sentence as an alert above the rows', async (refusal, key) => {
 		const control = await render({ rows, refusal });
 		const alert = control.querySelector('[role="alert"]')!;
-		expect(alert.textContent?.trim()).toBe(sentence);
+		expect(alert.textContent?.trim()).toBe(en[key]);
 		const list = control.querySelector('ul')!;
 		expect(alert.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 	});
@@ -154,43 +142,39 @@ describe('refusal', () => {
 		expect(buttonsOf(control)).toHaveLength(1);
 	});
 
-	it('draws the refusal sentence from the given words', async () => {
-		const control = await render({ rows, refusal: 'owner-absent', words: german });
-		expect(control.querySelector('[role="alert"]')?.textContent?.trim()).toBe('Sein Besitzer ist nicht hier.');
-	});
 });
 
 describe('empty face', () => {
 	it('draws only the empty sentence when there are no rows', async () => {
 		const control = await render({ rows: [] });
-		expect(control.textContent?.trim()).toBe('No agent is reachable right now.');
+		expect(control.textContent?.trim()).toBe(en['agent.empty']);
 		expect(control.querySelector('ul, li, button, [role="alert"]')).toBeNull();
 	});
 
 	it('draws the empty sentence and the refusal when both apply', async () => {
 		const control = await render({ rows: [], refusal: 'agent-unavailable' });
 		expect(control.querySelector('[role="alert"]')?.textContent?.trim()).toBe(
-			'The agent is not reachable right now.'
+			en['agent.agentUnavailable']
 		);
-		expect(control.textContent).toContain('No agent is reachable right now.');
+		expect(control.textContent).toContain(en['agent.empty']);
 		expect(control.querySelector('ul, li, button')).toBeNull();
 	});
 
 	it('draws no empty sentence while rows exist', async () => {
 		const control = await render({ rows: [{ key: 'k1', name: 'Mozart', state: 'here' }] });
-		expect(control.textContent).not.toContain('No agent is reachable');
+		expect(control.textContent).not.toContain(en['agent.empty']);
 	});
 });
 
 describe('words', () => {
-	it('draws every word of the given language and none of the en defaults', async () => {
+	it('draws every word of the de words: the ruled list, the names and none of the en words', async () => {
 		const control = await render({
 			rows: [
 				{ key: 'k1', name: 'Mozart', state: 'available' },
 				{ key: 'k2', name: 'Bach', state: 'inviting' },
 				{ key: 'k3', name: 'Leonardo', state: 'here' }
 			],
-			words: german
+			words: de
 		});
 		expect(rowsOf(control).map((row) => row.lastElementChild?.textContent?.trim())).toEqual([
 			'Rufen',
@@ -204,8 +188,52 @@ describe('words', () => {
 		expect(control.textContent).not.toMatch(/Call|Ask to leave/);
 	});
 
-	it('draws the empty sentence from the given words', async () => {
-		const control = await render({ rows: [], words: german });
+	it('draws the empty sentence of the de words', async () => {
+		const control = await render({ rows: [], words: de });
 		expect(control.textContent?.trim()).toBe('Gerade ist kein Agent erreichbar.');
+	});
+
+	it.each<[AgentControlRefusal, string]>([
+		['not-allowed', 'Du darfst diesen Agenten nicht rufen.'],
+		['owner-absent', 'Sein Besitzer ist nicht hier.'],
+		['place-full', 'Hier ist kein Platz für einen weiteren Agenten.'],
+		['agent-unavailable', 'Der Agent ist gerade nicht erreichbar.'],
+		['try-again', 'Das hat nicht geklappt. Versuch es noch einmal.']
+	])('draws the %s sentence of the de words as an alert', async (refusal, sentence) => {
+		const control = await render({ rows: [], refusal, words: de });
+		expect(control.querySelector('[role="alert"]')?.textContent?.trim()).toBe(sentence);
+	});
+});
+
+describe('en words', () => {
+	it('shows the texts the kit rendered before its words came from the catalogs', async () => {
+		const control = await render({
+			rows: [
+				{ key: 'k1', name: 'Mozart', state: 'available' },
+				{ key: 'k2', name: 'Bach', state: 'inviting' },
+				{ key: 'k3', name: 'Leonardo', state: 'here' }
+			]
+		});
+		expect(rowsOf(control).map((row) => row.lastElementChild?.textContent?.trim())).toEqual([
+			'Call',
+			'Calling…',
+			'Ask to leave'
+		]);
+		expect(buttonsOf(control).map((button) => button.getAttribute('aria-label'))).toEqual([
+			'Call Mozart',
+			'Ask Leonardo to leave'
+		]);
+		expect((await render({ rows: [] })).textContent?.trim()).toBe('No agent is reachable right now.');
+	});
+
+	it.each<[AgentControlRefusal, string]>([
+		['not-allowed', 'You may not call this agent.'],
+		['owner-absent', 'Its owner is not here.'],
+		['place-full', 'There is no room here for another agent.'],
+		['agent-unavailable', 'The agent is not reachable right now.'],
+		['try-again', 'That did not work. Please try again.']
+	])('shows the %s sentence the kit rendered before its words came from the catalogs', async (refusal, sentence) => {
+		const control = await render({ rows: [], refusal });
+		expect(control.querySelector('[role="alert"]')?.textContent?.trim()).toBe(sentence);
 	});
 });
