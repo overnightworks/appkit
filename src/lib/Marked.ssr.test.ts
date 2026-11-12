@@ -2,7 +2,8 @@ import { render } from 'svelte/server';
 import { describe, expect, it } from 'vitest';
 import Page, { type sentences } from './Marked.test.svelte';
 
-const markup = (parts: (typeof sentences)[number]['parts']) => render(Page, { props: { parts } }).body;
+type Parts = (typeof sentences)[number]['parts'];
+const markup = (parts: Parts) => render(Page, { props: { parts } }).body;
 function withoutAnchors(body: string): string {
 	let rest = body;
 	for (let start = rest.indexOf('<!--'); start !== -1; start = rest.indexOf('<!--')) {
@@ -12,14 +13,19 @@ function withoutAnchors(body: string): string {
 }
 
 describe('Marked server-rendered', () => {
-	it('writes the parts in order without a wrapper element or a space of its own', () => {
-		const body = markup(['Nur ', { marker: 'strong', text: 'wichtig' }, ' und ', { marker: 'link', text: 'mehr' }]);
-		expect(withoutAnchors(body)).toBe('<p>Nur <strong>wichtig</strong> und <a href="/more">mehr</a></p>');
-	});
-
-	it('writes every occurrence of a marker that two parts share', () => {
-		const body = markup(['a ', { marker: 'strong', text: 'x' }, ' b ', { marker: 'strong', text: 'y' }]);
-		expect(withoutAnchors(body)).toBe('<p>a <strong>x</strong> b <strong>y</strong></p>');
+	it.each([
+		{
+			case: 'writes the parts in order without a wrapper element or a space of its own',
+			parts: ['Nur ', { marker: 'strong', text: 'wichtig' }, ' und ', { marker: 'link', text: 'mehr' }],
+			expected: '<p>Nur <strong>wichtig</strong> und <a href="/more">mehr</a></p>'
+		},
+		{
+			case: 'writes every occurrence of a marker that two parts share',
+			parts: ['a ', { marker: 'strong', text: 'x' }, ' b ', { marker: 'strong', text: 'y' }],
+			expected: '<p>a <strong>x</strong> b <strong>y</strong></p>'
+		}
+	] satisfies { case: string; parts: Parts; expected: string }[])('$case', ({ parts, expected }) => {
+		expect(withoutAnchors(markup(parts))).toBe(expected);
 	});
 
 	it('escapes the text of a marked part', () => {
