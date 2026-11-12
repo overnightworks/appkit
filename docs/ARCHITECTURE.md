@@ -3,7 +3,7 @@
 ## 1. Context and Scope
 
 design is the family look that overnightworks products share: one stylesheet,
-its fonts and five Svelte components, and the generator that turns an app's
+its fonts and six Svelte components, and the generator that turns an app's
 translation catalogs into modules. It runs no service. Outside it: the
 product apps that load the stylesheet (and, for SvelteKit apps, the components),
 the Keycloak themes and the legal pages, which take the wheel's stylesheet and fonts through the
