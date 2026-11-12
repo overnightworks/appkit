@@ -1,0 +1,8 @@
+claim_id = "f9fc497ad10445958cd95cb75cb9d373"
+agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
+role = "builder"
+base = "e1796fd1d02245b983fc188173fb0cd93085c3e8"
+branch = "claude/issue-195-legal-row-name-release"
+scope = ["README.md", "docs/languages.md", "docs/stylesheet.md", "package.json", "pyproject.toml", "src/catalogs", "src/design/words.py", "src/lib", "tests/e2e", "tests/test_npm_package.py", "tests/test_wheel.py", "uv.lock"]
+opened_commit = "6ccd60d70daa5efa349a024b01247a9bc7d0e8d7"
+whole_reason = "The last breaking change of one release and its version: the row, the two components that draw it, one catalog key with its generated modules, and their proofs."
