@@ -131,6 +131,10 @@ def _gap(field: str, piece: str) -> Gap:
 
 def _marker(piece: str) -> Marker:
     name = piece[2:-1]
+    if re.match(r"[^\W\d]\w*[/\s]", name):
+        raise ValueError(
+            f"marker {piece} is not supported: a part is written {{#name}}...{{/name}}, nothing after the name"
+        )
     if not name.isidentifier():
         raise ValueError(f"marker {piece} is not a plain name")
     return Marker(name, closing=piece[1] == CLOSING_SIGN)
@@ -151,6 +155,8 @@ def _check_parts(pieces: tuple[Piece, ...]) -> None:
             if not any(isinstance(item, Gap) or item.strip() for item in content):
                 raise ValueError(f"the part {opened} is empty")
             opened = None
+        elif piece.closing:
+            raise ValueError(f"marker {piece} closes the part {opened}, but the names differ")
         else:
             raise ValueError(f"marker {piece} comes inside the part {opened}; parts do not nest or cross")
     if opened is not None:
@@ -227,7 +233,7 @@ def _same_gaps(left: frozenset[str], right: frozenset[str], *, family: bool) -> 
 
 def _piece_problems(text: str, source_text: str | None = None, *, family: bool = False) -> list[str]:
     """What is wrong with the gaps and markers of `text`: a malformed one and, given the source's text, a gap set
-    or a marker multiset that differs, both in one problem so that the text gets one finding."""
+    or a marker multiset that differs, both in one problem of two statements so that the text gets one finding."""
     try:
         pieces = pieces_of(text)
     except ValueError as error:
@@ -244,7 +250,7 @@ def _piece_problems(text: str, source_text: str | None = None, *, family: bool =
         differences.append(
             f"has {_markers_text(markers_of(pieces))}; the source has {_markers_text(markers_of(source_pieces))}"
         )
-    return [", and ".join(differences)] if differences else []
+    return [". It ".join(differences)] if differences else []
 
 
 @dataclass(frozen=True)
