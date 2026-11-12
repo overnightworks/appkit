@@ -478,7 +478,8 @@ def test_a_consumer_imports_the_agent_control_with_its_types_from_the_package_ro
 
 def test_a_consumer_imports_the_hearing_switch_with_its_types_from_the_package_root(consumer):
     consumer.check(
-        f"import {{ HearingSwitch, type HearingKind, type HearingSwitchProps, type KitWords }} from '{consumer.name}';\n"
+        f"import {{ HearingSwitch, type HearingKind, type HearingSwitchProps, type KitWords }} "
+        f"from '{consumer.name}';\n"
         "export const component: typeof HearingSwitch = HearingSwitch;\n"
         "declare const words: KitWords;\n"
         "const common = { on: true, onChange: (on: boolean) => void on, words };\n"
@@ -488,9 +489,11 @@ def test_a_consumer_imports_the_hearing_switch_with_its_types_from_the_package_r
         "// @ts-expect-error a kind outside the two\n"
         "export const unknownKind: HearingSwitchProps = { ...common, kind: 'mute' };\n"
         "// @ts-expect-error the switch is controlled: the state is required\n"
-        "export const uncontrolled: HearingSwitchProps = { kind: 'hear', onChange: (on: boolean) => void on, words };\n"
+        "export const uncontrolled: HearingSwitchProps = "
+        "{ kind: 'hear', onChange: (on: boolean) => void on, words };\n"
         "// @ts-expect-error a press reports the new state as a boolean\n"
-        "export const wrongReport: HearingSwitchProps = { ...common, kind: 'hear', onChange: (on: string) => void on };\n"
+        "export const wrongReport: HearingSwitchProps = "
+        "{ ...common, kind: 'hear', onChange: (on: string) => void on };\n"
     )
 
 
