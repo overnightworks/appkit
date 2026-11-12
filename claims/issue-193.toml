@@ -1,8 +1,0 @@
-claim_id = "39337e8acc884bcca3074bef3c36139d"
-agent = "Claude 12dab979-d3e8-40c5-a2d7-66c70ae570cb"
-role = "builder"
-base = "2c4f07921bfef5cb9e0ee3c1e9520c26bb8d345f"
-branch = "claude/issue-193-components-take-kit-words"
-scope = ["README.md", "docs/ARCHITECTURE.md", "docs/languages.md", "docs/stylesheet.md", "src/lib", "tests/e2e", "tests/test_npm_package.py"]
-opened_commit = "3a01b8cfd1917555d928ff3d9ac79d9dc3afacf1"
-whole_reason = "One breaking contract: a kit with only some components switched is a state no release may carry, so the three components, their types and their proofs change together."
