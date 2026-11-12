@@ -1,7 +1,17 @@
 import './app.css';
 import { mount } from 'svelte';
 import { SvelteMap } from 'svelte/reactivity';
-import { AccountMenu, AgentControl, LegalLinks, SignInPage, type AgentRow, type SignInState, type ThemeChoice } from 'overnightworks-design';
+import {
+	AccountMenu,
+	AgentControl,
+	LegalLinks,
+	SignInPage,
+	loadKitWords,
+	type AgentRow,
+	type KitLanguage,
+	type SignInState,
+	type ThemeChoice
+} from 'overnightworks-design';
 
 declare global {
 	interface Window {
@@ -78,7 +88,17 @@ function mountAgentControl(variant: string): void {
 	});
 }
 
-if (location.search === '?typed') {
+/** The languages this page offers; the type check fails when the kit lacks one. */
+const pageLanguages = ['de', 'en'] as const satisfies readonly KitLanguage[];
+
+if (location.search.startsWith('?words=')) {
+	// The app's side of the kit's words: the loader called with a language of the app's own list.
+	const tag = new URLSearchParams(location.search).get('words');
+	const language = pageLanguages.find((candidate) => candidate === tag) ?? pageLanguages[0];
+	void loadKitWords(language).then((words) => {
+		document.body.innerHTML = `<p role="status">${words['account.logOut']}</p>`;
+	});
+} else if (location.search === '?typed') {
 	// A person typed the name; the app wrote the words around it.
 	document.body.innerHTML = '<main><h1>Source <span class="as-typed">talks</span></h1></main>';
 } else if (location.search === '?legal') {
