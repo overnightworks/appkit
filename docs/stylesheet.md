@@ -38,9 +38,7 @@ The sentences in this section are ruled.
 Sign-in wording is identical in every app. The kit's catalogs carry these strings verbatim; no button names Keycloak:
 
 - en: "Log in", "Log out", "You are logged out.", "No access", "Login failed", "Try again", "Legal"
-- de: "Anmelden", "Abmelden", "Du bist abgemeldet.", "Kein Zugang", "Anmeldung fehlgeschlagen", "Erneut versuchen"
-
-The de word "Rechtliches" beside en "Legal", the accessible name of the legal row, is not ruled until the operator answers the open question on it.
+- de: "Anmelden", "Abmelden", "Du bist abgemeldet.", "Kein Zugang", "Anmeldung fehlgeschlagen", "Erneut versuchen", "Rechtliches"
 
 ## The components' words
 

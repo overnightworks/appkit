@@ -12,7 +12,7 @@ Distribution is a GitHub release. It carries:
   `design-catalogs` ([Catalogs](#catalogs)) and the kit's Python words
   ([The kit's words](#the-kits-words));
 - `overnightworks-design-<version>.tgz`: the same stylesheet and fonts, plus the
-  components `SignInPage`, `AccountMenu`, `AgentControl`, `LegalLinks` and `AiMark` and the
+  components `SignInPage`, `AccountMenu`, `AgentControl`, `LegalLinks`, `Marked` and `AiMark` and the
   kit's words per language ([The kit's words](#the-kits-words)). It is the
   only npm distribution, and `svelte` ^5.20 is its only, peer, dependency;
 - `design-<version>-tokens.txt`: the sorted custom-property names `design.css`
@@ -91,6 +91,28 @@ action; an app that lets people send agents away passes the handler.
 <AgentControl {rows} {onCall} {onSendAway} {refusal} words={kitWords} />
 ```
 
+## Marked
+
+A sentence with a part the page sets apart, as `design-catalogs` generates it
+([Catalogs](#catalogs)), is a list of parts. `Marked` renders the list in place, with
+no element and no white space of its own: the app gives one snippet for each marker
+name, which receives the part's text and chooses the element. A missing snippet, and
+a snippet written in place for a name the sentence lacks, is a type error.
+
+```svelte
+<script lang="ts">
+  import { Marked } from 'overnightworks-design';
+  import { words } from './words/de';
+
+  const parts = words['retention.archiveConfirm']({ count: 3, deleted: '2' });
+</script>
+
+{#snippet strong(text: string)}<strong>{text}</strong>{/snippet}
+{#snippet help(text: string)}<a href="/help">{text}</a>{/snippet}
+
+<p><Marked {parts} marked={{ strong, help }} /></p>
+```
+
 ## Catalogs
 
 `design-catalogs` turns an app's gettext catalogs into typed modules, so that a
@@ -116,6 +138,9 @@ dev = ["overnightworks-design[catalogs] @ git+https://github.com/overnightworks/
 - `design-catalogs` reads one `<tag>.po` per language and writes one TypeScript
   module per language, the loader `index.ts` beside them and, where the app
   declares one, a Python module.
+- A text marks a part the page sets apart as `{#name}…{/name}`, and the module
+  returns the sentence as a list of parts that [`Marked`](#marked) renders; the
+  rules are LANG-25 in [Languages](docs/languages.md).
 - `design-catalogs --check` writes nothing and fails on a broken catalog, a
   missing, empty, fuzzy or outdated translation, a module or loader that is
   missing or differs from its catalogs, and a file in the module directory that

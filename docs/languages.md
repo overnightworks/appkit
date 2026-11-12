@@ -258,7 +258,8 @@ flowchart LR
   name as often as the source, and may move them and the gaps anywhere in its sentence; every
   entry of a plural family carries the same markers. In the TypeScript module a text with
   markers returns a list of parts, each a string or `{ marker, text }` with its gaps filled,
-  which the page renders as text, never as HTML. In the Python module `text()` returns the
+  which the page renders as text, never as HTML; a Svelte page renders them with the kit's
+  `Marked` component. In the Python module `text()` returns the
   sentence without its markers, as MessageFormat 2 formats markup to a string by default. A
   page without script reads no marked text while the Python module returns sentences without
   their markers; parts in the Python module wait for such a page. Markup the page derives from
@@ -272,15 +273,27 @@ flowchart LR
   msgid "Archive {#strong}{count} takes{/strong} and delete {#strong}{deleted}{/strong}. {#help}Learn more{/help}"
   ```
 
-  The page chooses the element of each marker with an each block and text interpolation only:
+  A Svelte page gives `Marked` the list and one snippet per marker name; the snippet chooses
+  the element and gets the part's text, which it writes as text interpolation only:
 
   ```svelte
   <script lang="ts">
+    import { Marked } from "overnightworks-design";
     import { words } from "./de";
 
     const parts = words["retention.archiveConfirm"]({ count: 3, deleted: "2" });
   </script>
 
+  {#snippet strong(text: string)}<strong>{text}</strong>{/snippet}
+  {#snippet help(text: string)}<a href="/help">{text}</a>{/snippet}
+
+  <p><Marked {parts} marked={{ strong, help }} /></p>
+  ```
+
+  `Marked` is what a page without it writes by hand, an each block with text interpolation
+  only; it adds no element and no white space between the parts:
+
+  ```svelte
   <p>
     {#each parts as part}
       {#if typeof part === "string"}
