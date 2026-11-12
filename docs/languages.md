@@ -163,7 +163,7 @@ flowchart LR
   `message` field. Tool descriptions for agents and log lines are not interface text.
 - **LANG-13** A text that is stored, such as a failure message in a database, stores its
   token and data, never the sentence; the page renders it in the reader's language.
-- **LANG-14** An app has one catalog per language, read by both sides. The generator emits
+- **LANG-14** A shipped unit has one catalog per language, read by both sides. The generator emits
   one TypeScript module per language, whose key type comes from the source module, and a
   Python module where the server sends tokens, serves a script-less page (LANG-17) or a
   Python test reads texts. It also writes a loader, `index.ts`, beside the language modules:
@@ -205,7 +205,7 @@ flowchart LR
   loader. The app loads them with `loadKitWords` for the page's language, as it loads its own,
   and passes them to every kit component; a component reads no language itself. The app passes
   its generated `Language`, never a literal or a cast, and an app-owned module outside the
-  generated words directory carries the line `languages satisfies readonly KitLanguage[]`, so
+  generated words directory carries the statement `void (languages satisfies readonly KitLanguage[]);`, so
   the app's type check fails when it offers a language the kit lacks.
 - **LANG-20** Content never follows the interface language: lyrics, slides, chat messages
   and names. Where an app needs content's own language (for example to mark a span with
@@ -241,10 +241,10 @@ flowchart LR
   remaining risk: clearing a mark without translating defeats the check, which is an aid for
   cooperative agents.
 - **LANG-23** Catalogs live at `frontend/src/lib/catalogs/<tag>.po` and
-  generated modules beside the code that imports them, unless the repository's one
-  declaration, which the generator and quality's rule read, names other paths. The
-  declaration is the optional table `[tool.design-catalogs]` in the root `pyproject.toml`
-  (design's README). A file in the module directory that no catalog
+  generated modules beside the code that imports them, in the unit's directory, unless the
+  unit's declaration, which the generator and quality's rule read, names other paths. The
+  declaration is the optional table `[tool.design-catalogs]` in the `pyproject.toml` of the
+  unit's directory (design's README). A file in the module directory that no catalog
   produces is a stray, which `--check` fails; a dotfile (`.gitkeep`) is no stray.
 - **LANG-24** The rule for new text: no new literal sentence in markup, no sentence from the
   server. Literal strings in script (toasts, confirm dialogs) are bound by it too, but no
@@ -317,8 +317,8 @@ One question governs this section: what does a further language add that a test 
   - the generated modules and the loader are current.
 
   The type check holds the rest of the key contract: server tokens are typed against the
-  module's key type (LANG-14), and the kit ships every language the app offers, by the line
-  `languages satisfies readonly KitLanguage[]` (LANG-19).
+  module's key type (LANG-14), and the kit ships every language the app offers, by the statement
+  `void (languages satisfies readonly KitLanguage[]);` (LANG-19).
 - **quality's rule** (a) requires the `--check` in the app's CI and the render pass below, and
   (b) owns the scan for literal text in markup, in a text or in a human-readable attribute
   (presentator's `scripts/check_catalog_purity.py` is the reference), with a baseline that

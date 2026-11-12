@@ -1,4 +1,4 @@
-"""Where an app keeps its catalogs and generated modules: the one optional table of its root pyproject.toml."""
+"""Where a shipped unit keeps its catalogs and generated modules: the optional table of its pyproject.toml."""
 
 import os
 import tomllib
@@ -22,7 +22,7 @@ class DeclarationError(Exception):
 
 @dataclass(frozen=True)
 class Declaration:
-    """The source language and the paths, relative to the repository root, the command works with."""
+    """The source language and the paths the command works with, relative to the directory of the declaration."""
 
     source: LanguageTag
     catalogs: Path

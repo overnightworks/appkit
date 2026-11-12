@@ -98,7 +98,9 @@ A sentence with a part the page sets apart, as `design-catalogs` generates it
 no element and no white space of its own: the app gives one snippet for each marker
 name, which receives the part, `{ text }`, and chooses the element. A missing snippet,
 a snippet written in place for a name the sentence lacks and a snippet that takes the
-text as a string are type errors. A parameter written as a plain name would leave a
+text as a string are type errors. That holds only while the parts keep their literal
+marker names: a list whose marker is typed `string` accepts a record of any keys, so a
+missing snippet fails at render time. A parameter written as a plain name would leave a
 default value no call reaches: a branch an app that measures with istanbul counts.
 
 ```svelte
@@ -182,8 +184,15 @@ const language = languages.find((candidate) => candidate === tag) ?? sourceLangu
 const words = await loadWords(language);
 ```
 
-All three run in the repository's root. The optional table `[tool.design-catalogs]` in
-its `pyproject.toml` overrides the defaults; paths are relative to the root and
+The snippet's module is the page's one entry module, which no second chunk imports at
+the same time, so it may await at its top level. The rule in [The kit's
+words](#the-kits-words) is for a module that two chunks import.
+
+Each run is in the directory that holds its declaration: the repository's root for an
+app of one unit. A separately shipped unit in the same repository has its own
+declaration, its own run and its own `--check`; its words never enter another unit's
+catalog. The optional table `[tool.design-catalogs]` in that directory's
+`pyproject.toml` overrides the defaults; paths are relative to that directory and
 stay inside it, the TypeScript directory is not the catalogs directory, the
 Python module lies outside both, and an unknown key or a wrong type fails:
 
@@ -284,8 +293,11 @@ generated words directory checks that the kit ships every language the app offer
 import type { KitLanguage } from "overnightworks-design";
 import { languages } from "./words";
 
-languages satisfies readonly KitLanguage[]; // a language the kit lacks fails the type check
+void (languages satisfies readonly KitLanguage[]); // a language the kit lacks fails the type check
 ```
+
+The `void` keeps typescript-eslint's `no-unused-expressions` rule quiet, which flags a
+bare `satisfies` statement.
 
 ```ts
 // src/routes/[language]/+page.ts
@@ -306,6 +318,10 @@ export const load = async ({ params }) => {
   return { words: await loadWords(language), kitWords: await loadKitWords(language) };
 };
 ```
+
+The root layout awaits both loaders in its `load`, as the example does, and never at the
+top level of a module: some Safari versions reject a module with a top-level `await` that
+two chunks import at once.
 
 ## Documentation
 
