@@ -87,6 +87,13 @@ behaviour are documented in [`src/lib/types.ts`](src/lib/types.ts). Without
 `onSendAway` a row of an agent that is here shows its mark and name and no
 action; an app that lets people send agents away passes the handler.
 
+A call that ends without a seat shows briefly why on its row. The app passes the row as
+`state: 'ended'` with an `outcome` (`'no-answer'`, `'busy'` or `'owner-absent'`); the row shows
+the outcome in place of the waiting text, muted, with a small icon and no key. After four
+seconds, the same in every app, the row is drawn like an `available` row and its call key
+works as usual, until the app changes the row. The kit invents no reason: it shows the
+outcome the app passes.
+
 ```svelte
 <AgentControl {rows} {onCall} {onSendAway} {refusal} words={kitWords} />
 ```
