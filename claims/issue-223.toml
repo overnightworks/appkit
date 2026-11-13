@@ -1,0 +1,8 @@
+claim_id = "fcd7bcb975d043edb3f0ebd63fc5aad5"
+agent = "Claude 019c230b-7e16-4294-87f3-af95e9827632"
+role = "builder"
+base = "0e2155448b3f88d797e4361457e0c180ac8e00fe"
+branch = "claude/issue-223-helper-chat"
+scope = ["README.md", "docs/ARCHITECTURE.md", "docs/stylesheet.md", "package.json", "pyproject.toml", "src/catalogs", "src/design/words.py", "src/lib/HelperChat.ssr.test.ts", "src/lib/HelperChat.svelte", "src/lib/HelperChat.test.ts", "src/lib/index.ts", "src/lib/types.ts", "src/lib/words", "tests/e2e", "tests/test_npm_package.py", "uv.lock"]
+opened_commit = "45d4ba34964da97a153cfa6dc803e6c244edb3a7"
+whole_reason = "One component, its kit words, the words generated from them, its proofs, its documentation and its release go together."
