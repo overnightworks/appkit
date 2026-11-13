@@ -329,11 +329,12 @@ describe('sending', () => {
 		expect(event.defaultPrevented).toBe(true);
 	});
 
-	it('sends nothing while an IME composes', async () => {
+	it('sends nothing and still cancels a plain Enter while an IME composes', async () => {
 		const onSend = vi.fn();
 		const root = await render({ draft: 'こんにち', onSend });
-		press(field(root), { key: 'Enter', isComposing: true });
+		const event = press(field(root), { key: 'Enter', isComposing: true });
 		expect(onSend).not.toHaveBeenCalled();
+		expect(event.defaultPrevented).toBe(true);
 	});
 
 	it('runs the app’s keydown first and sends nothing when it cancels the key', async () => {

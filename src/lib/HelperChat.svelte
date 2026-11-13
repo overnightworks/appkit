@@ -38,10 +38,10 @@
 
 	function handleKeydown(event: KeyboardEvent): void {
 		onComposerKeydown?.(event);
-		if (event.defaultPrevented || event.isComposing) return;
+		const cancelledByApp = event.defaultPrevented;
 		if (event.key === 'Enter' && !event.shiftKey) {
 			event.preventDefault();
-			send();
+			if (!cancelledByApp && !event.isComposing) send();
 		}
 	}
 
