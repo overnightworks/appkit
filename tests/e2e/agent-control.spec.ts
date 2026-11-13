@@ -191,10 +191,18 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			});
 		}
 
-		test('draws the row callable again after the outcome and reports the call', async ({ page }) => {
+		test('shows the outcome still under reduced motion, clears it, draws the row callable again and reports the call', async ({
+			page
+		}) => {
+			await page.emulateMedia({ reducedMotion: 'reduce' });
 			await routeTo(page.context(), outDir);
 			await page.goto(`${origin}/?agents=ended-busy`);
-			await expect(page.getByRole('status').filter({ hasText: en['agent.busy'] })).toBeVisible();
+			const outcome = page.getByRole('status').filter({ hasText: en['agent.busy'] });
+			await expect(outcome).toBeVisible();
+			const boxBefore = await outcome.boundingBox();
+			expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+			await expect(outcome.locator('i')).toHaveCount(0);
+			expect(await outcome.boundingBox()).toEqual(boxBefore);
 			const call = page.getByRole('button', { name: callMozart });
 			await expect(call).toBeVisible({ timeout: 10_000 });
 			await expect(page.getByRole('status').filter({ hasText: en['agent.busy'] })).toHaveCount(0);
