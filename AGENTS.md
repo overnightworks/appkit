@@ -9,7 +9,7 @@
 - `uv run --frozen --extra catalogs design-catalogs --check`: the kit's own catalogs in `src/catalogs` against `src/lib/words` and `src/design/words.py`; plain `design-catalogs` regenerates them after a catalog change.
 - `uv run --frozen ruff check .` and `uv run --frozen ruff format --check .`: Python lint; both must pass.
 - `quality check`: the shared static check. Run it at the release `.github/workflows/ci.yml` pins.
-- `pnpm run test:consumer`: the Playwright consumers, a probe stack. Run it only under the `flock` rule in the global contract's section "Machine load and local runs".
+- `pnpm run test:consumer`: the Playwright consumers, a probe stack. Run it only through `probe-run`, as the global contract's section "Machine load and local runs" says; the consumers serve a routed origin and bind no host port, so lanes may drive in parallel.
 - `gh workflow run release.yml -R overnightworks/design -f version=X.Y.Z`: the operator's release dispatch. `main` must carry X.Y.Z in `pyproject.toml` and `package.json`.
 
 ## Rules
