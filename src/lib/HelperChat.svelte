@@ -24,8 +24,6 @@
 		words
 	}: HelperChatProps<Message> = $props();
 
-	let root: HTMLDivElement | undefined = $state();
-	let thinkingLine: HTMLParagraphElement | undefined = $state();
 	let composerBox: HTMLDivElement | undefined = $state();
 
 	const lastMessage = $derived(messages.at(-1));
@@ -33,6 +31,7 @@
 	const thinking = $derived(
 		historyReady && running && lastMessage?.role === 'assistant' && lastMessage.text === ''
 	);
+	const thinkingWord = $derived(words['helperChat.thinking']({ name: helperName }));
 	const sendable = $derived(!running && readOnly === undefined && draft.trim() !== '');
 
 	const hasContent = (message: Message): boolean => message.text !== '' || (message.toolCalls?.length ?? 0) > 0;
@@ -55,18 +54,6 @@
 		onDraft(field.value, field.selectionStart);
 	}
 
-	// The one status element sits in the last helper bubble while the list shows it, and returns to the root otherwise,
-	// so a change of the history never destroys it.
-	$effect(() => {
-		const line = thinkingLine!;
-		const lastBubbleShown = lastMessage !== undefined && (hasContent(lastMessage) || thinking);
-		const host =
-			historyReady && lastMessage?.role === 'assistant' && lastBubbleShown
-				? list?.lastElementChild?.querySelector(':scope > .bubble')
-				: null;
-		(host ?? root!).append(line);
-	});
-
 	// Pressing a button in the composer keeps the focus in the field: the keyboard stays open and a tap on Send lands.
 	$effect(() => {
 		const box = composerBox!;
@@ -78,7 +65,7 @@
 	});
 </script>
 
-<div class="helper-chat" bind:this={root}>
+<div class="helper-chat">
 	{#if history.state === 'loading'}
 		<p class="subtle">{words['helperChat.loading']}</p>
 	{:else if history.state === 'failed'}
@@ -103,6 +90,9 @@
 							{/each}
 							{#if message.text !== ''}
 								<div class="text">{message.text}</div>
+							{/if}
+							{#if thinking && index === messages.length - 1}
+								<p class="thinking" aria-hidden="true">{thinkingWord}</p>
 							{/if}
 						</div>
 					{/if}
@@ -131,11 +121,12 @@
 			<button class="send" type="button" disabled={!sendable} onclick={send}>{words['helperChat.send']}</button>
 		</div>
 	</div>
-	<p class="subtle thinking" role="status" bind:this={thinkingLine}>{thinking ? words['helperChat.thinking']({ name: helperName }) : ''}</p>
+	<p class="status" role="status">{thinking ? thinkingWord : ''}</p>
 </div>
 
 <style>
 	.helper-chat {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		height: 100%;
@@ -153,7 +144,7 @@
 		margin: 0;
 		color: var(--text-muted);
 	}
-	p.subtle:not(.thinking) {
+	p.subtle {
 		padding: 8px;
 	}
 	.failure {
@@ -211,7 +202,17 @@
 		font-size: 0.8rem;
 	}
 	.thinking {
-		overflow-wrap: anywhere;
+		margin: 0;
+		color: var(--text-muted);
+	}
+	.status {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
 	.composer {
 		display: flex;

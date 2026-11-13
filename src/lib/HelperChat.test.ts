@@ -40,6 +40,7 @@ async function render(overrides: Partial<HelperChatProps<HelperMessage>> = {}): 
 const field = (root: HTMLElement) => root.querySelector('textarea')!;
 const sendButton = (root: HTMLElement) => root.querySelector<HTMLButtonElement>('.send')!;
 const status = (root: HTMLElement) => root.querySelector('[role="status"]');
+const visibleLine = (root: HTMLElement) => root.querySelector('.list .thinking');
 
 function press(target: HTMLElement, init: KeyboardEventInit): KeyboardEvent {
 	const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init });
@@ -235,29 +236,36 @@ describe('the thinking line', () => {
 		expect(status(root)?.textContent).toBe(de['helperChat.thinking']({ name: 'Mozart' }));
 	});
 
-	it('shows the thinking line after the tool rows, inside the bubble of the answer that has no text yet', async () => {
+	it('shows the visible thinking line, hidden from assistive technology, after the tool rows in the last helper bubble', async () => {
 		const root = await render({
 			messages: [{ role: 'assistant', text: '', toolCalls: [{ name: 'rewrite', input: {} }] }],
 			running: true
 		});
 		const row = root.querySelector('.tool-call')!;
-		expect(root.querySelector('.bubble')!.contains(status(root))).toBe(true);
-		expect(row.compareDocumentPosition(status(root)!)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-		expect(status(root)?.textContent).not.toBe('');
+		const visible = visibleLine(root)!;
+		expect(root.querySelector('.bubble')!.contains(visible)).toBe(true);
+		expect(visible.getAttribute('aria-hidden')).toBe('true');
+		expect(visible.textContent).toBe(en['helperChat.thinking']({ name: 'Mozart' }));
+		expect(row.compareDocumentPosition(visible)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
 	});
 
-	it('gives the pending helper message one AiMark and its bubble the thinking line while it has neither text nor tool calls', async () => {
+	it('gives the pending helper message one AiMark and its bubble the visible thinking line while it has neither text nor tool calls', async () => {
 		const root = await render({ messages: [{ role: 'user', text: 'Hi' }, { role: 'assistant', text: '' }], running: true });
 		const bubbles = root.querySelectorAll('.bubble');
 		expect(bubbles).toHaveLength(2);
 		expect(bubbles[1].querySelectorAll('.ai-mark')).toHaveLength(1);
-		expect(bubbles[1].contains(status(root))).toBe(true);
+		expect(bubbles[1].contains(visibleLine(root))).toBe(true);
+	});
+
+	it('keeps the status element out of the list, as a direct child of the part’s root', async () => {
+		const root = await render({ messages: [{ role: 'user', text: 'Hi' }, { role: 'assistant', text: '' }], running: true });
+		expect(status(root)!.parentElement).toBe(root.querySelector('.helper-chat'));
 	});
 
 	it.each([
 		['starts', false, true],
 		['stops', true, false]
-	])('keeps the one status element inside the last helper bubble when a turn %s on an unchanged empty helper message', async (_case, before, after) => {
+	])('keeps the one status element and shows the visible line only while thinking when a turn %s on an unchanged empty helper message', async (_case, before, after) => {
 		const held = new SvelteMap<string, boolean>([['running', before]]);
 		const target = document.createElement('div');
 		document.body.append(target);
@@ -267,24 +275,27 @@ describe('the thinking line', () => {
 		mounted.push({ target, component: mount(HelperChat, { target, props }) });
 		await tick();
 		const line = status(target)!;
+		expect(visibleLine(target) !== null).toBe(before);
 
 		held.set('running', after);
 		await tick();
 		expect(status(target)).toBe(line);
 		expect(target.querySelectorAll('[role="status"]')).toHaveLength(1);
-		expect(target.contains(line)).toBe(true);
-		const lastBubble = target.querySelector('.list')!.lastElementChild!.querySelector(':scope > .bubble');
-		expect(lastBubble?.contains(line) ?? false).toBe(after);
+		expect(visibleLine(target) !== null).toBe(after);
+		expect(line.textContent === '').toBe(!after);
 	});
 
-	it('keeps the one status element while the history changes, with its text empty unless the list shows', async () => {
-		const held = new SvelteMap<string, unknown>([['history', { state: 'ready' }]]);
+	it('keeps the one status element while the history changes, with its text empty unless the list shows, and while the list is replaced', async () => {
+		const held = new SvelteMap<string, unknown>([
+			['history', { state: 'ready' }],
+			['messages', [{ role: 'user', text: 'Hi' }, { role: 'assistant', text: '' }]]
+		]);
 		const target = document.createElement('div');
 		document.body.append(target);
-		const props = Object.defineProperties(
-			baseProps({ messages: [{ role: 'user', text: 'Hi' }, { role: 'assistant', text: '' }], running: true }),
-			{ history: { enumerable: true, get: () => held.get('history') as HelperChatProps<HelperMessage>['history'] } }
-		);
+		const props = Object.defineProperties(baseProps({ running: true }), {
+			history: { enumerable: true, get: () => held.get('history') as HelperChatProps<HelperMessage>['history'] },
+			messages: { enumerable: true, get: () => held.get('messages') as HelperMessage[] }
+		});
 		mounted.push({ target, component: mount(HelperChat, { target, props }) });
 		await tick();
 		const line = status(target)!;
@@ -295,10 +306,15 @@ describe('the thinking line', () => {
 			await tick();
 			expect(status(target)).toBe(line);
 			expect(target.querySelectorAll('[role="status"]')).toHaveLength(1);
-			expect(target.contains(line)).toBe(true);
 			expect(line.textContent === '').toBe(state.state !== 'ready');
+			expect(visibleLine(target) !== null).toBe(state.state === 'ready');
 		}
-		expect(target.querySelectorAll('.bubble')[1].contains(line)).toBe(true);
+
+		held.set('messages', [{ role: 'user', text: 'Earlier' }, { role: 'assistant', text: 'Answer' }, { role: 'user', text: 'Hi' }, { role: 'assistant', text: '' }]);
+		await tick();
+		expect(status(target)).toBe(line);
+		expect(line.textContent).toBe(en['helperChat.thinking']({ name: 'Mozart' }));
+		expect(target.querySelectorAll('.bubble')[3].contains(visibleLine(target))).toBe(true);
 	});
 });
 
