@@ -31,80 +31,82 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			await expect(fieldOf(page, language)).toBeVisible();
 		}
 
-		for (const colorScheme of colorSchemes) {
-			for (const width of widths) {
-				test(`draws the bubbles, the tool rows and the composer from the fixed values and the app accent, in ${colorScheme} at ${width} px`, async ({
-					page
-				}) => {
-					await page.emulateMedia({ colorScheme });
-					await page.setViewportSize({ width, height: 800 });
-					await open(page, 'base');
-					const tokens = await resolveStyle(
-						page,
-						{
-							color: 'var(--accent)',
-							'background-color': 'var(--on-accent)',
-							'border-top-color': 'var(--text-muted)',
-							'font-family': 'var(--font-display)'
-						},
-						['color', 'background-color', 'border-top-color', 'font-family']
-					);
-					const send = sendOf(page);
-					const field = fieldOf(page);
+		for (const language of languages) {
+			for (const colorScheme of colorSchemes) {
+				for (const width of widths) {
+					test(`draws the bubbles, the tool rows and the composer from the fixed values and the app accent, in ${colorScheme} at ${width} px in the ${language} words`, async ({
+						page
+					}) => {
+						await page.emulateMedia({ colorScheme });
+						await page.setViewportSize({ width, height: 800 });
+						await open(page, 'base', language);
+						const tokens = await resolveStyle(
+							page,
+							{
+								color: 'var(--accent)',
+								'background-color': 'var(--on-accent)',
+								'border-top-color': 'var(--text-muted)',
+								'font-family': 'var(--font-display)'
+							},
+							['color', 'background-color', 'border-top-color', 'font-family']
+						);
+						const send = sendOf(page, language);
+						const field = fieldOf(page, language);
 
-					await expect(send).toHaveCSS('background-color', tokens.color);
-					await expect(send).toHaveCSS('color', tokens['background-color']);
-					await expect(send).toHaveCSS('font-family', tokens['font-family']);
-					await expect(send).toHaveCSS('text-transform', 'uppercase');
-					await expect(send).toHaveCSS('border-top-left-radius', '6px');
-					await expect(field).toHaveCSS('border-top-left-radius', '8px');
-					await expect(bubbleOf(page, 'Make the second verse')).toHaveCSS('border-top-left-radius', '12px');
-					await expect(bubbleOf(page, 'Make the second verse')).toHaveCSS('background-color', tokens.color);
-					expect((await field.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-					const sendBox = (await send.boundingBox())!;
-					expect(sendBox.height).toBeGreaterThanOrEqual(44);
-					expect(sendBox.width).toBeGreaterThanOrEqual(44);
+						await expect(send).toHaveCSS('background-color', tokens.color);
+						await expect(send).toHaveCSS('color', tokens['background-color']);
+						await expect(send).toHaveCSS('font-family', tokens['font-family']);
+						await expect(send).toHaveCSS('text-transform', 'uppercase');
+						await expect(send).toHaveCSS('border-top-left-radius', '6px');
+						await expect(field).toHaveCSS('border-top-left-radius', '8px');
+						await expect(bubbleOf(page, 'Make the second verse')).toHaveCSS('border-top-left-radius', '12px');
+						await expect(bubbleOf(page, 'Make the second verse')).toHaveCSS('background-color', tokens.color);
+						expect((await field.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+						const sendBox = (await send.boundingBox())!;
+						expect(sendBox.height).toBeGreaterThanOrEqual(44);
+						expect(sendBox.width).toBeGreaterThanOrEqual(44);
 
-					const row = rowOf(page, 'rewrite_section');
-					await expect(row).toHaveCSS('color', tokens['border-top-color']);
-					await expect(row).toHaveCSS('font-size', '12.8px');
-					expect(await row.evaluate((node) => getComputedStyle(node).fontFamily)).toContain('ui-monospace');
+						const row = rowOf(page, 'rewrite_section');
+						await expect(row).toHaveCSS('color', tokens['border-top-color']);
+						await expect(row).toHaveCSS('font-size', '12.8px');
+						expect(await row.evaluate((node) => getComputedStyle(node).fontFamily)).toContain('ui-monospace');
 
-					expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-				});
+						expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+					});
 
-				test(`draws a disabled field as muted text on the deep background and a disabled Send at half opacity, in ${colorScheme} at ${width} px`, async ({
-					page
-				}) => {
-					await page.emulateMedia({ colorScheme });
-					await page.setViewportSize({ width, height: 800 });
-					await open(page, 'archived');
-					const tokens = await resolveStyle(
-						page,
-						{ color: 'var(--text-muted)', 'background-color': 'var(--bg-deep)' },
-						['color', 'background-color']
-					);
-					await expect(fieldOf(page)).toBeDisabled();
-					await expect(fieldOf(page)).toHaveCSS('color', tokens.color);
-					await expect(fieldOf(page)).toHaveCSS('background-color', tokens['background-color']);
-					await expect(sendOf(page)).toBeDisabled();
-					await expect(sendOf(page)).toHaveCSS('opacity', '0.5');
-				});
+					test(`draws a disabled field as muted text on the deep background and a disabled Send at half opacity, in ${colorScheme} at ${width} px in the ${language} words`, async ({
+						page
+					}) => {
+						await page.emulateMedia({ colorScheme });
+						await page.setViewportSize({ width, height: 800 });
+						await open(page, 'archived', language);
+						const tokens = await resolveStyle(
+							page,
+							{ color: 'var(--text-muted)', 'background-color': 'var(--bg-deep)' },
+							['color', 'background-color']
+						);
+						await expect(fieldOf(page, language)).toBeDisabled();
+						await expect(fieldOf(page, language)).toHaveCSS('color', tokens.color);
+						await expect(fieldOf(page, language)).toHaveCSS('background-color', tokens['background-color']);
+						await expect(sendOf(page, language)).toBeDisabled();
+						await expect(sendOf(page, language)).toHaveCSS('opacity', '0.5');
+					});
 
-				test(`wraps a long tool target and keeps the composer inside the page, in ${colorScheme} at ${width} px`, async ({
-					page
-				}) => {
-					await page.emulateMedia({ colorScheme });
-					await page.setViewportSize({ width, height: 800 });
-					await open(page, 'base');
-					const target = page.locator('.target', { hasText: 'Bridge of a long-named' });
-					await expect(target).toBeVisible();
-					const bubble = (await bubbleOf(page, 'Bridge of a long-named').boundingBox())!;
-					const box = (await target.boundingBox())!;
-					expect(box.x + box.width).toBeLessThanOrEqual(bubble.x + bubble.width + 1);
-					const send = (await sendOf(page).boundingBox())!;
-					expect(send.x + send.width).toBeLessThanOrEqual(width);
-				});
+					test(`wraps a long tool target and keeps the composer inside the page, in ${colorScheme} at ${width} px in the ${language} words`, async ({
+						page
+					}) => {
+						await page.emulateMedia({ colorScheme });
+						await page.setViewportSize({ width, height: 800 });
+						await open(page, 'base', language);
+						const target = page.locator('.target', { hasText: 'Bridge of a long-named' });
+						await expect(target).toBeVisible();
+						const bubble = (await bubbleOf(page, 'Bridge of a long-named').boundingBox())!;
+						const box = (await target.boundingBox())!;
+						expect(box.x + box.width).toBeLessThanOrEqual(bubble.x + bubble.width + 1);
+						const send = (await sendOf(page, language).boundingBox())!;
+						expect(send.x + send.width).toBeLessThanOrEqual(width);
+					});
+				}
 			}
 		}
 
