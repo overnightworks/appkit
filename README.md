@@ -92,7 +92,9 @@ A call that ends without a seat shows briefly why on its row. The app passes the
 the outcome in place of the waiting text, muted, with a small icon and no key. After four
 seconds, the same in every app, the row is drawn like an `available` row and its call key
 works as usual, until the app changes the row. The kit invents no reason: it shows the
-outcome the app passes.
+outcome the app passes. While a call is under way the app passes the row as `inviting`, so an
+ended outcome that repeats after a new call restarts the four seconds; the same ended outcome
+passed again with no state change in between shows nothing new.
 
 ```svelte
 <AgentControl {rows} {onCall} {onSendAway} {refusal} words={kitWords} />
