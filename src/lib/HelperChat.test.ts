@@ -370,7 +370,7 @@ describe('sending', () => {
 		expect(event.defaultPrevented).toBe(true);
 	});
 
-	it('runs the app’s keydown first and sends nothing when it cancels the key', async () => {
+	it('runs the app’s keydown before the part handles the key', async () => {
 		const order: string[] = [];
 		const onSend = vi.fn(() => void order.push('send'));
 		const root = await render({
@@ -395,14 +395,18 @@ describe('sending', () => {
 		expect(onSend).not.toHaveBeenCalled();
 	});
 
-	it.each<[string, Partial<HelperChatProps<HelperMessage>>, boolean]>([
-		['the draft has text', { draft: 'Hello' }, false],
-		['the draft is empty', { draft: '' }, true],
-		['a turn runs', { draft: 'Hello', running: true }, true],
-		['the chat is read-only', { draft: 'Hello', readOnly: text('Archived') }, true]
-	])('turns Send %s off=%s', async (_case, overrides, off) => {
+	it('leaves Send on for a draft with text', async () => {
+		const root = await render({ draft: 'Hello' });
+		expect(sendButton(root).disabled).toBe(false);
+	});
+
+	it.each<[string, Partial<HelperChatProps<HelperMessage>>]>([
+		['the draft is empty', { draft: '' }],
+		['a turn runs', { draft: 'Hello', running: true }],
+		['the chat is read-only', { draft: 'Hello', readOnly: text('Archived') }]
+	])('turns Send off when %s', async (_case, overrides) => {
 		const root = await render(overrides);
-		expect(sendButton(root).disabled).toBe(off);
+		expect(sendButton(root).disabled).toBe(true);
 	});
 
 	it('names Send by the kit word', async () => {
