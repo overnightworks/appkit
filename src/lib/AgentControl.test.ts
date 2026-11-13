@@ -306,6 +306,17 @@ describe('empty face', () => {
 		expect(control.querySelector('ul, li, button')).toBeNull();
 	});
 
+	it('draws the place-full sentence instead of the empty sentence when full is set', async () => {
+		const control = await render({ rows: [], full: true });
+		expect(control.textContent?.trim()).toBe(en['agent.placeFull']);
+		expect(control.textContent).not.toContain(en['agent.empty']);
+	});
+
+	it('draws the empty sentence when full is unset or false', async () => {
+		const control = await render({ rows: [], full: false });
+		expect(control.textContent?.trim()).toBe(en['agent.empty']);
+	});
+
 	it('draws no empty sentence while rows exist', async () => {
 		const control = await render({ rows: [{ key: 'k1', name: 'Mozart', state: 'here' }] });
 		expect(control.textContent).not.toContain(en['agent.empty']);

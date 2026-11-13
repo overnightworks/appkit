@@ -256,5 +256,14 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			await expect(page.getByRole('button')).toHaveCount(0);
 			await expect(page.getByRole('list')).toHaveCount(0);
 		});
+
+		test('draws the place-full sentence in place of the empty sentence when the place is full', async ({ page }) => {
+			await routeTo(page.context(), outDir);
+			await page.goto(`${origin}/?agents=empty-full`);
+			await expect(page.getByText(en['agent.placeFull'])).toBeVisible();
+			await expect(page.getByText(en['agent.empty'])).toHaveCount(0);
+			await expect(page.getByRole('button')).toHaveCount(0);
+			await expect(page.getByRole('list')).toHaveCount(0);
+		});
 	});
 }

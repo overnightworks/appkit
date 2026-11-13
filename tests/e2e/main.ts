@@ -89,7 +89,7 @@ const endedVariants: Record<string, AgentControlOutcome> = {
 };
 
 function rowsOfVariant(variant: string): AgentRow[] {
-	if (variant === 'empty') return [];
+	if (variant === 'empty' || variant === 'empty-full') return [];
 	const outcome = endedVariants[variant];
 	return outcome ? [{ key: 'key-mozart', name: 'Mozart', state: 'ended', outcome }, ...agentRows.slice(1)] : agentRows;
 }
@@ -100,6 +100,7 @@ function mountAgentControl(variant: string, words: KitWords): void {
 		target: document.body,
 		props: {
 			rows: rowsOfVariant(variant),
+			full: variant === 'empty-full',
 			refusal: variant === 'refusal' ? 'owner-absent' : undefined,
 			onCall: (key: string) => void window.reports.push(`call:${key}`),
 			onSendAway: (key: string) => void window.reports.push(`leave:${key}`),

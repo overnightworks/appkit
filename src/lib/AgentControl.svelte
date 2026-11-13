@@ -23,7 +23,7 @@
 		'owner-absent': 'agent.ownerAbsent'
 	} satisfies Record<AgentControlOutcome, keyof KitWords>;
 
-	let { rows, onCall, onSendAway, refusal, words }: AgentControlProps = $props();
+	let { rows, full, onCall, onSendAway, refusal, words }: AgentControlProps = $props();
 
 	// Keys of the ended rows whose outcome has run out; a row leaves the set when the app changes it.
 	const lapsed = new SvelteSet<string>();
@@ -62,7 +62,7 @@
 		</div>
 	{/if}
 	{#if rows.length === 0}
-		<p class="empty">{words['agent.empty']}</p>
+		<p class="empty">{words[full ? 'agent.placeFull' : 'agent.empty']}</p>
 	{:else}
 		<ul>
 			{#each rows as row (row.key)}

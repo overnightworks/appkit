@@ -140,8 +140,16 @@ export type AgentControlRefusal =
  * leave takes effect at once, with no confirm step.
  */
 export interface AgentControlProps {
-	/** An empty list draws only the empty sentence, and the refusal when one is set. */
+	/**
+	 * An empty list draws only the empty sentence, and the refusal when one is set. The sentence is
+	 * `agent.placeFull` when `full` is set, `agent.empty` otherwise.
+	 */
 	rows: readonly AgentRow[];
+	/**
+	 * The place holds no further agent. With no rows, the empty sentence says so instead of saying
+	 * that no agent is reachable. The app decides when the place is full; rows are drawn unchanged.
+	 */
+	full?: boolean;
 	/** Called with the row's key by the button of an `available` row. */
 	onCall: (key: string) => void;
 	/**
