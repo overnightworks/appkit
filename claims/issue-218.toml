@@ -1,0 +1,8 @@
+claim_id = "ca757561f9294a3b96651781e22d8bbe"
+agent = "Claude 019c230b-7e16-4294-87f3-af95e9827632"
+role = "builder"
+base = "948c734a40ef811a9664387a51c0a72617997a98"
+branch = "claude/issue-218-agent-control-call-outcome"
+scope = ["README.md", "docs/mockups/agent-control.html", "docs/stylesheet.md", "package.json", "pyproject.toml", "src/catalogs", "src/design/words.py", "src/lib/AgentControl.ssr.test.ts", "src/lib/AgentControl.svelte", "src/lib/AgentControl.test.ts", "src/lib/index.ts", "src/lib/types.ts", "src/lib/words", "tests/e2e", "tests/test_npm_package.py", "uv.lock"]
+opened_commit = "b4730229f5b21105cd84c808dbc9055275b566c7"
+whole_reason = "The picture, the row's new state, its words, its proofs, its documentation and the release that ships it go together."
