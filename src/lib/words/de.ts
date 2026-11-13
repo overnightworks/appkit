@@ -24,6 +24,8 @@ export type Words = {
     readonly "account.logOut": string;
     readonly "agent.call": string;
     readonly "agent.calling": string;
+    readonly "agent.noAnswer": string;
+    readonly "agent.busy": string;
     readonly "agent.askToLeave": string;
     readonly "agent.callLabel": (gaps: { readonly name: string }) => string;
     readonly "agent.askToLeaveLabel": (gaps: { readonly name: string }) => string;
@@ -62,6 +64,8 @@ export const words: Words = {
     "account.logOut": "Abmelden",
     "agent.call": "Rufen",
     "agent.calling": "Wird gerufen…",
+    "agent.noAnswer": "Keine Antwort",
+    "agent.busy": "Gerade beschäftigt",
     "agent.askToLeave": "Bitten zu gehen",
     "agent.callLabel": (gaps: { readonly name: string }) => gaps.name + " rufen",
     "agent.askToLeaveLabel": (gaps: { readonly name: string }) => gaps.name + " bitten zu gehen",
