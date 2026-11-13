@@ -396,7 +396,14 @@ def test_a_consumer_passes_the_kit_words_to_each_component_and_fails_its_type_ch
 
 @pytest.mark.parametrize(
     "removed",
-    ["AccountMenuWords", "SignInPageWords", "AgentControlWords", "HearingSwitchWords", "EarMarkWords", "HelperChatWords"],
+    [
+        "AccountMenuWords",
+        "SignInPageWords",
+        "AgentControlWords",
+        "HearingSwitchWords",
+        "EarMarkWords",
+        "HelperChatWords",
+    ],
 )
 def test_the_package_root_exports_no_per_component_words_type(consumer, removed):
     consumer.check(
@@ -549,7 +556,8 @@ def test_a_consumer_imports_the_helper_chat_with_its_types_from_the_package_root
         "export const histories: HelperHistory[] = [{ state: 'ready' }, { state: 'loading' }, "
         "{ state: 'failed', failure: 'x' }];\n"
         "interface AppMessage extends HelperMessage { readonly id: string }\n"
-        "export const own: HelperChatProps<AppMessage> = { ...common, messages: [{ role: 'user', text: 't', id: 'a' }] };\n"
+        "export const own: HelperChatProps<AppMessage> = "
+        "{ ...common, messages: [{ role: 'user', text: 't', id: 'a' }] };\n"
         "// @ts-expect-error a role outside the two\n"
         "export const unknownRole: HelperMessage = { role: 'system', text: 't' };\n"
         "// @ts-expect-error a failed history names its failure\n"
