@@ -10,6 +10,7 @@ export { loadKitWords } from './kitWords.js';
 export type { KitLanguage, KitWords } from './kitWords.js';
 export type {
 	AccountMenuProps,
+	AgentControlOutcome,
 	AgentControlProps,
 	AgentControlRefusal,
 	AgentRow,

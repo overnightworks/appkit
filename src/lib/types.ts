@@ -106,15 +106,23 @@ export interface SignInPageProps {
 	words: KitWords;
 }
 
-/** One row of the agent control. */
-export interface AgentRow {
+/** How a call ended without a seat: the invitation ran out, the agent is busy, or its owner is away. */
+export type AgentControlOutcome = 'no-answer' | 'busy' | 'owner-absent';
+
+/**
+ * One row of the agent control. `inviting` is a call under way, `here` an agent in the place and
+ * `ended` a call that ended without a seat: the row shows its `outcome` in place of the waiting
+ * text for a few seconds, then draws like an `available` row until the app changes it.
+ */
+export type AgentRow = {
 	/** Opaque and minted by the app; the kit hands it back to `onCall` and `onSendAway`. */
 	key: string;
 	/** Shown as given. */
 	name: string;
-	/** `inviting` is a call under way, `here` an agent in the place. */
-	state: 'available' | 'inviting' | 'here';
-}
+} & (
+	| { state: 'available' | 'inviting' | 'here' }
+	| { state: 'ended'; outcome: AgentControlOutcome }
+);
 
 /** Why a call or a send-away was refused; the same five reasons serve both actions. */
 export type AgentControlRefusal =
@@ -126,9 +134,10 @@ export type AgentControlRefusal =
 
 /**
  * The panel of rows with which a person calls an agent into a place and asks it to leave again:
- * each row leads with `AiMark`, then the name, then one action or the waiting text.
- * Trigger and popover stay with the app. The control holds no state of the call: the app sets
- * `rows` and `refusal` and clears them. Asking to leave takes effect at once, with no confirm step.
+ * each row leads with `AiMark`, then the name, then one action, the waiting text or the outcome of a
+ * call. Trigger and popover stay with the app. The control holds no state of the call: the app sets
+ * `rows` and `refusal` and clears them; its one timer only ends the display of an outcome. Asking to
+ * leave takes effect at once, with no confirm step.
  */
 export interface AgentControlProps {
 	/** An empty list draws only the empty sentence, and the refusal when one is set. */
