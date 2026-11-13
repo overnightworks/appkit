@@ -1,0 +1,8 @@
+claim_id = "0c3415b2348842ef9d0ae3c2c7d446c3"
+agent = "Claude 019c230b-7e16-4294-87f3-af95e9827632"
+role = "builder"
+base = "cceb929bc22a941e5d6a9e8cef7fcfe814741e8e"
+branch = "claude/issue-220-agent-control-full-place"
+scope = ["README.md", "docs/stylesheet.md", "package.json", "pyproject.toml", "src/catalogs", "src/design/words.py", "src/lib/AgentControl.ssr.test.ts", "src/lib/AgentControl.svelte", "src/lib/AgentControl.test.ts", "src/lib/types.ts", "src/lib/words", "tests/e2e", "tests/test_npm_package.py", "uv.lock"]
+opened_commit = "7c316fc2c1ca08bf23716d869417dd983dde6fa0"
+whole_reason = "The new state, its sentence, its proofs, its documentation and the release that ships it go together."
