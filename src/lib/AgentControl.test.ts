@@ -1,7 +1,8 @@
 import { mount, tick, unmount } from 'svelte';
+import { SvelteMap } from 'svelte/reactivity';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import AgentControl from './AgentControl.svelte';
-import type { AgentControlProps, AgentControlRefusal } from './types.ts';
+import AgentControl, { outcomeMilliseconds } from './AgentControl.svelte';
+import type { AgentControlOutcome, AgentControlProps, AgentControlRefusal } from './types.ts';
 import { loadWords } from './words/index.ts';
 
 const en = await loadWords('en');
@@ -22,6 +23,7 @@ async function render(overrides: Partial<AgentControlProps> = {}): Promise<HTMLE
 }
 
 afterEach(async () => {
+	vi.useRealTimers();
 	for (const { target, component } of mounted.splice(0)) {
 		await unmount(component);
 		target.remove();
@@ -112,6 +114,151 @@ describe('actions', () => {
 		expect(onSendAway).toHaveBeenCalledExactlyOnceWith('key-2');
 		expect(onCall).not.toHaveBeenCalled();
 		expect(control.querySelector('[role="dialog"], [role="alertdialog"]')).toBeNull();
+	});
+});
+
+describe('ended rows', () => {
+	const outcomeWords: [AgentControlOutcome, keyof typeof en][] = [
+		['no-answer', 'agent.noAnswer'],
+		['busy', 'agent.busy'],
+		['owner-absent', 'agent.ownerAbsent']
+	];
+	const ended = (outcome: AgentControlOutcome): AgentControlProps['rows'][number] => ({
+		key: 'k1',
+		name: 'Mozart',
+		state: 'ended',
+		outcome
+	});
+	const statusOf = (control: HTMLElement) => control.querySelector('[role="status"]');
+
+	async function renderWithTimers(overrides: Partial<AgentControlProps>) {
+		vi.useFakeTimers();
+		return render(overrides);
+	}
+
+	async function renderChangingRows(initial: AgentControlProps['rows']) {
+		vi.useFakeTimers();
+		const state = new SvelteMap([['rows', initial]]);
+		const target = document.createElement('div');
+		document.body.append(target);
+		const props = {
+			...baseProps(),
+			get rows() {
+				return state.get('rows')!;
+			}
+		};
+		mounted.push({ target, component: mount(AgentControl, { target, props }) });
+		await tick();
+		return {
+			control: target,
+			setRows: async (rows: AgentControlProps['rows']) => {
+				state.set('rows', rows);
+				await tick();
+			}
+		};
+	}
+
+	it.each(outcomeWords)(
+		'shows the %s outcome as a muted status with an icon and no key',
+		async (outcome, key) => {
+			const control = await render({ rows: [ended(outcome)] });
+			expect(buttonsOf(control)).toHaveLength(0);
+			const status = statusOf(control)!;
+			expect(status.textContent?.trim()).toBe(en[key]);
+			expect(status.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+			expect(status.querySelector('.dots')).toBeNull();
+		}
+	);
+
+	it.each(outcomeWords)('shows the %s outcome in the words of the page language', async (outcome, key) => {
+		const control = await render({ rows: [ended(outcome)], words: de });
+		expect(statusOf(control)?.textContent?.trim()).toBe(de[key]);
+	});
+
+	it('draws the row like an available row once the duration has passed', async () => {
+		const onCall = vi.fn();
+		const control = await renderWithTimers({ rows: [ended('busy')], onCall });
+		await vi.advanceTimersByTimeAsync(outcomeMilliseconds - 1);
+		expect(statusOf(control)).not.toBeNull();
+		await vi.advanceTimersByTimeAsync(1);
+		expect(statusOf(control)).toBeNull();
+		const buttons = buttonsOf(control);
+		expect(buttons).toHaveLength(1);
+		expect(buttons[0].textContent?.trim()).toBe(en['agent.call']);
+		expect(buttons[0].getAttribute('aria-label')).toBe(en['agent.callLabel']({ name: 'Mozart' }));
+		buttons[0].click();
+		expect(onCall).toHaveBeenCalledExactlyOnceWith('k1');
+	});
+
+	it('keeps the row callable until the app changes it', async () => {
+		const control = await renderWithTimers({ rows: [ended('no-answer')] });
+		await vi.advanceTimersByTimeAsync(outcomeMilliseconds * 5);
+		expect(buttonsOf(control)).toHaveLength(1);
+		expect(statusOf(control)).toBeNull();
+	});
+
+	it('restarts the duration when the app passes a new ended state for the row', async () => {
+		const { control, setRows } = await renderChangingRows([ended('no-answer')]);
+		await vi.advanceTimersByTimeAsync(outcomeMilliseconds - 1);
+		await setRows([{ key: 'k1', name: 'Mozart', state: 'inviting' }]);
+		await setRows([ended('busy')]);
+		await vi.advanceTimersByTimeAsync(outcomeMilliseconds - 1);
+		expect(statusOf(control)?.textContent?.trim()).toBe(en['agent.busy']);
+		await vi.advanceTimersByTimeAsync(1);
+		expect(statusOf(control)).toBeNull();
+	});
+
+	it('restarts the duration when the outcome of an ended row changes', async () => {
+		const { control, setRows } = await renderChangingRows([ended('no-answer')]);
+		await vi.advanceTimersByTimeAsync(outcomeMilliseconds - 1);
+		await setRows([ended('busy')]);
+		await vi.advanceTimersByTimeAsync(outcomeMilliseconds - 1);
+		expect(statusOf(control)?.textContent?.trim()).toBe(en['agent.busy']);
+	});
+
+	it('shows the outcome again when the app ends the call anew after the row lapsed', async () => {
+		const { control, setRows } = await renderChangingRows([ended('no-answer')]);
+		await vi.advanceTimersByTimeAsync(outcomeMilliseconds);
+		expect(statusOf(control)).toBeNull();
+		await setRows([{ key: 'k1', name: 'Mozart', state: 'inviting' }]);
+		await setRows([ended('no-answer')]);
+		expect(statusOf(control)?.textContent?.trim()).toBe(en['agent.noAnswer']);
+	});
+
+	it('leaves other rows and their timers untouched', async () => {
+		const { control, setRows } = await renderChangingRows([
+			ended('no-answer'),
+			{ key: 'k2', name: 'Bach', state: 'inviting' }
+		]);
+		await vi.advanceTimersByTimeAsync(outcomeMilliseconds - 1);
+		await setRows([ended('no-answer'), { key: 'k2', name: 'Bach', state: 'here' }]);
+		await vi.advanceTimersByTimeAsync(1);
+		expect(rowsOf(control).map((row) => row.lastElementChild?.textContent?.trim())).toEqual([
+			en['agent.call'],
+			en['agent.askToLeave']
+		]);
+	});
+
+	it('does not restart the duration when the app passes the same ended row again', async () => {
+		const { control, setRows } = await renderChangingRows([ended('busy')]);
+		await vi.advanceTimersByTimeAsync(outcomeMilliseconds - 1);
+		await setRows([ended('busy')]);
+		await vi.advanceTimersByTimeAsync(1);
+		expect(statusOf(control)).toBeNull();
+	});
+
+	it('clears its timer when the row changes or the control unmounts', async () => {
+		const { setRows } = await renderChangingRows([ended('busy')]);
+		expect(vi.getTimerCount()).toBe(1);
+		await setRows([{ key: 'k1', name: 'Mozart', state: 'here' }]);
+		expect(vi.getTimerCount()).toBe(0);
+		await setRows([ended('busy')]);
+		expect(vi.getTimerCount()).toBe(1);
+		for (const { target, component } of mounted.splice(0)) {
+			await unmount(component);
+			target.remove();
+		}
+		expect(vi.getTimerCount()).toBe(0);
 	});
 });
 

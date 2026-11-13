@@ -87,6 +87,14 @@ msgctxt "agent.calling"
 msgid "Wird gerufen…"
 msgstr "Calling…"
 
+msgctxt "agent.noAnswer"
+msgid "Keine Antwort"
+msgstr "No answer"
+
+msgctxt "agent.busy"
+msgid "Gerade beschäftigt"
+msgstr "Busy right now"
+
 msgctxt "agent.askToLeave"
 msgid "Bitten zu gehen"
 msgstr "Ask to leave"

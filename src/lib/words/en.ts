@@ -24,6 +24,8 @@ const translated = {
     "account.logOut": "Log out",
     "agent.call": "Call",
     "agent.calling": "Calling…",
+    "agent.noAnswer": "No answer",
+    "agent.busy": "Busy right now",
     "agent.askToLeave": "Ask to leave",
     "agent.callLabel": (gaps: { readonly name: string }) => "Call " + gaps.name,
     "agent.askToLeaveLabel": (gaps: { readonly name: string }) => "Ask " + gaps.name + " to leave",

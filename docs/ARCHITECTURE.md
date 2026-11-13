@@ -55,7 +55,8 @@ flowchart TB
   and both render `LegalLinks`. `AgentControl` is the panel of rows with which a
   person calls an agent and asks it to leave; each row leads with `AiMark`, the
   "AI" pill before an agent's name, which takes no props. The app owns the
-  trigger and the popover, and the control holds no state of the call.
+  trigger and the popover, and the control holds no state of the call beyond the one
+  timer per row that ends the display of an outcome after a fixed duration.
   `HearingSwitch` is one controlled chip with a switch for an agent's hearing; it
   takes its on colour from the app's `--accent`, and the app owns where the chips
   stand and what a switch does. `EarMark` is the round ear with the agent's name in a pill

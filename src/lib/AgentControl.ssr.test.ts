@@ -33,6 +33,24 @@ describe.each(languages)('AgentControl server-rendered in the %s words', (langua
 	});
 
 	it.each([
+		['no-answer', 'agent.noAnswer'],
+		['busy', 'agent.busy'],
+		['owner-absent', 'agent.ownerAbsent']
+	] as const)('renders the %s outcome of an ended row as a status without a script', async (outcome, key) => {
+		const words = await loadWords(language);
+		const { body } = render(AgentControl, {
+			props: {
+				rows: [{ key: 'k1', name: 'Mozart', state: 'ended', outcome }],
+				onCall: () => {},
+				onSendAway: () => {},
+				words
+			}
+		});
+		expect(body).toMatch(new RegExp(`role="status"[^>]*>.*${words[key]}`, 's'));
+		expect(body).not.toMatch(/<script\b|<button\b/);
+	});
+
+	it.each([
 		['not-allowed', 'agent.notAllowed'],
 		['owner-absent', 'agent.ownerAbsent'],
 		['place-full', 'agent.placeFull'],

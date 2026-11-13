@@ -145,6 +145,71 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			await expect(dot).toHaveCSS('animation-name', 'none');
 		});
 
+		const outcomes = [
+			['ended-no-answer', 'agent.noAnswer'],
+			['ended-busy', 'agent.busy'],
+			['ended-owner-absent', 'agent.ownerAbsent']
+		] as const;
+
+		for (const colorScheme of colorSchemes) {
+			for (const width of widths) {
+				for (const [variant, key] of outcomes) {
+					test(`paints the ${variant} row muted with a small icon and no key in ${colorScheme} at ${width} px`, async ({
+						page
+					}) => {
+						await page.emulateMedia({ colorScheme });
+						await page.setViewportSize({ width, height: 800 });
+						await routeTo(page.context(), outDir);
+						await page.goto(`${origin}/?agents=${variant}`);
+						const row = page.getByRole('listitem').first();
+						const outcome = row.getByRole('status');
+						await expect(outcome).toHaveText(en[key]);
+						await expect(row.getByRole('button')).toHaveCount(0);
+						const tokens = await resolveStyle(page, { color: 'var(--text-muted)' }, ['color']);
+						await expect(outcome).toHaveCSS('color', tokens.color);
+						const icon = outcome.locator('svg');
+						await expect(icon).toHaveCSS('width', '15px');
+						await expect(icon).toHaveCSS('height', '15px');
+						await expect(outcome.locator('i')).toHaveCount(0);
+						const box = (await outcome.boundingBox())!;
+						expect(box.x + box.width).toBeLessThanOrEqual(width);
+						expect(
+							await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
+						).toBe(true);
+					});
+				}
+			}
+		}
+
+		for (const language of languages) {
+			test(`draws the ${language} words of an outcome`, async ({ page }) => {
+				await routeTo(page.context(), outDir);
+				await page.goto(`${origin}/?agents=ended-no-answer&lang=${language}`);
+				await expect(page.getByRole('listitem').first().getByRole('status')).toHaveText(
+					wordsOf[language]['agent.noAnswer']
+				);
+			});
+		}
+
+		test('shows the outcome still under reduced motion, clears it, draws the row callable again and reports the call', async ({
+			page
+		}) => {
+			await page.emulateMedia({ reducedMotion: 'reduce' });
+			await routeTo(page.context(), outDir);
+			await page.goto(`${origin}/?agents=ended-busy`);
+			const outcome = page.getByRole('status').filter({ hasText: en['agent.busy'] });
+			await expect(outcome).toBeVisible();
+			const boxBefore = await outcome.boundingBox();
+			expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+			await expect(outcome.locator('i')).toHaveCount(0);
+			expect(await outcome.boundingBox()).toEqual(boxBefore);
+			const call = page.getByRole('button', { name: callMozart });
+			await expect(call).toBeVisible({ timeout: 10_000 });
+			await expect(page.getByRole('status').filter({ hasText: en['agent.busy'] })).toHaveCount(0);
+			await call.click();
+			expect(await reportsOf(page)).toEqual(['call:key-mozart']);
+		});
+
 		test('is operable by keyboard in reading order', async ({ page }) => {
 			await open(page);
 			await page.keyboard.press('Tab');

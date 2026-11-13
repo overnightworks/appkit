@@ -9,6 +9,7 @@ import {
 	LegalLinks,
 	SignInPage,
 	loadKitWords,
+	type AgentControlOutcome,
 	type AgentRow,
 	type HearingKind,
 	type KitLanguage,
@@ -80,12 +81,25 @@ const agentRows: AgentRow[] = [
 	{ key: 'key-leonardo', name: 'Leonardo da Vinci, the long-named painter and inventor', state: 'here' }
 ];
 
+/** The variants that end Mozart's call, by the outcome the page passes. */
+const endedVariants: Record<string, AgentControlOutcome> = {
+	'ended-no-answer': 'no-answer',
+	'ended-busy': 'busy',
+	'ended-owner-absent': 'owner-absent'
+};
+
+function rowsOfVariant(variant: string): AgentRow[] {
+	if (variant === 'empty') return [];
+	const outcome = endedVariants[variant];
+	return outcome ? [{ key: 'key-mozart', name: 'Mozart', state: 'ended', outcome }, ...agentRows.slice(1)] : agentRows;
+}
+
 function mountAgentControl(variant: string, words: KitWords): void {
 	window.reports = [];
 	mount(AgentControl, {
 		target: document.body,
 		props: {
-			rows: variant === 'empty' ? [] : agentRows,
+			rows: rowsOfVariant(variant),
 			refusal: variant === 'refusal' ? 'owner-absent' : undefined,
 			onCall: (key: string) => void window.reports.push(`call:${key}`),
 			onSendAway: (key: string) => void window.reports.push(`leave:${key}`),
