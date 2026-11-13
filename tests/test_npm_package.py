@@ -456,8 +456,8 @@ def test_a_consumer_imports_the_agent_control_with_its_types_from_the_package_ro
     consumer,
 ):
     consumer.check(
-        f"import {{ AgentControl, type AgentControlProps, type AgentControlRefusal, type AgentRow, "
-        f"type KitWords }} from '{consumer.name}';\n"
+        f"import {{ AgentControl, type AgentControlOutcome, type AgentControlProps, type AgentControlRefusal, "
+        f"type AgentRow, type KitWords }} from '{consumer.name}';\n"
         "export const component: typeof AgentControl = AgentControl;\n"
         "declare const words: KitWords;\n"
         "const common = { onCall: (key: string) => void key, onSendAway: (key: string) => void key, words };\n"
@@ -465,6 +465,7 @@ def test_a_consumer_imports_the_agent_control_with_its_types_from_the_package_ro
         "  { key: 'k1', name: 'Mozart', state: 'available' },\n"
         "  { key: 'k2', name: 'Bach', state: 'inviting' },\n"
         "  { key: 'k3', name: 'Leonardo', state: 'here' },\n"
+        "  { key: 'k4', name: 'Bach', state: 'ended', outcome: 'busy' },\n"
         "];\n"
         "export const plain: AgentControlProps = { ...common, rows };\n"
         "export const withoutSendAway: AgentControlProps = { onCall: (key: string) => void key, rows, words };\n"
@@ -474,8 +475,15 @@ def test_a_consumer_imports_the_agent_control_with_its_types_from_the_package_ro
         "];\n"
         "// @ts-expect-error a refusal outside the five reasons\n"
         "export const unknownRefusal: AgentControlProps = { ...common, rows, refusal: 'sorry' };\n"
-        "// @ts-expect-error a state outside the three\n"
+        "export const outcomes: AgentControlOutcome[] = ['no-answer', 'busy', 'owner-absent'];\n"
+        "// @ts-expect-error a state outside the four\n"
         "export const unknownState: AgentRow = { key: 'k', name: 'N', state: 'gone' };\n"
+        "// @ts-expect-error an ended row names its outcome\n"
+        "export const unnamedOutcome: AgentRow = { key: 'k', name: 'N', state: 'ended' };\n"
+        "// @ts-expect-error an outcome outside the three\n"
+        "export const unknownOutcome: AgentRow = { key: 'k', name: 'N', state: 'ended', outcome: 'gone' };\n"
+        "// @ts-expect-error only an ended row has an outcome\n"
+        "export const strayOutcome: AgentRow = { key: 'k', name: 'N', state: 'here', outcome: 'busy' };\n"
         "// @ts-expect-error the rows are required\n"
         "export const noRows: AgentControlProps = { ...common };\n"
     )
