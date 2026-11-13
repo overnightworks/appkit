@@ -43,6 +43,11 @@ type Key = Literal[
     'hearing.iWantToHearAgent',
     'hearing.agentHearsYou',
     'hearing.agentHearsPerson',
+    'helperChat.send',
+    'helperChat.thinking',
+    'helperChat.ranTool',
+    'helperChat.loading',
+    'helperChat.composerLabel',
     'legalLinks.name',
 ]
 type Language = Literal[
@@ -101,6 +106,11 @@ WORDS: Mapping[Language, Mapping[Key, str | Mapping[Category, str]]] = {
         'hearing.iWantToHearAgent': 'Ich will den Agenten hören',
         'hearing.agentHearsYou': '{agent} hört dich',
         'hearing.agentHearsPerson': '{agent} hört {name}',
+        'helperChat.send': 'Senden',
+        'helperChat.thinking': '{name} denkt nach…',
+        'helperChat.ranTool': 'Werkzeug benutzt: {tool}',
+        'helperChat.loading': 'Chat wird geladen…',
+        'helperChat.composerLabel': 'Nachricht an {name}',
         'legalLinks.name': 'Rechtliches',
     },
     'en': {
@@ -140,6 +150,11 @@ WORDS: Mapping[Language, Mapping[Key, str | Mapping[Category, str]]] = {
         'hearing.iWantToHearAgent': 'I want to hear the agent',
         'hearing.agentHearsYou': '{agent} hears you',
         'hearing.agentHearsPerson': '{agent} hears {name}',
+        'helperChat.send': 'Send',
+        'helperChat.thinking': '{name} is thinking…',
+        'helperChat.ranTool': 'ran tool: {tool}',
+        'helperChat.loading': 'Loading chat…',
+        'helperChat.composerLabel': 'Message to {name}',
         'legalLinks.name': 'Legal',
     },
 }

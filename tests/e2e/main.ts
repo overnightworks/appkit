@@ -17,11 +17,12 @@ import {
 	type SignInState,
 	type ThemeChoice
 } from 'overnightworks-design';
+import HelperChatStub from './HelperChatStub.svelte';
 import MarkedSentence from './MarkedSentence.svelte';
 
 declare global {
 	interface Window {
-		/** Every report the menu, the agent control, the hearing switch or the sign-in page made, in order. */
+		/** Every report the menu, the agent control, the hearing switch, the helper chat's stub app or the sign-in page made, in order. */
 		reports: string[];
 	}
 }
@@ -190,6 +191,12 @@ if (query.has('words')) {
 	});
 } else if (query.has('marked')) {
 	mount(MarkedSentence, { target: document.body });
+} else if (query.has('helper')) {
+	window.reports = [];
+	mount(HelperChatStub, {
+		target: document.body,
+		props: { variant: query.get('helper') ?? '', words: await loadKitWords(pageLanguage) }
+	});
 } else if (query.has('ear')) {
 	mountEarMarks(query.get('ear') ?? '', await loadKitWords(pageLanguage));
 } else if (query.has('hearing')) {

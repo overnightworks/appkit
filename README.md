@@ -1,7 +1,7 @@
 # design
 
 The family look that overnightworks products share (tokens, fonts, two classes
-and eight Svelte components), for the engineers of those products.
+and nine Svelte components), for the engineers of those products.
 
 ## Quick start
 
@@ -12,7 +12,7 @@ Distribution is a GitHub release. It carries:
   `design-catalogs` ([Catalogs](#catalogs)) and the kit's Python words
   ([The kit's words](#the-kits-words));
 - `overnightworks-design-<version>.tgz`: the same stylesheet and fonts, plus the
-  components `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `EarMark`, `LegalLinks`, `Marked` and `AiMark` and the
+  components `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `EarMark`, `HelperChat`, `LegalLinks`, `Marked` and `AiMark` and the
   kit's words per language ([The kit's words](#the-kits-words)). It is the
   only npm distribution, and `svelte` ^5.20 is its only, peer, dependency;
 - `design-<version>-tokens.txt`: the sorted custom-property names `design.css`
@@ -133,6 +133,40 @@ in [`src/lib/types.ts`](src/lib/types.ts).
 
 ```svelte
 <EarMark agent="Mozart" person="Anna" words={kitWords} />
+```
+
+## HelperChat
+
+The conversation a person has with an app's helper agent, drawn from props alone: the message
+list with the helper's tool-call rows, the answer as it grows, the thinking line and the
+composer. Each helper message leads with `AiMark`. The part holds no fetch, no store and no
+app data; the app owns the turn, the network, the header and notice before it, and the scroll
+memory. Message text arrives already shaped and is shown as written. The composer is
+controlled through `draft` and `onDraft(draft, caret)`: Enter sends the trimmed draft and
+Shift+Enter makes a new line; a plain Enter is always cancelled (also while a turn runs, while
+the draft is empty and while read-only), nothing is sent during IME composition, and
+`onComposerKeydown` runs first, so its `preventDefault()` keeps a keystroke from sending. The
+app places its own pieces through props and snippets: `problemLine`, `toolCallTarget`,
+`toolCallTitle`, `composerPopup` (inside the composer's box, which is `position: relative`),
+`composerTop`, `readOnly` (a banner that also disables the composer), `history` (`loading` and
+`failed` show instead of the list), `list` and `onListScroll`. The part is generic over the
+app's message type, which reaches the snippets unchanged. It uses `design.css` tokens and the
+app's `--accent` and `--on-accent`; the other visual values are its own. Props and behaviour
+are documented in [`src/lib/types.ts`](src/lib/types.ts).
+
+```svelte
+<HelperChat
+  {messages}
+  {running}
+  history={{ state: 'ready' }}
+  helperName="Mozart"
+  emptyHint="Ask Mozart about your song."
+  placeholder="Ask for a rewrite…"
+  {draft}
+  onDraft={(text) => (draft = text)}
+  onSend={send}
+  words={kitWords}
+/>
 ```
 
 ## Marked
@@ -294,9 +328,9 @@ The shape of the catalogs and the rules `--check` holds are in
 
 ## The kit's words
 
-The words of `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `EarMark` and `LegalLinks` come from the
+The words of `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `EarMark`, `HelperChat` and `LegalLinks` come from the
 kit's own catalogs, which the kit builds with `design-catalogs` like an app. Each of the
-six takes them as the required prop `words: KitWords`, holds no default and reads no
+seven takes them as the required prop `words: KitWords`, holds no default and reads no
 language itself, so a page cannot show one language on another's page; the
 examples above get `kitWords` from the `load` below. To override one word, pass a
 spread typed as `KitWords`: `words={{ ...kitWords, "account.logOut": "Exit" }}`. The

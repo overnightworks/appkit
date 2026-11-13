@@ -39,6 +39,11 @@ export type Words = {
     readonly "hearing.iWantToHearAgent": string;
     readonly "hearing.agentHearsYou": (gaps: { readonly agent: string }) => string;
     readonly "hearing.agentHearsPerson": (gaps: { readonly agent: string; readonly name: string }) => string;
+    readonly "helperChat.send": string;
+    readonly "helperChat.thinking": (gaps: { readonly name: string }) => string;
+    readonly "helperChat.ranTool": (gaps: { readonly tool: string }) => string;
+    readonly "helperChat.loading": string;
+    readonly "helperChat.composerLabel": (gaps: { readonly name: string }) => string;
     readonly "legalLinks.name": string;
 };
 // prettier-ignore
@@ -79,6 +84,11 @@ export const words: Words = {
     "hearing.iWantToHearAgent": "Ich will den Agenten hören",
     "hearing.agentHearsYou": (gaps: { readonly agent: string }) => gaps.agent + " hört dich",
     "hearing.agentHearsPerson": (gaps: { readonly agent: string; readonly name: string }) => gaps.agent + " hört " + gaps.name,
+    "helperChat.send": "Senden",
+    "helperChat.thinking": (gaps: { readonly name: string }) => gaps.name + " denkt nach…",
+    "helperChat.ranTool": (gaps: { readonly tool: string }) => "Werkzeug benutzt: " + gaps.tool,
+    "helperChat.loading": "Chat wird geladen…",
+    "helperChat.composerLabel": (gaps: { readonly name: string }) => "Nachricht an " + gaps.name,
     "legalLinks.name": "Rechtliches",
 };
 export type Key = keyof Words;

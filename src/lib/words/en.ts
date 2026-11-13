@@ -39,6 +39,11 @@ const translated = {
     "hearing.iWantToHearAgent": "I want to hear the agent",
     "hearing.agentHearsYou": (gaps: { readonly agent: string }) => gaps.agent + " hears you",
     "hearing.agentHearsPerson": (gaps: { readonly agent: string; readonly name: string }) => gaps.agent + " hears " + gaps.name,
+    "helperChat.send": "Send",
+    "helperChat.thinking": (gaps: { readonly name: string }) => gaps.name + " is thinking…",
+    "helperChat.ranTool": (gaps: { readonly tool: string }) => "ran tool: " + gaps.tool,
+    "helperChat.loading": "Loading chat…",
+    "helperChat.composerLabel": (gaps: { readonly name: string }) => "Message to " + gaps.name,
     "legalLinks.name": "Legal",
 } satisfies Words;
 // A translation that leaves out a gap of its source fails here.
