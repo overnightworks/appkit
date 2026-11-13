@@ -235,14 +235,47 @@ describe('the thinking line', () => {
 		expect(status(root)?.textContent).toBe(de['helperChat.thinking']({ name: 'Mozart' }));
 	});
 
-	it('shows the thinking line after the tool rows of the answer that has no text yet', async () => {
+	it('shows the thinking line after the tool rows, inside the bubble of the answer that has no text yet', async () => {
 		const root = await render({
 			messages: [{ role: 'assistant', text: '', toolCalls: [{ name: 'rewrite', input: {} }] }],
 			running: true
 		});
 		const row = root.querySelector('.tool-call')!;
+		expect(root.querySelector('.bubble')!.contains(status(root))).toBe(true);
 		expect(row.compareDocumentPosition(status(root)!)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
 		expect(status(root)?.textContent).not.toBe('');
+	});
+
+	it('gives the pending helper message one AiMark and its bubble the thinking line while it has neither text nor tool calls', async () => {
+		const root = await render({ messages: [{ role: 'user', text: 'Hi' }, { role: 'assistant', text: '' }], running: true });
+		const bubbles = root.querySelectorAll('.bubble');
+		expect(bubbles).toHaveLength(2);
+		expect(bubbles[1].querySelectorAll('.ai-mark')).toHaveLength(1);
+		expect(bubbles[1].contains(status(root))).toBe(true);
+	});
+
+	it('keeps the one status element while the history changes, with its text empty unless the list shows', async () => {
+		const held = new SvelteMap<string, unknown>([['history', { state: 'ready' }]]);
+		const target = document.createElement('div');
+		document.body.append(target);
+		const props = Object.defineProperties(
+			baseProps({ messages: [{ role: 'user', text: 'Hi' }, { role: 'assistant', text: '' }], running: true }),
+			{ history: { enumerable: true, get: () => held.get('history') as HelperChatProps<HelperMessage>['history'] } }
+		);
+		mounted.push({ target, component: mount(HelperChat, { target, props }) });
+		await tick();
+		const line = status(target)!;
+		expect(line.textContent).toBe(en['helperChat.thinking']({ name: 'Mozart' }));
+
+		for (const state of [{ state: 'loading' }, { state: 'failed', failure: 'Gone' }, { state: 'ready' }]) {
+			held.set('history', state);
+			await tick();
+			expect(status(target)).toBe(line);
+			expect(target.querySelectorAll('[role="status"]')).toHaveLength(1);
+			expect(target.contains(line)).toBe(true);
+			expect(line.textContent === '').toBe(state.state !== 'ready');
+		}
+		expect(target.querySelectorAll('.bubble')[1].contains(line)).toBe(true);
 	});
 });
 

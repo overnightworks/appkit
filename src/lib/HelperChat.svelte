@@ -24,10 +24,15 @@
 		words
 	}: HelperChatProps<Message> = $props();
 
+	let root: HTMLDivElement | undefined = $state();
+	let thinkingLine: HTMLParagraphElement | undefined = $state();
 	let composerBox: HTMLDivElement | undefined = $state();
 
 	const lastMessage = $derived(messages.at(-1));
-	const thinking = $derived(running && lastMessage?.role === 'assistant' && lastMessage.text === '');
+	const historyReady = $derived(history.state === 'ready');
+	const thinking = $derived(
+		historyReady && running && lastMessage?.role === 'assistant' && lastMessage.text === ''
+	);
 	const sendable = $derived(!running && readOnly === undefined && draft.trim() !== '');
 
 	const hasContent = (message: Message): boolean => message.text !== '' || (message.toolCalls?.length ?? 0) > 0;
@@ -50,6 +55,17 @@
 		onDraft(field.value, field.selectionStart);
 	}
 
+	// The one status element sits in the last helper bubble while the list shows it, and returns to the root otherwise,
+	// so a change of the history never destroys it.
+	$effect(() => {
+		const line = thinkingLine!;
+		const host =
+			historyReady && lastMessage?.role === 'assistant' && messages.length > 0
+				? list?.lastElementChild?.querySelector(':scope > .bubble')
+				: null;
+		(host ?? root!).append(line);
+	});
+
 	// Pressing a button in the composer keeps the focus in the field: the keyboard stays open and a tap on Send lands.
 	$effect(() => {
 		const box = composerBox!;
@@ -61,7 +77,7 @@
 	});
 </script>
 
-<div class="helper-chat">
+<div class="helper-chat" bind:this={root}>
 	{#if history.state === 'loading'}
 		<p class="subtle">{words['helperChat.loading']}</p>
 	{:else if history.state === 'failed'}
@@ -73,7 +89,7 @@
 			{/if}
 			{#each messages as message, index (index)}
 				<div class="message {message.role}">
-					{#if hasContent(message)}
+					{#if hasContent(message) || (thinking && index === messages.length - 1)}
 						<div class="bubble">
 							{#if message.role === 'assistant'}
 								<span class="mark"><AiMark /></span>
@@ -92,7 +108,6 @@
 					{@render problemLine?.({ message, index })}
 				</div>
 			{/each}
-			<p class="subtle thinking" role="status">{thinking ? words['helperChat.thinking']({ name: helperName }) : ''}</p>
 		</div>
 	{/if}
 
@@ -115,6 +130,7 @@
 			<button class="send" type="button" disabled={!sendable} onclick={send}>{words['helperChat.send']}</button>
 		</div>
 	</div>
+	<p class="subtle thinking" role="status" bind:this={thinkingLine}>{thinking ? words['helperChat.thinking']({ name: helperName }) : ''}</p>
 </div>
 
 <style>
@@ -161,12 +177,14 @@
 	.bubble {
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
 		min-width: 0;
 		max-width: 100%;
 		padding: 8px 12px;
 		border-radius: 12px;
 		overflow-wrap: anywhere;
+	}
+	.bubble > :not(:first-child):not(:empty) {
+		margin-top: 4px;
 	}
 	.user .bubble {
 		background: var(--accent);
