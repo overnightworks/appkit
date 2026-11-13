@@ -1,0 +1,7 @@
+claim_id = "67055112312b474c8203ead9b0c90592"
+agent = "Claude 019c230b-7e16-4294-87f3-af95e9827632"
+role = "builder"
+base = "cceb929bc22a941e5d6a9e8cef7fcfe814741e8e"
+branch = "docs/probe-run"
+scope = ["AGENTS.md"]
+opened_commit = "d3d14ac5e6357a248bdf917f9fa96cc2ec029f42"
