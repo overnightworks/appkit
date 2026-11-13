@@ -254,6 +254,29 @@ describe('the thinking line', () => {
 		expect(bubbles[1].contains(status(root))).toBe(true);
 	});
 
+	it.each([
+		['starts', false, true],
+		['stops', true, false]
+	])('keeps the one status element inside the last helper bubble when a turn %s on an unchanged empty helper message', async (_case, before, after) => {
+		const held = new SvelteMap<string, boolean>([['running', before]]);
+		const target = document.createElement('div');
+		document.body.append(target);
+		const props = Object.defineProperties(baseProps({ messages: [{ role: 'user', text: 'Hi' }, { role: 'assistant', text: '' }] }), {
+			running: { enumerable: true, get: () => held.get('running')! }
+		});
+		mounted.push({ target, component: mount(HelperChat, { target, props }) });
+		await tick();
+		const line = status(target)!;
+
+		held.set('running', after);
+		await tick();
+		expect(status(target)).toBe(line);
+		expect(target.querySelectorAll('[role="status"]')).toHaveLength(1);
+		expect(target.contains(line)).toBe(true);
+		const lastBubble = target.querySelector('.list')!.lastElementChild!.querySelector(':scope > .bubble');
+		expect(lastBubble?.contains(line) ?? false).toBe(after);
+	});
+
 	it('keeps the one status element while the history changes, with its text empty unless the list shows', async () => {
 		const held = new SvelteMap<string, unknown>([['history', { state: 'ready' }]]);
 		const target = document.createElement('div');

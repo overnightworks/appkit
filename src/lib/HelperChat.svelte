@@ -59,8 +59,9 @@
 	// so a change of the history never destroys it.
 	$effect(() => {
 		const line = thinkingLine!;
+		const lastBubbleShown = lastMessage !== undefined && (hasContent(lastMessage) || thinking);
 		const host =
-			historyReady && lastMessage?.role === 'assistant' && messages.length > 0
+			historyReady && lastMessage?.role === 'assistant' && lastBubbleShown
 				? list?.lastElementChild?.querySelector(':scope > .bubble')
 				: null;
 		(host ?? root!).append(line);
