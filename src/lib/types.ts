@@ -214,3 +214,79 @@ export interface MarkedProps<Marker extends string> {
 	parts: readonly MarkedPart<Marker>[];
 	marked: { [Name in NoInfer<Marker>]: Snippet<[{ readonly text: string }]> };
 }
+
+/** Who wrote a message of a helper conversation: the person or the helper agent. */
+export type HelperRole = 'user' | 'assistant';
+
+/** One tool the helper ran during a turn: its name and the input it ran with. */
+export interface HelperToolCall {
+	readonly name: string;
+	readonly input: Readonly<Record<string, unknown>>;
+}
+
+/**
+ * The part of a message that `HelperChat` renders. An app's own message type stays assignable to it
+ * and passes through `HelperChat` unchanged to the snippets.
+ */
+export interface HelperMessage {
+	readonly role: HelperRole;
+	/** Already shaped by the app; shown as written, with line breaks kept. */
+	readonly text: string;
+	readonly toolCalls?: readonly HelperToolCall[];
+}
+
+/** Whether the conversation's earlier messages are there: `loading` and `failed` show instead of the list. */
+export type HelperHistory =
+	| { readonly state: 'ready' }
+	| { readonly state: 'loading' }
+	| { readonly state: 'failed'; readonly failure: string };
+
+/**
+ * The conversation a person has with an app's helper agent, drawn from props alone: the messages with
+ * the helper's tool-call rows, the answer as it grows, the thinking line and the composer. The part holds
+ * no fetch, no store and no app data, rules or page layout. The app places its header and notice before it
+ * and owns the turn, the network and the scroll memory.
+ *
+ * The composer is controlled through `draft` and `onDraft`. Enter sends and Shift+Enter makes a new line;
+ * a plain Enter is always cancelled, also while a turn runs, while the draft is empty and while the chat is
+ * read-only, and nothing is sent during IME composition. `onComposerKeydown` runs first, and its
+ * `preventDefault()` stops the send. The part's own colours come from `design.css` tokens and the app's
+ * `--accent` and `--on-accent`.
+ */
+export interface HelperChatProps<Message extends HelperMessage> {
+	messages: readonly Message[];
+	/** A turn runs: the last helper message is the growing answer, and Send is off. */
+	running: boolean;
+	history: HelperHistory;
+	/** The helper's name, the gap in the thinking line and in the composer's label. */
+	helperName: string;
+	/** Shown while the conversation is empty. */
+	emptyHint: string;
+	placeholder: string;
+	/** The composer's text. */
+	draft: string;
+	/** Called with the field's text and its caret on every edit; the app sets `draft` again. */
+	onDraft: (draft: string, caret: number) => void;
+	/** Called with the trimmed draft, never empty, never while `running` or read-only. */
+	onSend: (text: string) => void;
+	/** Runs before the part handles the key; its `preventDefault()` stops the send. */
+	onComposerKeydown?: (event: KeyboardEvent) => void;
+	/** Present means read-only: a banner above the composer, and the composer disabled. */
+	readOnly?: Snippet;
+	/** The app's problem line, shown after the message it belongs to. */
+	problemLine?: Snippet<[{ readonly message: Message; readonly index: number }]>;
+	/** The target of a tool call, shown after its "ran tool" line. */
+	toolCallTarget?: Snippet<[{ readonly call: HelperToolCall; readonly message: Message }]>;
+	/** The title attribute of a tool-call row, such as the input as JSON. */
+	toolCallTitle?: (call: HelperToolCall) => string;
+	/** Inside the composer's box, above the field: a pick list. The box is `position: relative`. */
+	composerPopup?: Snippet;
+	/** Between the banner and the composer: a bar of tags. */
+	composerTop?: Snippet;
+	/** The message list's element, for the app's scroll memory. */
+	list?: HTMLElement;
+	/** Called when the message list scrolls. */
+	onListScroll?: () => void;
+	/** The kit's words in the page's language, from `loadKitWords`. */
+	words: KitWords;
+}
