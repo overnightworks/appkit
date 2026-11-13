@@ -96,6 +96,11 @@ outcome the app passes. While a call is under way the app passes the row as `inv
 ended outcome that repeats after a new call restarts the four seconds; the same ended outcome
 passed again with no state change in between shows nothing new.
 
+When the place holds no further agent, the app passes `full`; with no rows the panel then says
+so ("Hier ist kein Platz für einen weiteren Agenten.", the sentence of the `place-full` refusal)
+instead of the empty sentence. The kit does not decide when a place is full, and rows are drawn
+unchanged.
+
 ```svelte
 <AgentControl {rows} {onCall} {onSendAway} {refusal} words={kitWords} />
 ```

@@ -73,4 +73,13 @@ describe.each(languages)('AgentControl server-rendered in the %s words', (langua
 		expect(body).toContain(words['agent.empty']);
 		expect(body).not.toMatch(/<ul\b|<li\b|<button\b|role="alert"/);
 	});
+
+	it('renders the place-full sentence in place of the empty sentence when full is set', async () => {
+		const words = await loadWords(language);
+		const { body } = render(AgentControl, {
+			props: { rows: [], full: true, onCall: () => {}, onSendAway: () => {}, words }
+		});
+		expect(body).toContain(words['agent.placeFull']);
+		expect(body).not.toContain(words['agent.empty']);
+	});
 });
