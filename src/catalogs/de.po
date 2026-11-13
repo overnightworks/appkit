@@ -147,6 +147,26 @@ msgctxt "hearing.agentHearsPerson"
 msgid "{agent} hört {name}"
 msgstr ""
 
+msgctxt "helperChat.send"
+msgid "Senden"
+msgstr ""
+
+msgctxt "helperChat.thinking"
+msgid "{name} denkt nach…"
+msgstr ""
+
+msgctxt "helperChat.ranTool"
+msgid "Werkzeug benutzt: {tool}"
+msgstr ""
+
+msgctxt "helperChat.loading"
+msgid "Chat wird geladen…"
+msgstr ""
+
+msgctxt "helperChat.composerLabel"
+msgid "Nachricht an {name}"
+msgstr ""
+
 msgctxt "legalLinks.name"
 msgid "Rechtliches"
 msgstr ""
