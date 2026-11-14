@@ -182,3 +182,19 @@ msgstr "You"
 msgctxt "legalLinks.name"
 msgid "Rechtliches"
 msgstr "Legal"
+
+msgctxt "turnState.notEnabled"
+msgid "Nicht freigeschaltet"
+msgstr "Not enabled"
+
+msgctxt "turnState.busy"
+msgid "Gerade ausgelastet"
+msgstr "At capacity right now"
+
+msgctxt "turnState.budgetSpent"
+msgid "Budget aufgebraucht"
+msgstr "Out of budget"
+
+msgctxt "turnState.unavailable"
+msgid "Gerade gestört"
+msgstr "Not working right now"

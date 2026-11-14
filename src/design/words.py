@@ -52,6 +52,10 @@ type Key = Literal[
     'helperChat.speaker',
     'helperChat.you',
     'legalLinks.name',
+    'turnState.notEnabled',
+    'turnState.busy',
+    'turnState.budgetSpent',
+    'turnState.unavailable',
 ]
 type Language = Literal[
     'de',
@@ -118,6 +122,10 @@ WORDS: Mapping[Language, Mapping[Key, str | Mapping[Category, str]]] = {
         'helperChat.speaker': '{name}:',
         'helperChat.you': 'Du',
         'legalLinks.name': 'Rechtliches',
+        'turnState.notEnabled': 'Nicht freigeschaltet',
+        'turnState.busy': 'Gerade ausgelastet',
+        'turnState.budgetSpent': 'Budget aufgebraucht',
+        'turnState.unavailable': 'Gerade gestört',
     },
     'en': {
         'signIn.loggedOut': 'You are logged out.',
@@ -165,6 +173,10 @@ WORDS: Mapping[Language, Mapping[Key, str | Mapping[Category, str]]] = {
         'helperChat.speaker': '{name}:',
         'helperChat.you': 'You',
         'legalLinks.name': 'Legal',
+        'turnState.notEnabled': 'Not enabled',
+        'turnState.busy': 'At capacity right now',
+        'turnState.budgetSpent': 'Out of budget',
+        'turnState.unavailable': 'Not working right now',
     },
 }
 

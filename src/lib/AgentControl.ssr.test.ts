@@ -32,6 +32,19 @@ describe.each(languages)('AgentControl server-rendered in the %s words', (langua
 		expect(body).not.toMatch(/<script\b/);
 	});
 
+	it('renders the stated turn outcome of a here row beside its name without a script', async () => {
+		const words = await loadWords(language);
+		const { body } = render(AgentControl, {
+			props: {
+				rows: [{ key: 'k1', name: 'Mozart', state: 'here', turnState: 'unavailable' }],
+				onCall: () => {},
+				words
+			}
+		});
+		expect(body).toContain(words['turnState.unavailable']);
+		expect(body).not.toMatch(/<script\b/);
+	});
+
 	it.each([
 		['no-answer', 'agent.noAnswer'],
 		['busy', 'agent.busy'],
