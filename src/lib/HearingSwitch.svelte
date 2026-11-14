@@ -159,17 +159,19 @@
 		clip-path: inset(50%);
 	}
 	@media (any-pointer: coarse) {
+		.hearing-switch {
+			margin-block: 8px;
+		}
 		.compact {
 			margin-inline: 9px;
 		}
 		.hearing-switch::before {
 			content: '';
 			position: absolute;
-			top: 50%;
-			left: 50%;
-			width: max(100%, 44px);
-			height: 44px;
-			transform: translate(-50%, -50%);
+			inset: -8px 0;
+		}
+		.compact::before {
+			inset-inline: -9px;
 		}
 	}
 	@media (prefers-reduced-motion: no-preference) {

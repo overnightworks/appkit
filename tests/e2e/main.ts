@@ -116,22 +116,37 @@ function mountAgentControl(variant: string, words: KitWords): void {
  * The chips on a stand-in for the video they always sit on, held by the app as a controlled switch is. The
  * variant is a comma-separated list: `off` starts them off, `ignore` is an app that never takes the change,
  * `see` adds the see chip after the two others, and `narrow` shows a compact see chip beside the hearing
- * chip in a stage too narrow for both in full.
+ * chip in a stage too narrow for both in full. `hear`, `listen` and `see` pick the chips shown (in that order,
+ * `reverse` flips the DOM order), `compact` shows every chip compact, and `row` sets them side by side with no
+ * gap instead of stacked.
  */
 function mountHearingSwitches(variant: string, words: KitWords): void {
 	window.reports = [];
 	const flags = new Set(variant.split(','));
-	const kinds: HearingKind[] = flags.has('narrow') ? ['see', 'hear'] : flags.has('see') ? ['hear', 'listen', 'see'] : ['hear', 'listen'];
+	const chosen = (['hear', 'listen', 'see'] as const).filter((kind) => flags.has(kind));
+	const shown: HearingKind[] =
+		flags.has('hear') || flags.has('listen')
+			? chosen
+			: flags.has('narrow')
+				? ['see', 'hear']
+				: flags.has('see')
+					? ['hear', 'listen', 'see']
+					: ['hear', 'listen'];
+	const kinds = flags.has('reverse') ? [...shown].reverse() : shown;
 	const held = new SvelteMap<HearingKind, boolean>(kinds.map((kind) => [kind, !flags.has('off')]));
 	const stage = document.createElement('div');
-	stage.className = flags.has('narrow') ? 'hearing-stage hearing-stage-narrow' : 'hearing-stage';
+	stage.className = flags.has('narrow')
+		? 'hearing-stage hearing-stage-narrow'
+		: flags.has('row')
+			? 'hearing-stage hearing-stage-row'
+			: 'hearing-stage';
 	document.body.append(stage);
 	for (const kind of kinds) {
 		mount(HearingSwitch, {
 			target: stage,
 			props: {
 				kind,
-				compact: flags.has('narrow') && kind === 'see',
+				compact: flags.has('compact') || (flags.has('narrow') && kind === 'see'),
 				get on() {
 					return held.get(kind)!;
 				},
