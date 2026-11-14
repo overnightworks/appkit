@@ -1,8 +1,0 @@
-claim_id = "f91a797155a34ab6a2c25c385834cb45"
-agent = "Claude 019c230b-7e16-4294-87f3-af95e9827632"
-role = "builder"
-base = "d10ccb80b450aa3ec9d76f55119c64f7b1a77b94"
-branch = "claude/issue-226-helper-chat-list-role"
-scope = ["README.md", "docs/stylesheet.md", "package.json", "pyproject.toml", "src/catalogs", "src/design/words.py", "src/lib/HelperChat.ssr.test.ts", "src/lib/HelperChat.svelte", "src/lib/HelperChat.test.ts", "src/lib/words", "tests/e2e", "uv.lock"]
-opened_commit = "ef7b71bc08f593eea1bc4b003b028ba27290dee8"
-whole_reason = "The role, its kit word, the words generated from it, its proofs and its release go together."
