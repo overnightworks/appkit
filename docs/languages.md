@@ -160,7 +160,12 @@ flowchart LR
   and `values`, beside the field that carries the sentence for agents where the response has
   one. The shape holds where a response carries a text for the person; a domain token that
   the page maps to its own key (a refusal's reason, a game's ending) is data and needs no
-  `message` field. Tool descriptions for agents and log lines are not interface text.
+  `message` field. A response with several texts for the person carries one token per text,
+  each in `<field>_message` (`key` and `values`) beside the unchanged sentence for agents in
+  `<field>`, such as `error_message` beside `error`; `message` stays the form for a single
+  text. Rejected: a token nested inside each agent field, which changes the shape agents
+  already read, and a list of tokens, where the page could no longer tell which text is
+  which. Tool descriptions for agents and log lines are not interface text.
 - **LANG-13** A text that is stored, such as a failure message in a database, stores its
   token and data, never the sentence; the page renders it in the reader's language.
 - **LANG-14** A shipped unit has one catalog per language, read by both sides. The generator emits
