@@ -3,6 +3,6 @@ agent = "Claude 019c230b-7e16-4294-87f3-af95e9827632"
 role = "builder"
 base = "5f99a1bdbab495fb62c2dc79944fd73bf6a4b395"
 branch = "claude/issue-239-turn-outcome-generated"
-scope = [".github/workflows/ci.yml", "docs/ARCHITECTURE.md", "pyproject.toml", "scripts", "src/lib/turn-outcome.ts", "src/lib/types.ts", "tests"]
+scope = [".github/workflows/ci.yml", "AGENTS.md", "docs/ARCHITECTURE.md", "pyproject.toml", "quality/config.toml", "scripts", "src/lib/turn-outcome.ts", "src/lib/types.ts", "tests"]
 opened_commit = "cf73f4ecb17bbc1af4dfc3443b9e9c11ae87e04d"
 whole_reason = "The pin, the generator, the generated type and the CI check that holds them in step are one contract."
