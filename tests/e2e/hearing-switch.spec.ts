@@ -213,6 +213,21 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 				await open(page, 'narrow');
 				await tapsLandOnChip(page, 'see');
 			});
+
+			test('draws the hearing chip beside a compact chip as wide as under a fine pointer', async ({ page, browser }) => {
+				await open(page, 'narrow');
+				const drawn = async (target: Page) => (await chipOf(target, 'hear').boundingBox())!.width;
+				const coarse = await drawn(page);
+				const fineContext = await browser.newContext({ hasTouch: false, isMobile: false, viewport: { width: 390, height: 800 } });
+				try {
+					const fine = await fineContext.newPage();
+					await open(fine, 'narrow');
+					expect(await fine.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(false);
+					expect(coarse).toBeCloseTo(await drawn(fine), 0);
+				} finally {
+					await fineContext.close();
+				}
+			});
 		});
 
 		test('reports the negated state of each chip and follows the app when it takes the change', async ({ page }) => {

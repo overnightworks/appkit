@@ -34,6 +34,13 @@ h1 {
 	padding: 0;
 }
 
+/* The compact chip's 44 px box is 18 px wider than the chip, so the tile grows by it and the hearing chip keeps its width. */
+@media (any-pointer: coarse) {
+	.hearing-stage-narrow {
+		width: 138px;
+	}
+}
+
 /* Chips side by side with no gap, so a hit area that overlaps its neighbour shows. */
 .hearing-stage-row {
 	flex-direction: row;
