@@ -1,0 +1,8 @@
+claim_id = "6dce2bbf4d3b41aaad1b2db1609157d1"
+agent = "Claude 019c230b-7e16-4294-87f3-af95e9827632"
+role = "builder"
+base = "587600a8e69d23b9584f59318794c6f553ccb23d"
+branch = "claude/issue-231-turn-state"
+scope = ["README.md", "docs/ARCHITECTURE.md", "docs/stylesheet.md", "package.json", "pyproject.toml", "src/catalogs", "src/design/words.py", "src/lib/AgentControl.ssr.test.ts", "src/lib/AgentControl.svelte", "src/lib/AgentControl.test.ts", "src/lib/TurnState.ssr.test.ts", "src/lib/TurnState.svelte", "src/lib/TurnState.test.ts", "src/lib/index.ts", "src/lib/types.ts", "src/lib/words", "tests/e2e", "tests/test_npm_package.py", "uv.lock"]
+opened_commit = "6f7f0f2f82a6099f04d6dd4d4825b86b4a838343"
+whole_reason = "One part, its use in the here row, its kit words, the words generated from them, its proofs, its documentation and its release go together."
