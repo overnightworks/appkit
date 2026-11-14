@@ -35,7 +35,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 		async function open(page: Page, variant = '', language: KitLanguage = 'en'): Promise<void> {
 			await routeTo(page.context(), outDir);
 			await page.goto(`${origin}/?hearing=${variant}${language === 'en' ? '' : `&lang=${language}`}`);
-			await expect(chipOf(page, 'hear', language)).toBeVisible();
+			await expect(page.getByRole('switch').first()).toBeVisible();
 		}
 
 		test('blurs the video behind the chip, so the built CSS keeps the standard backdrop-filter', async ({ page }) => {
@@ -163,19 +163,70 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 		test.describe('with a finger at 390 px', () => {
 			test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 800 } });
 
-			test('lets the visible body of each chip belong to that chip at the edges that face each other', async ({ page }) => {
-				await open(page);
-				expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true);
-				const lands = async (chip: Locator, edge: 'bottom' | 'top') => {
-					const box = (await chip.boundingBox())!;
-					const y = edge === 'bottom' ? box.y + box.height - 2 : box.y + 2;
-					return chip.evaluate((node, point) => node.contains(document.elementFromPoint(point.x, point.y)), {
-						x: box.x + box.width / 2,
-						y
+			const reach = 20;
+			const directions = [[0, -1], [0, 1], [-1, 0], [1, 0]] as const;
+			const kinds = ['hear', 'listen', 'see'] as const;
+
+			async function tapsLandOnChip(page: Page, kind: (typeof kinds)[number]) {
+				const chip = chipOf(page, kind);
+				const box = (await chip.boundingBox())!;
+				const layout = await chip.evaluate((node) => {
+					const margin = getComputedStyle(node);
+					return {
+						width: node.getBoundingClientRect().width + parseFloat(margin.marginLeft) + parseFloat(margin.marginRight),
+						height: node.getBoundingClientRect().height + parseFloat(margin.marginTop) + parseFloat(margin.marginBottom)
+					};
+				});
+				expect(layout.width).toBeGreaterThanOrEqual(44);
+				expect(layout.height).toBeGreaterThanOrEqual(44);
+				for (const [dx, dy] of directions) {
+					const point = { x: box.x + box.width / 2 + dx * reach, y: box.y + box.height / 2 + dy * reach };
+					expect(
+						await chip.evaluate((node, at) => node.contains(document.elementFromPoint(at.x, at.y)), point)
+					).toBe(true);
+					const before = await chip.getAttribute('aria-checked');
+					const reported = (await reportsOf(page)).length;
+					await page.touchscreen.tap(point.x, point.y);
+					await expect(chip).toHaveAttribute('aria-checked', String(before !== 'true'));
+					expect((await reportsOf(page)).slice(reported)).toEqual([`${kind}:${before !== 'true'}`]);
+				}
+			}
+
+			const arrangements = [
+				{ name: 'stacked full', flags: 'see', kinds },
+				{ name: 'stacked compact', flags: 'see,compact', kinds },
+				{ name: 'side by side full hear and see', flags: 'hear,see,row', kinds: ['hear', 'see'] as const },
+				{ name: 'side by side full listen and see', flags: 'listen,see,row', kinds: ['listen', 'see'] as const },
+				{ name: 'side by side compact', flags: 'see,compact,row', kinds }
+			];
+			for (const { name, flags, kinds: shown } of arrangements) {
+				for (const order of ['in reading order', 'in reverse DOM order']) {
+					test(`reaches every ${name} chip from ${reach} px off its centre in four directions, ${order}`, async ({ page }) => {
+						await open(page, order === 'in reading order' ? flags : `${flags},reverse`);
+						expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true);
+						for (const kind of shown) await tapsLandOnChip(page, kind);
 					});
-				};
-				expect(await lands(chipOf(page, 'hear'), 'bottom')).toBe(true);
-				expect(await lands(chipOf(page, 'listen'), 'top')).toBe(true);
+				}
+			}
+
+			test('keeps a compact chip beside the hearing chip reachable in the narrow container', async ({ page }) => {
+				await open(page, 'narrow');
+				await tapsLandOnChip(page, 'see');
+			});
+
+			test('draws the hearing chip beside a compact chip as wide as under a fine pointer', async ({ page, browser }) => {
+				await open(page, 'narrow');
+				const drawn = async (target: Page) => (await chipOf(target, 'hear').boundingBox())!.width;
+				const coarse = await drawn(page);
+				const fineContext = await browser.newContext({ hasTouch: false, isMobile: false, viewport: { width: 390, height: 800 } });
+				try {
+					const fine = await fineContext.newPage();
+					await open(fine, 'narrow');
+					expect(await fine.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(false);
+					expect(coarse).toBeCloseTo(await drawn(fine), 0);
+				} finally {
+					await fineContext.close();
+				}
 			});
 		});
 
