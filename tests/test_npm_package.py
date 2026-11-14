@@ -59,6 +59,8 @@ COMPONENT_FILES = {
     "svelte-dist/kitWords.d.ts",
     "svelte-dist/types.js",
     "svelte-dist/types.d.ts",
+    "svelte-dist/turn-outcome.js",
+    "svelte-dist/turn-outcome.d.ts",
     "svelte-dist/AccountMenu.svelte",
     "svelte-dist/AccountMenu.svelte.d.ts",
     "svelte-dist/AgentControl.svelte",
