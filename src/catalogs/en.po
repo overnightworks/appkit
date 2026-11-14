@@ -139,6 +139,14 @@ msgctxt "hearing.iWantToHearAgent"
 msgid "Ich will den Agenten hören"
 msgstr "I want to hear the agent"
 
+msgctxt "hearing.agentMaySeeMe"
+msgid "Agent darf mich sehen"
+msgstr "Agent may see me"
+
+msgctxt "hearing.seeShort"
+msgid "Sehen"
+msgstr "See"
+
 msgctxt "hearing.agentHearsYou"
 msgid "{agent} hört dich"
 msgstr "{agent} hears you"

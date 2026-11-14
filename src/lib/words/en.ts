@@ -37,6 +37,8 @@ const translated = {
     "agent.tryAgain": "That did not work. Please try again.",
     "hearing.agentMayHearMe": "Agent may hear me",
     "hearing.iWantToHearAgent": "I want to hear the agent",
+    "hearing.agentMaySeeMe": "Agent may see me",
+    "hearing.seeShort": "See",
     "hearing.agentHearsYou": (gaps: { readonly agent: string }) => gaps.agent + " hears you",
     "hearing.agentHearsPerson": (gaps: { readonly agent: string; readonly name: string }) => gaps.agent + " hears " + gaps.name,
     "helperChat.send": "Send",

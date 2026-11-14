@@ -185,12 +185,14 @@ export interface AgentControlProps {
 	words: KitWords;
 }
 
-/** The two directions of an agent's hearing: the agent hears the person, or the person hears the agent. */
-export type HearingKind = 'hear' | 'listen';
+/** What the chip switches: the agent hears the person, the person hears the agent, or the agent sees the person. */
+export type HearingKind = 'hear' | 'listen' | 'see';
 
 /**
  * One chip with a switch for an agent's hearing, drawn on a video: `hear` is the agent hearing the
- * person ("Agent may hear me"), `listen` the person hearing the agent ("I want to hear the agent").
+ * person ("Agent may hear me"), `listen` the person hearing the agent ("I want to hear the agent"),
+ * `see` the agent seeing the person: its visible label is the short word "See" and its accessible name
+ * the full "Agent may see me".
  * The chip holds no state: it shows `on` and, when pressed, calls `onChange` with the negated value;
  * the app sets `on` again or leaves it. The on colour is the app's `--accent`; the glass and the ink
  * are the chip's own. Where the chips stand and what a switch does stay with the app.
@@ -203,6 +205,11 @@ export interface HearingSwitchProps {
 	onChange: (on: boolean) => void;
 	/** The kit's words in the page's language, from `loadKitWords`. */
 	words: KitWords;
+	/**
+	 * Draws only the 26 px track, the icon on its knob and the label visually hidden but still the
+	 * accessible name, for a tile too narrow for the chip. Off by default; the app decides when it applies.
+	 */
+	compact?: boolean;
 }
 
 /**
