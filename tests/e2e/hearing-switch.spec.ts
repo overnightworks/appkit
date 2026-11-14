@@ -7,6 +7,12 @@ const colorSchemes = ['light', 'dark'] as const;
 const widths = [390, 1280] as const;
 const languages = ['de', 'en'] as const satisfies readonly KitLanguage[];
 
+const nameKeys = {
+	hear: 'hearing.agentMayHearMe',
+	listen: 'hearing.iWantToHearAgent',
+	see: 'hearing.agentMaySeeMe'
+} as const satisfies Record<'hear' | 'listen' | 'see', keyof KitWords>;
+
 const reportsOf = (page: Page) => page.evaluate(() => window.reports);
 
 /** The computed `transform` of the knob, the track's `::after`. */
@@ -23,11 +29,8 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			en = wordsOf.en;
 		});
 
-		const chipOf = (page: Page, kind: 'hear' | 'listen', language: KitLanguage = 'en') =>
-			page.getByRole('switch', {
-				name: wordsOf[language][kind === 'hear' ? 'hearing.agentMayHearMe' : 'hearing.iWantToHearAgent'],
-				exact: true
-			});
+		const chipOf = (page: Page, kind: 'hear' | 'listen' | 'see', language: KitLanguage = 'en') =>
+			page.getByRole('switch', { name: wordsOf[language][nameKeys[kind]], exact: true });
 
 		async function open(page: Page, variant = '', language: KitLanguage = 'en'): Promise<void> {
 			await routeTo(page.context(), outDir);
@@ -40,46 +43,49 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			await expect(chipOf(page, 'hear')).not.toHaveCSS('backdrop-filter', 'none');
 		});
 
-		for (const colorScheme of colorSchemes) {
-			for (const width of widths) {
-				test(`paints an on chip in the app accent and an off chip softened, on its own glass, in ${colorScheme} at ${width} px`, async ({
-					page
-				}) => {
-					await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
-					await page.setViewportSize({ width, height: 800 });
-					await open(page);
-					const tokens = await resolveStyle(
-						page,
-						{ color: 'var(--accent)', 'background-color': 'var(--surface)', 'border-top-color': 'var(--text)' },
-						['color', 'background-color', 'border-top-color']
-					);
+		for (const kind of ['hear', 'see'] as const) {
+			for (const colorScheme of colorSchemes) {
+				for (const width of widths) {
+					test(`paints an on ${kind} chip in the app accent and an off chip softened, on its own glass, in ${colorScheme} at ${width} px`, async ({
+						page
+					}) => {
+						await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+						await page.setViewportSize({ width, height: 800 });
+						await open(page, 'see');
+						const tokens = await resolveStyle(
+							page,
+							{ color: 'var(--accent)', 'background-color': 'var(--surface)', 'border-top-color': 'var(--text)' },
+							['color', 'background-color', 'border-top-color']
+						);
 
-					const on = chipOf(page, 'hear');
-					await expect(on).toHaveAttribute('aria-checked', 'true');
-					await expect(on.locator('svg')).toHaveCSS('color', tokens.color);
-					await expect(on.locator('span[aria-hidden]')).toHaveCSS('background-color', tokens.color);
-					const onInk = await on.evaluate((node) => getComputedStyle(node.querySelector('span:nth-child(2)')!).color);
-					const onKnob = await knobTransform(on.locator('span[aria-hidden]'));
-					expect(onKnob).not.toBe('none');
-					await expect(on).not.toHaveCSS('background-color', tokens['background-color']);
-					await expect(on).not.toHaveCSS('color', tokens['border-top-color']);
+						const on = chipOf(page, kind);
+						await expect(on).toHaveAttribute('aria-checked', 'true');
+						await expect(on.locator('svg')).toHaveCSS('color', tokens.color);
+						await expect(on.locator('span[aria-hidden]')).toHaveCSS('background-color', tokens.color);
+						const onInk = await on.evaluate((node) => getComputedStyle(node.querySelector('span:nth-child(2)')!).color);
+						const onKnob = await knobTransform(on.locator('span[aria-hidden]'));
+						expect(onKnob).not.toBe('none');
+						await expect(on).not.toHaveCSS('background-color', tokens['background-color']);
+						await expect(on).not.toHaveCSS('color', tokens['border-top-color']);
 
-					await open(page, 'off');
-					const off = chipOf(page, 'hear');
-					await expect(off).toHaveAttribute('aria-checked', 'false');
-					await expect(off.locator('svg')).not.toHaveCSS('color', tokens.color);
-					await expect(off.locator('span[aria-hidden]')).not.toHaveCSS('background-color', tokens.color);
-					expect(await knobTransform(off.locator('span[aria-hidden]'))).not.toBe(onKnob);
-					await expect(off.locator('span').nth(1)).not.toHaveCSS('color', onInk);
-				});
+						await open(page, 'see,off');
+						const off = chipOf(page, kind);
+						await expect(off).toHaveAttribute('aria-checked', 'false');
+						await expect(off.locator('svg')).not.toHaveCSS('color', tokens.color);
+						await expect(off.locator('span[aria-hidden]')).not.toHaveCSS('background-color', tokens.color);
+						expect(await knobTransform(off.locator('span[aria-hidden]'))).not.toBe(onKnob);
+						await expect(off.locator('span').nth(1)).not.toHaveCSS('color', onInk);
+					});
+				}
+			}
 			}
 		}
 
 		for (const width of widths) {
-			test(`keeps both chips inside the viewport in the de words at ${width} px`, async ({ page }) => {
+			test(`keeps every chip inside the viewport in the de words at ${width} px`, async ({ page }) => {
 				await page.setViewportSize({ width, height: 800 });
-				await open(page, '', 'de');
-				for (const kind of ['hear', 'listen'] as const) {
+				await open(page, 'see', 'de');
+				for (const kind of ['hear', 'listen', 'see'] as const) {
 					const box = (await chipOf(page, kind, 'de').boundingBox())!;
 					expect(box.x).toBeGreaterThanOrEqual(0);
 					expect(box.x + box.width).toBeLessThanOrEqual(width);
@@ -96,6 +102,64 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 				await expect(page.getByRole('switch')).toHaveCount(2);
 			});
 		}
+
+		for (const language of languages) {
+			test(`shows the see chip by its short ${language} word and names it by the full words`, async ({ page }) => {
+				await open(page, 'see', language);
+				await expect(chipOf(page, 'see', language)).toHaveText(wordsOf[language]['hearing.seeShort']);
+				await expect(page.getByRole('switch')).toHaveCount(3);
+			});
+		}
+
+		for (const colorScheme of colorSchemes) {
+			for (const width of widths) {
+				for (const language of languages) {
+					test(`keeps the compact see chip whole, pressable and inside a 120 px container beside the hearing chip in ${language}, ${colorScheme} at ${width} px`, async ({
+						page
+					}) => {
+						await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+						await page.setViewportSize({ width, height: 800 });
+						await open(page, 'narrow', language);
+						const see = chipOf(page, 'see', language);
+						const stage = (await page.locator('.hearing-stage').boundingBox())!;
+						const track = see.locator('span[aria-hidden]');
+						for (const on of [true, false]) {
+							await expect(see).toHaveAttribute('aria-checked', String(on));
+							const box = (await see.boundingBox())!;
+							const trackBox = (await track.boundingBox())!;
+							const iconBox = (await see.locator('svg').boundingBox())!;
+							expect(box.width).toBeCloseTo(26, 0);
+							expect(trackBox.width).toBeCloseTo(26, 0);
+							expect(box.x).toBeGreaterThanOrEqual(stage.x);
+							expect(box.x + box.width).toBeLessThanOrEqual(stage.x + stage.width);
+							expect(iconBox.width).toBeCloseTo(12, 0);
+							expect(iconBox.x).toBeGreaterThanOrEqual(trackBox.x);
+							expect(iconBox.x + iconBox.width).toBeLessThanOrEqual(trackBox.x + trackBox.width);
+							expect(iconBox.y).toBeGreaterThanOrEqual(trackBox.y);
+							expect(iconBox.y + iconBox.height).toBeLessThanOrEqual(trackBox.y + trackBox.height);
+							const label = (await see.locator('span').nth(1).boundingBox())!;
+							expect(label.width).toBeLessThanOrEqual(1);
+							await see.click();
+							await expect(see).toHaveAttribute('aria-checked', String(!on));
+						}
+						expect(await reportsOf(page)).toEqual(['see:false', 'see:true']);
+						const hear = (await chipOf(page, 'hear', language).boundingBox())!;
+						expect(hear.x + hear.width).toBeLessThanOrEqual(stage.x + stage.width);
+						expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+					});
+				}
+			}
+		}
+
+		test('moves the icon with the knob on a compact chip', async ({ page }) => {
+			await page.emulateMedia({ reducedMotion: 'reduce' });
+			await open(page, 'narrow');
+			const see = chipOf(page, 'see');
+			const iconX = async () => (await see.locator('svg').boundingBox())!.x;
+			const on = await iconX();
+			await see.click();
+			expect(await iconX()).toBeLessThan(on);
+		});
 
 		test.describe('with a finger at 390 px', () => {
 			test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 800 } });

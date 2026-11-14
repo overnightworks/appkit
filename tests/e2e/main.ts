@@ -113,29 +113,31 @@ function mountAgentControl(variant: string, words: KitWords): void {
 }
 
 /**
- * Both chips on a stand-in for the video they always sit on, held by the app as a controlled switch is:
- * `off` starts them off, `ignore` is an app that never takes the change.
+ * The chips on a stand-in for the video they always sit on, held by the app as a controlled switch is. The
+ * variant is a comma-separated list: `off` starts them off, `ignore` is an app that never takes the change,
+ * `see` adds the see chip after the two others, and `narrow` shows a compact see chip beside the hearing
+ * chip in a stage too narrow for both in full.
  */
 function mountHearingSwitches(variant: string, words: KitWords): void {
 	window.reports = [];
-	const held = new SvelteMap<HearingKind, boolean>([
-		['hear', variant !== 'off'],
-		['listen', variant !== 'off']
-	]);
+	const flags = new Set(variant.split(','));
+	const kinds: HearingKind[] = flags.has('narrow') ? ['see', 'hear'] : flags.has('see') ? ['hear', 'listen', 'see'] : ['hear', 'listen'];
+	const held = new SvelteMap<HearingKind, boolean>(kinds.map((kind) => [kind, !flags.has('off')]));
 	const stage = document.createElement('div');
-	stage.className = 'hearing-stage';
+	stage.className = flags.has('narrow') ? 'hearing-stage hearing-stage-narrow' : 'hearing-stage';
 	document.body.append(stage);
-	for (const kind of ['hear', 'listen'] as const satisfies HearingKind[]) {
+	for (const kind of kinds) {
 		mount(HearingSwitch, {
 			target: stage,
 			props: {
 				kind,
+				compact: flags.has('narrow') && kind === 'see',
 				get on() {
 					return held.get(kind)!;
 				},
 				onChange(on: boolean) {
 					window.reports.push(`${kind}:${on}`);
-					if (variant !== 'ignore') held.set(kind, on);
+					if (!flags.has('ignore')) held.set(kind, on);
 				},
 				words
 			}

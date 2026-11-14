@@ -123,6 +123,7 @@
 		background: #0d1013;
 	}
 	.compact {
+		flex: none;
 		width: 26px;
 		padding: 0;
 		gap: 0;
