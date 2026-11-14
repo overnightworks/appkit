@@ -1,8 +1,0 @@
-claim_id = "b19468cbc0244535b674b6bd9ceb19b7"
-agent = "Claude 019c230b-7e16-4294-87f3-af95e9827632"
-role = "builder"
-base = "90937a2166aa924aa8aa7b85052166bc7893c0eb"
-branch = "claude/issue-236-hearing-touch"
-scope = ["docs/stylesheet.md", "package.json", "pyproject.toml", "src/lib/HearingSwitch.svelte", "tests/e2e", "uv.lock"]
-opened_commit = "08eba6614c2acf72d8d044241be6d69b918ad7e0"
-whole_reason = "One hit-area rule, its consumer proof and its release go together."
