@@ -78,7 +78,6 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 					});
 				}
 			}
-			}
 		}
 
 		for (const width of widths) {
