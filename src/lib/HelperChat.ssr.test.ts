@@ -30,6 +30,8 @@ describe.each(languages)('HelperChat server-rendered in the %s words', (language
 		expect(body).toContain(words['helperChat.ranTool']({ tool: 'rewrite' }));
 		expect(body).toContain(words['helperChat.send']);
 		expect(body).toContain(words['helperChat.composerLabel']({ name: 'Mozart' }));
+		expect(body).toContain(`aria-label="${words['helperChat.listLabel']({ name: 'Mozart' })}"`);
+		expect(body).toMatch(/<ol\b[^>]*role="list"/);
 		expect(body).toMatch(/<textarea\b[^>]*>/);
 		expect(body).toMatch(/role="status"/);
 		expect(body).not.toMatch(/<script\b/);

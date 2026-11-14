@@ -141,7 +141,10 @@ The conversation a person has with an app's helper agent, drawn from props alone
 list with the helper's tool-call rows, the answer as it grows, the thinking line and the
 composer. Each helper message leads with `AiMark`. The part holds no fetch, no store and no
 app data; the app owns the turn, the network, the header and notice before it, and the scroll
-memory. Message text arrives already shaped and is shown as written. The composer is
+memory. The messages sit in an `ol` with `role="list"` named by the kit word
+`helperChat.listLabel` with the helper's name, each one an `li`; the list has no live region, so
+the thinking line's `role="status"` is the only announcement, and the scrolling element has no
+role. Message text arrives already shaped and is shown as written. The composer is
 controlled through `draft` and `onDraft(draft, caret)`: Enter sends the trimmed draft and
 Shift+Enter makes a new line; a plain Enter is always cancelled (also while a turn runs, while
 the draft is empty and while read-only), nothing is sent during IME composition, and

@@ -74,31 +74,34 @@
 		<div class="list" bind:this={list} onscroll={onListScroll}>
 			{#if messages.length === 0}
 				<p class="subtle">{emptyHint}</p>
-			{/if}
-			{#each messages as message, index (index)}
-				<div class="message {message.role}">
-					{#if hasContent(message) || (thinking && index === messages.length - 1)}
-						<div class="bubble">
-							{#if message.role === 'assistant'}
-								<span class="mark"><AiMark /></span>
-							{/if}
-							{#each message.toolCalls ?? [] as call, callIndex (callIndex)}
-								<div class="tool-call" title={toolCallTitle?.(call)}>
-									<span>{words['helperChat.ranTool']({ tool: call.name })}</span>
-									{@render toolCallTarget?.({ call, message })}
+			{:else}
+				<ol role="list" aria-label={words['helperChat.listLabel']({ name: helperName })}>
+					{#each messages as message, index (index)}
+						<li class="message {message.role}">
+							{#if hasContent(message) || (thinking && index === messages.length - 1)}
+								<div class="bubble">
+									{#if message.role === 'assistant'}
+										<span class="mark"><AiMark /></span>
+									{/if}
+									{#each message.toolCalls ?? [] as call, callIndex (callIndex)}
+										<div class="tool-call" title={toolCallTitle?.(call)}>
+											<span>{words['helperChat.ranTool']({ tool: call.name })}</span>
+											{@render toolCallTarget?.({ call, message })}
+										</div>
+									{/each}
+									{#if message.text !== ''}
+										<div class="text">{message.text}</div>
+									{/if}
+									{#if thinking && index === messages.length - 1}
+										<p class="thinking" aria-hidden="true">{thinkingWord}</p>
+									{/if}
 								</div>
-							{/each}
-							{#if message.text !== ''}
-								<div class="text">{message.text}</div>
 							{/if}
-							{#if thinking && index === messages.length - 1}
-								<p class="thinking" aria-hidden="true">{thinkingWord}</p>
-							{/if}
-						</div>
-					{/if}
-					{@render problemLine?.({ message, index })}
-				</div>
-			{/each}
+							{@render problemLine?.({ message, index })}
+						</li>
+					{/each}
+				</ol>
+			{/if}
 		</div>
 	{/if}
 
@@ -151,6 +154,11 @@
 		margin: 0;
 		padding: 8px;
 		color: var(--fail);
+	}
+	ol {
+		margin: 0;
+		padding: 0;
+		list-style-type: none;
 	}
 	.message {
 		display: flex;
