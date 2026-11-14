@@ -1,7 +1,0 @@
-claim_id = "9f9e150789da40f0a6757541f001da51"
-agent = "Claude 019c230b-7e16-4294-87f3-af95e9827632"
-role = "builder"
-base = "90937a2166aa924aa8aa7b85052166bc7893c0eb"
-branch = "claude/issue-240-lang12-several-texts"
-scope = ["docs/languages.md"]
-opened_commit = "d310ac1f4027de418106bd4c0464d7ae9329586f"
