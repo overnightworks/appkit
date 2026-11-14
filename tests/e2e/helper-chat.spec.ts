@@ -22,6 +22,8 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 
 		const fieldOf = (page: Page, language: KitLanguage = 'en'): Locator =>
 			page.getByRole('textbox', { name: wordsOf[language]['helperChat.composerLabel']({ name: 'Mozart' }), exact: true });
+		const messageOf = (page: Page, text: string): Locator =>
+			page.getByRole('list', { name: wordsOf.en['helperChat.listLabel']({ name: 'Mozart' }), exact: true }).getByRole('listitem').filter({ hasText: text });
 		const sendOf = (page: Page, language: KitLanguage = 'en'): Locator =>
 			page.getByRole('button', { name: wordsOf[language]['helperChat.send'], exact: true });
 
@@ -174,11 +176,11 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 
 		test('shows the app’s problem line after the message it belongs to and reports its retry', async ({ page }) => {
 			await open(page, 'problem');
-			const message = page.locator('.message', { hasText: 'I got as far as' });
+			const message = messageOf(page, 'I got as far as');
 			await expect(message.getByRole('alert')).toContainText('Mozart stopped.');
 			await message.getByRole('button', { name: 'Try again' }).click();
 			expect(await reportsOf(page)).toEqual(['retry']);
-			await expect(page.locator('.message', { hasText: 'Make the second verse' }).getByRole('alert')).toHaveCount(0);
+			await expect(messageOf(page, 'Make the second verse').getByRole('alert')).toHaveCount(0);
 		});
 
 		test('shows the archived banner with its button above the composer and disables the composer', async ({ page }) => {

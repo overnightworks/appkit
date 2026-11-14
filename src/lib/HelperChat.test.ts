@@ -63,6 +63,21 @@ describe('the message list', () => {
 		expect(filled.textContent).not.toContain('Ask me anything');
 	});
 
+	it('names the message list with the kit word and the helper’s name and makes each message one of its items', async () => {
+		const root = await render({ messages: [{ role: 'user', text: 'Hi' }, { role: 'assistant', text: 'Hello' }], words: de });
+		const lists = root.querySelectorAll('[role="list"]');
+		expect(lists).toHaveLength(1);
+		expect(lists[0].getAttribute('aria-label')).toBe(de['helperChat.listLabel']({ name: 'Mozart' }));
+		expect([...lists[0].children].map((item) => item.tagName)).toEqual(['LI', 'LI']);
+		expect(lists[0].closest('[aria-live]')).toBeNull();
+	});
+
+	it('shows only the empty hint, no list, while there is no message', async () => {
+		const root = await render();
+		expect(root.querySelector('[role="list"], ol, li')).toBeNull();
+		expect(root.querySelector('.list')?.textContent).toBe('Ask me anything');
+	});
+
 	it('shows each message as written, with its line breaks kept', async () => {
 		const root = await render({
 			messages: [
@@ -185,6 +200,7 @@ describe('the list element', () => {
 		mounted.push({ target, component: mount(HelperChat, { target, props }) });
 		await tick();
 		expect(holder.list).toBe(target.querySelector('.list'));
+		expect(holder.list?.hasAttribute('role')).toBe(false);
 	});
 });
 

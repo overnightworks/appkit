@@ -44,6 +44,7 @@ const translated = {
     "helperChat.ranTool": (gaps: { readonly tool: string }) => "ran tool: " + gaps.tool,
     "helperChat.loading": "Loading chat…",
     "helperChat.composerLabel": (gaps: { readonly name: string }) => "Message to " + gaps.name,
+    "helperChat.listLabel": (gaps: { readonly name: string }) => "Conversation with " + gaps.name,
     "legalLinks.name": "Legal",
 } satisfies Words;
 // A translation that leaves out a gap of its source fails here.
