@@ -12,7 +12,7 @@ Distribution is a GitHub release. It carries:
   `design-catalogs` ([Catalogs](#catalogs)) and the kit's Python words
   ([The kit's words](#the-kits-words));
 - `overnightworks-design-<version>.tgz`: the same stylesheet and fonts, plus the
-  components `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `EarMark`, `HelperChat`, `LegalLinks`, `Marked` and `AiMark` and the
+  components `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `EarMark`, `HelperChat`, `LegalLinks`, `TurnState`, `Marked` and `AiMark` and the
   kit's words per language ([The kit's words](#the-kits-words)). It is the
   only npm distribution, and `svelte` ^5.20 is its only, peer, dependency;
 - `design-<version>-tokens.txt`: the sorted custom-property names `design.css`
@@ -133,6 +133,20 @@ in [`src/lib/types.ts`](src/lib/types.ts).
 
 ```svelte
 <EarMark agent="Mozart" person="Anna" words={kitWords} />
+```
+
+## TurnState
+
+The mark and the kit's word for the reason an agent's turns at a place do not answer, drawn beside
+the agent's name: `outcome` is `not_enabled`, `busy`, `budget_spent` or `unavailable`, the values
+the agents service states, and the part shows a small muted mark with the word in the page's
+language. With `undefined` it renders nothing. It holds no state and no timer: the app passes the
+last stated value and drops it when the agent's seat ends. A `here` row of `AgentControl` draws it
+from the row's optional `turnState`; where an app draws the name itself, as at a seat, it places
+`TurnState` beside the name. Props are documented in [`src/lib/types.ts`](src/lib/types.ts).
+
+```svelte
+<TurnState outcome="budget_spent" words={kitWords} />
 ```
 
 ## HelperChat
@@ -333,7 +347,7 @@ The shape of the catalogs and the rules `--check` holds are in
 
 ## The kit's words
 
-The words of `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `EarMark`, `HelperChat` and `LegalLinks` come from the
+The words of `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `EarMark`, `HelperChat`, `LegalLinks` and `TurnState` come from the
 kit's own catalogs, which the kit builds with `design-catalogs` like an app. Each of the
 seven takes them as the required prop `words: KitWords`, holds no default and reads no
 language itself, so a page cannot show one language on another's page; the

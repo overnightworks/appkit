@@ -79,6 +79,18 @@ describe('rows', () => {
 		expect(row.children[1].textContent).toBe('Mozart');
 	});
 
+	it('draws the stated turn outcome of a here row beside its name, and nothing extra without one', async () => {
+		const control = await render({
+			rows: [
+				{ key: 'k1', name: 'Mozart', state: 'here', turnState: 'budget_spent' },
+				{ key: 'k2', name: 'Bach', state: 'here' }
+			]
+		});
+		const [stated, silent] = rowsOf(control);
+		expect(stated.querySelector('.who')!.textContent?.trim()).toBe(`Mozart${en['turnState.budgetSpent']}`);
+		expect(silent.querySelector('.turn-state')).toBeNull();
+	});
+
 	it('shows the rows in the given order', async () => {
 		const control = await render({
 			rows: [

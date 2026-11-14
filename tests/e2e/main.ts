@@ -8,6 +8,7 @@ import {
 	HearingSwitch,
 	LegalLinks,
 	SignInPage,
+	TurnState,
 	loadKitWords,
 	type AgentControlOutcome,
 	type AgentRow,
@@ -15,7 +16,8 @@ import {
 	type KitLanguage,
 	type KitWords,
 	type SignInState,
-	type ThemeChoice
+	type ThemeChoice,
+	type TurnOutcome
 } from 'overnightworks-design';
 import HelperChatStub from './HelperChatStub.svelte';
 import MarkedSentence from './MarkedSentence.svelte';
@@ -161,6 +163,41 @@ function mountEarMarks(variant: string, words: KitWords): void {
 	}
 }
 
+/**
+ * The turn-state part: `alone` stacks the four outcomes and an unstated one, `here` shows it in the here
+ * row of an agent control beside a short and a long agent name.
+ */
+function mountTurnState(variant: string, words: KitWords): void {
+	const outcomes: (TurnOutcome | undefined)[] = ['not_enabled', 'busy', 'budget_spent', 'unavailable', undefined];
+	if (variant === 'here') {
+		const narrowStage = document.createElement('div');
+		narrowStage.className = 'turn-stage-narrow';
+		document.body.append(narrowStage);
+		mount(AgentControl, {
+			target: narrowStage,
+			props: {
+				rows: [
+					{ key: 'key-mozart', name: 'Mozart', state: 'here', turnState: 'busy' },
+					{ key: 'key-leonardo', name: 'Leonardo da Vinci, the long-named painter and inventor', state: 'here', turnState: 'unavailable' },
+					{ key: 'key-bach', name: 'Bach', state: 'here' }
+				],
+				onCall: () => {},
+				onSendAway: () => {},
+				words
+			}
+		});
+		return;
+	}
+	const stage = document.createElement('div');
+	stage.className = 'turn-stage';
+	document.body.append(stage);
+	for (const outcome of outcomes) {
+		const row = document.createElement('div');
+		stage.append(row);
+		mount(TurnState, { target: row, props: { outcome, words } });
+	}
+}
+
 /** The languages this page offers; the type check fails when the kit lacks one. */
 const pageLanguages = ['de', 'en'] as const satisfies readonly KitLanguage[];
 
@@ -197,6 +234,8 @@ if (query.has('words')) {
 		target: document.body,
 		props: { variant: query.get('helper') ?? '', words: await loadKitWords(pageLanguage) }
 	});
+} else if (query.has('turn')) {
+	mountTurnState(query.get('turn') ?? '', await loadKitWords(pageLanguage));
 } else if (query.has('ear')) {
 	mountEarMarks(query.get('ear') ?? '', await loadKitWords(pageLanguage));
 } else if (query.has('hearing')) {

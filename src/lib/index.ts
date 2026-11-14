@@ -7,6 +7,7 @@ export { default as HelperChat } from './HelperChat.svelte';
 export { default as LegalLinks } from './LegalLinks.svelte';
 export { default as Marked } from './Marked.svelte';
 export { default as SignInPage } from './SignInPage.svelte';
+export { default as TurnState } from './TurnState.svelte';
 export { loadKitWords } from './kitWords.js';
 export type { KitLanguage, KitWords } from './kitWords.js';
 export type {
@@ -33,5 +34,7 @@ export type {
 	SignInPageProps,
 	SignInState,
 	ThemeChoice,
-	ThemeRows
+	ThemeRows,
+	TurnOutcome,
+	TurnStateProps
 } from './types.ts';

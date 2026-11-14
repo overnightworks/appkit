@@ -48,6 +48,10 @@ const translated = {
     "helperChat.speaker": (gaps: { readonly name: string }) => gaps.name + ":",
     "helperChat.you": "You",
     "legalLinks.name": "Legal",
+    "turnState.notEnabled": "Not enabled",
+    "turnState.busy": "At capacity right now",
+    "turnState.budgetSpent": "Out of budget",
+    "turnState.unavailable": "Not working right now",
 } satisfies Words;
 // A translation that leaves out a gap of its source fails here.
 ({} as Words) satisfies typeof translated;

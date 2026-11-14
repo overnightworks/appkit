@@ -36,3 +36,16 @@ h1 {
 	padding: 8px;
 	background: #1b2a33;
 }
+
+.turn-stage-narrow {
+	width: 320px;
+	margin: 8px;
+}
+
+.turn-stage {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 8px;
+	margin: 8px;
+}

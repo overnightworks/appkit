@@ -73,6 +73,8 @@ COMPONENT_FILES = {
     "svelte-dist/HelperChat.svelte.d.ts",
     "svelte-dist/LegalLinks.svelte",
     "svelte-dist/LegalLinks.svelte.d.ts",
+    "svelte-dist/TurnState.svelte",
+    "svelte-dist/TurnState.svelte.d.ts",
     "svelte-dist/Marked.svelte",
     "svelte-dist/Marked.svelte.d.ts",
     "svelte-dist/SignInPage.svelte",
@@ -374,6 +376,7 @@ COMPONENT_PROPS = {
         "draft: '', onDraft: (draft: string, caret: number) => void caret, onSend: (text: string) => void text"
     ),
     "LegalLinks": "{ links: []",
+    "TurnState": "{ outcome: undefined",
 }
 
 
@@ -403,6 +406,7 @@ def test_a_consumer_passes_the_kit_words_to_each_component_and_fails_its_type_ch
         "HearingSwitchWords",
         "EarMarkWords",
         "HelperChatWords",
+        "TurnStateWords",
     ],
 )
 def test_the_package_root_exports_no_per_component_words_type(consumer, removed):

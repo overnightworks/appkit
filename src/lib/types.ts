@@ -106,6 +106,23 @@ export interface SignInPageProps {
 	words: KitWords;
 }
 
+/**
+ * Why an agent's turns at a place do not answer, as the agents service states it (`StopOutcome`); apps
+ * pass the stated value unchanged.
+ */
+export type TurnOutcome = 'not_enabled' | 'busy' | 'budget_spent' | 'unavailable';
+
+/**
+ * The mark and the kit's word for a stated turn outcome, meant to sit beside an agent's name. Without an
+ * outcome it renders nothing. It holds no state and no timer: the app passes the last stated value and
+ * drops it when the agent's seat ends.
+ */
+export interface TurnStateProps {
+	outcome: TurnOutcome | undefined;
+	/** The kit's words in the page's language, from `loadKitWords`. */
+	words: KitWords;
+}
+
 /** How a call ended without a seat: the invitation ran out, the agent is busy, or its owner is away. */
 export type AgentControlOutcome = 'no-answer' | 'busy' | 'owner-absent';
 
@@ -120,7 +137,12 @@ export type AgentRow = {
 	/** Shown as given. */
 	name: string;
 } & (
-	| { state: 'available' | 'inviting' | 'here' }
+	| { state: 'available' | 'inviting' }
+	| {
+			state: 'here';
+			/** The stated reason the agent's turns at the place do not answer; absent shows nothing extra. */
+			turnState?: TurnOutcome;
+	  }
 	| { state: 'ended'; outcome: AgentControlOutcome }
 );
 

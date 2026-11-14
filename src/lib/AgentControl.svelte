@@ -6,6 +6,7 @@
 <script lang="ts">
 	import { SvelteSet } from 'svelte/reactivity';
 	import AiMark from './AiMark.svelte';
+	import TurnState from './TurnState.svelte';
 	import type { AgentControlOutcome, AgentControlProps, AgentControlRefusal } from './types.ts';
 	import type { Words as KitWords } from './words/de.ts';
 
@@ -69,7 +70,10 @@
 				{@const outcome = row.state === 'ended' ? row.outcome : undefined}
 				<li class="agent" use:outcomeTimer={{ key: row.key, outcome }}>
 					<AiMark />
-					<span class="name">{row.name}</span>
+					<span class="who">
+						<span class="name">{row.name}</span
+						>{#if row.state === 'here'}<TurnState outcome={row.turnState} {words} />{/if}
+					</span>
 					{#if row.state === 'available' || (row.state === 'ended' && lapsed.has(row.key))}
 						<button
 							class="act"
@@ -130,20 +134,34 @@
 	}
 	.agent {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 10px;
+		gap: 4px 10px;
 		min-height: 40px;
 		padding: 0 8px 0 14px;
 	}
 	.agent > :global(.ai-mark) {
 		color: var(--text-muted);
 	}
+	.who {
+		display: flex;
+		flex: 1 1 0;
+		flex-wrap: wrap;
+		align-items: center;
+		column-gap: 8px;
+		min-width: min-content;
+	}
 	.name {
-		flex: 1;
-		min-width: 0;
+		flex: 1 1 auto;
+		contain: inline-size;
+		min-width: 5em;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+	.act,
+	.pending {
+		margin-left: auto;
 	}
 	.act {
 		position: relative;

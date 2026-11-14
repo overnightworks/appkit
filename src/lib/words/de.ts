@@ -48,6 +48,10 @@ export type Words = {
     readonly "helperChat.speaker": (gaps: { readonly name: string }) => string;
     readonly "helperChat.you": string;
     readonly "legalLinks.name": string;
+    readonly "turnState.notEnabled": string;
+    readonly "turnState.busy": string;
+    readonly "turnState.budgetSpent": string;
+    readonly "turnState.unavailable": string;
 };
 // prettier-ignore
 export const words: Words = {
@@ -96,5 +100,9 @@ export const words: Words = {
     "helperChat.speaker": (gaps: { readonly name: string }) => gaps.name + ":",
     "helperChat.you": "Du",
     "legalLinks.name": "Rechtliches",
+    "turnState.notEnabled": "Nicht freigeschaltet",
+    "turnState.busy": "Gerade ausgelastet",
+    "turnState.budgetSpent": "Budget aufgebraucht",
+    "turnState.unavailable": "Gerade gestört",
 };
 export type Key = keyof Words;
