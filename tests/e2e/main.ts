@@ -170,8 +170,11 @@ function mountEarMarks(variant: string, words: KitWords): void {
 function mountTurnState(variant: string, words: KitWords): void {
 	const outcomes: (TurnOutcome | undefined)[] = ['not_enabled', 'busy', 'budget_spent', 'unavailable', undefined];
 	if (variant === 'here') {
+		const narrowStage = document.createElement('div');
+		narrowStage.className = 'turn-stage-narrow';
+		document.body.append(narrowStage);
 		mount(AgentControl, {
-			target: document.body,
+			target: narrowStage,
 			props: {
 				rows: [
 					{ key: 'key-mozart', name: 'Mozart', state: 'here', turnState: 'busy' },
