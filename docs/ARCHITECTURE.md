@@ -35,7 +35,7 @@ get identical CSS and fonts. The components exist only in the tarball.
 flowchart TB
   subgraph source[src]
     css[design/static: design.css and fonts]
-    comp[lib: SignInPage, AccountMenu, AgentControl, HearingSwitch, EarMark, HelperChat, LegalLinks, Marked, AiMark and types]
+    comp[lib: SignInPage, AccountMenu, AgentControl, HearingSwitch, EarMark, HelperChat, LegalLinks, TurnState, Marked, AiMark and types]
     gen[design/catalogs: the catalog generator]
     cat[catalogs: the kit's words, de source and en]
   end
@@ -59,7 +59,9 @@ flowchart TB
   timer per row that ends the display of an outcome after a fixed duration.
   `HearingSwitch` is one controlled chip with a switch for an agent's hearing; it
   takes its on colour from the app's `--accent`, and the app owns where the chips
-  stand and what a switch does. `EarMark` is the round ear with the agent's name in a pill
+  stand and what a switch does. `TurnState` is the muted mark with the kit's word for a stated turn outcome
+  that sits beside an agent's name; it renders nothing without an outcome and holds no state,
+  and `AgentControl`'s `here` row draws it from the row's `turnState`. `EarMark` is the round ear with the agent's name in a pill
   that shows an agent hears a person; it takes its ring from `--accent`, holds no state,
   and the app owns when it shows, where it stands and how several stack. `HelperChat` renders a
   helper conversation from props alone, generic over the app's message type, with `AiMark`
@@ -69,7 +71,7 @@ flowchart TB
   renders the list of parts that `design-catalogs` generates for a marked sentence:
   one snippet per marker name chooses the element, and the component adds no
   element, white space, words or styles. `SignInPage`, `AccountMenu`,
-  `AgentControl`, `HearingSwitch`, `EarMark`, `HelperChat` and `LegalLinks` take the kit's words as the required prop
+  `AgentControl`, `HearingSwitch`, `EarMark`, `HelperChat`, `LegalLinks` and `TurnState` take the kit's words as the required prop
   `words`, which the app loads with `loadKitWords` for its page's language; no
   component holds an English default or reads a language. Each prop's meaning is a docstring in
   [`src/lib/types.ts`](../src/lib/types.ts).

@@ -42,7 +42,7 @@ Sign-in wording is identical in every app. The kit's catalogs carry these string
 
 ## The components' words
 
-The tarball's `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `EarMark`, `HelperChat` and `LegalLinks` components take their words from the kit's catalogs: the app loads them with `loadKitWords` for the page's language and passes them as the required prop `words`, see the [README](../README.md#the-kits-words); [Languages](languages.md) requires that the kit ships its words per language.
+The tarball's `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `EarMark`, `HelperChat`, `LegalLinks` and `TurnState` components take their words from the kit's catalogs: the app loads them with `loadKitWords` for the page's language and passes them as the required prop `words`, see the [README](../README.md#the-kits-words); [Languages](languages.md) requires that the kit ships its words per language.
 
 `SignInPage` shows the strings above, the failure banner of a login that failed, the sentence of no access, which names the app, the sentence of a sign-in that did not finish, the words of the signing-in state and the words of the window-blocked state. The list above binds the sign-in words in the kit's catalogs; the de strings of the other words are not ruled.
 
@@ -55,6 +55,8 @@ The tarball's `SignInPage`, `AccountMenu`, `AgentControl`, `HearingSwitch`, `Ear
 `HearingSwitch` shows one label, "Agent may hear me" for `hear` and "I want to hear the agent" for `listen`; the label is the chip's accessible name. The de words are ruled: "Agent darf mich hören" and "Ich will den Agenten hören". The en words are not ruled.
 
 `EarMark` shows the agent's name in a pill and names the mark with two accessible-name patterns, which the title repeats: "{agent} hört dich" on the person's own tile and "{agent} hört {name}" on another person's. The de words and the en words, "{agent} hears you" and "{agent} hears {name}", are ruled.
+
+`TurnState` shows one word for each stated turn outcome: `not_enabled` "Nicht freigeschaltet" / "Not enabled", `busy` "Gerade ausgelastet" / "At capacity right now", `budget_spent` "Budget aufgebraucht" / "Out of budget" and `unavailable` "Gerade gestört" / "Not working right now". The words are not ruled; `turnState.busy` is not the call outcome `agent.busy`. The mark is decorative and the part has no role or live region, because it states a standing condition.
 
 `HelperChat` shows eight words: the send button's name "Senden" / "Send", the thinking line "{name} denkt nach…" / "{name} is thinking…", the tool-call row "Werkzeug benutzt: {tool}" / "ran tool: {tool}", the loading state "Chat wird geladen…" / "Loading chat…", the composer's accessible name "Nachricht an {name}" / "Message to {name}" and the message list's accessible name "Unterhaltung mit {name}" / "Conversation with {name}", the visually hidden speaker line that begins every message "{name}:" and the person's name in it "Du" / "You". `{name}` is the helper's name, which the app passes as `helperName`. The empty hint, the placeholder, the failure sentence and the messages are the app's.
 
