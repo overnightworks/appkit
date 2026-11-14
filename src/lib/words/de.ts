@@ -37,6 +37,8 @@ export type Words = {
     readonly "agent.tryAgain": string;
     readonly "hearing.agentMayHearMe": string;
     readonly "hearing.iWantToHearAgent": string;
+    readonly "hearing.agentMaySeeMe": string;
+    readonly "hearing.seeShort": string;
     readonly "hearing.agentHearsYou": (gaps: { readonly agent: string }) => string;
     readonly "hearing.agentHearsPerson": (gaps: { readonly agent: string; readonly name: string }) => string;
     readonly "helperChat.send": string;
@@ -89,6 +91,8 @@ export const words: Words = {
     "agent.tryAgain": "Das hat nicht geklappt. Versuch es noch einmal.",
     "hearing.agentMayHearMe": "Agent darf mich hören",
     "hearing.iWantToHearAgent": "Ich will den Agenten hören",
+    "hearing.agentMaySeeMe": "Agent darf mich sehen",
+    "hearing.seeShort": "Sehen",
     "hearing.agentHearsYou": (gaps: { readonly agent: string }) => gaps.agent + " hört dich",
     "hearing.agentHearsPerson": (gaps: { readonly agent: string; readonly name: string }) => gaps.agent + " hört " + gaps.name,
     "helperChat.send": "Senden",

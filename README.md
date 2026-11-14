@@ -108,7 +108,10 @@ unchanged.
 ## HearingSwitch
 
 One chip with a switch for an agent's hearing, drawn on a video: `kind="hear"` is
-"Agent may hear me", `kind="listen"` is "I want to hear the agent". It is controlled: it
+"Agent may hear me", `kind="listen"` is "I want to hear the agent", `kind="see"` is "Agent may see me"
+with the short word "See" as its visible label. `compact` shrinks any kind to its 26 px track, the
+icon on the knob and the label visually hidden but still the accessible name; the app decides
+when a tile is too narrow for the full chip. It is controlled: it
 shows `on` and, when pressed, calls `onChange` with the negated value, so the app sets `on`
 again or leaves it. The on colour is the app's `--accent`; the glass and the light ink are
 the chip's own, because the chip always sits on a video. Where the chips stand, their

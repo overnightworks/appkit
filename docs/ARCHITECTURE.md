@@ -57,7 +57,8 @@ flowchart TB
   "AI" pill before an agent's name, which takes no props. The app owns the
   trigger and the popover, and the control holds no state of the call beyond the one
   timer per row that ends the display of an outcome after a fixed duration.
-  `HearingSwitch` is one controlled chip with a switch for an agent's hearing; it
+  `HearingSwitch` is one controlled chip with a switch for an agent's hearing or sight
+  (`hear`, `listen`, `see`), in full or `compact`; it
   takes its on colour from the app's `--accent`, and the app owns where the chips
   stand and what a switch does. `TurnState` is the muted mark with the kit's word for a stated turn outcome
   that sits beside an agent's name; it renders nothing without an outcome and holds no state,

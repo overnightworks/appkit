@@ -4,18 +4,31 @@
 
 	const labelKeys = {
 		hear: 'hearing.agentMayHearMe',
-		listen: 'hearing.iWantToHearAgent'
+		listen: 'hearing.iWantToHearAgent',
+		see: 'hearing.seeShort'
 	} satisfies Record<HearingKind, keyof KitWords>;
 
-	let { kind, on, onChange, words }: HearingSwitchProps = $props();
+	let { kind, on, onChange, words, compact = false }: HearingSwitchProps = $props();
 </script>
 
-<button class="hearing-switch" type="button" role="switch" aria-checked={on} onclick={() => onChange(!on)}>
+<button
+	class="hearing-switch"
+	class:compact
+	type="button"
+	role="switch"
+	aria-checked={on}
+	aria-label={kind === 'see' ? words['hearing.agentMaySeeMe'] : undefined}
+	onclick={() => onChange(!on)}
+>
 	<span class="icon">
 		<svg viewBox="0 0 24 24" aria-hidden="true">
 			{#if kind === 'hear'}
 				<path d="M6 10a6 6 0 1 1 12 0c0 3.2-3 4-3 7a3 3 0 0 1-6 0" />
 				<path d="M9.5 10a2.5 2.5 0 0 1 5 0" />
+				{#if !on}<path d="M4 4l16 16" />{/if}
+			{:else if kind === 'see'}
+				<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" />
+				<circle cx="12" cy="12" r="2.8" />
 				{#if !on}<path d="M4 4l16 16" />{/if}
 			{:else}
 				<path d="M4 9.5h3l4.5-3.7v12.4L7 14.5H4z" />
@@ -37,6 +50,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 8px;
+		min-width: 0;
 		max-width: 100%;
 		height: 28px;
 		padding: 0 5px 0 10px;
@@ -109,7 +123,45 @@
 		transform: translateX(14px);
 		background: #0d1013;
 	}
+	.compact {
+		flex: none;
+		width: 26px;
+		padding: 0;
+		gap: 0;
+		justify-content: center;
+	}
+	.compact .track {
+		width: 26px;
+	}
+	.compact[aria-checked='true'] .track::after {
+		transform: translateX(6px);
+	}
+	.compact .icon {
+		position: absolute;
+		top: 50%;
+		left: 4px;
+		z-index: 1;
+		margin-top: -6px;
+		color: #0d1013;
+		pointer-events: none;
+	}
+	.compact .icon svg {
+		width: 12px;
+		height: 12px;
+	}
+	.compact[aria-checked='true'] .icon {
+		transform: translateX(6px);
+	}
+	.compact .label {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		clip-path: inset(50%);
+	}
 	@media (prefers-reduced-motion: no-preference) {
+		.compact .icon {
+			transition: transform 0.2s;
+		}
 		.track {
 			transition: background 0.2s;
 		}

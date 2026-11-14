@@ -24,6 +24,16 @@ h1 {
 	background: #1b2a33;
 }
 
+/* A tile narrower than the hearing chip and the see chip side by side. */
+.hearing-stage-narrow {
+	flex-direction: row;
+	align-items: center;
+	width: 120px;
+	max-width: none;
+	margin: 8px;
+	padding: 0;
+}
+
 /* A stand-in for the tile the ear marks sit on; the app stacks the marks and places them. */
 .ear-stage {
 	display: flex;
