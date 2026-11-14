@@ -148,10 +148,12 @@
 		flex-wrap: wrap;
 		align-items: center;
 		column-gap: 8px;
-		min-width: 0;
+		min-width: min-content;
 	}
 	.name {
-		min-width: 0;
+		flex: 1 1 auto;
+		contain: inline-size;
+		min-width: 5em;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
