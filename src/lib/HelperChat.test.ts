@@ -72,6 +72,24 @@ describe('the message list', () => {
 		expect(lists[0].closest('[aria-live]')).toBeNull();
 	});
 
+	it.each([
+		['en', en],
+		['de', de]
+	])('begins each message with its speaker, the kit’s word for the person and the helper’s name for the helper, in the %s words', async (_language, words) => {
+		const root = await render({
+			messages: [{ role: 'user', text: 'Hi' }, { role: 'assistant', text: 'Hello' }, { role: 'assistant', text: '' }],
+			words
+		});
+		const items = [...root.querySelectorAll('li')];
+		expect(items.map((item) => item.firstElementChild?.textContent)).toEqual([
+			words['helperChat.speaker']({ name: words['helperChat.you'] }),
+			words['helperChat.speaker']({ name: 'Mozart' }),
+			words['helperChat.speaker']({ name: 'Mozart' })
+		]);
+		expect(items.map((item) => item.getAttribute('aria-label'))).toEqual([null, null, null]);
+		expect(items[2].querySelector('.bubble')).toBeNull();
+	});
+
 	it('shows only the empty hint, no list, while there is no message', async () => {
 		const root = await render();
 		expect(root.querySelector('[role="list"], ol, li')).toBeNull();

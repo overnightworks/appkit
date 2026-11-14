@@ -171,6 +171,14 @@ msgctxt "helperChat.listLabel"
 msgid "Unterhaltung mit {name}"
 msgstr "Conversation with {name}"
 
+msgctxt "helperChat.speaker"
+msgid "{name}:"
+msgstr "{name}:"
+
+msgctxt "helperChat.you"
+msgid "Du"
+msgstr "You"
+
 msgctxt "legalLinks.name"
 msgid "Rechtliches"
 msgstr "Legal"

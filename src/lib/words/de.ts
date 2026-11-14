@@ -45,6 +45,8 @@ export type Words = {
     readonly "helperChat.loading": string;
     readonly "helperChat.composerLabel": (gaps: { readonly name: string }) => string;
     readonly "helperChat.listLabel": (gaps: { readonly name: string }) => string;
+    readonly "helperChat.speaker": (gaps: { readonly name: string }) => string;
+    readonly "helperChat.you": string;
     readonly "legalLinks.name": string;
 };
 // prettier-ignore
@@ -91,6 +93,8 @@ export const words: Words = {
     "helperChat.loading": "Chat wird geladen…",
     "helperChat.composerLabel": (gaps: { readonly name: string }) => "Nachricht an " + gaps.name,
     "helperChat.listLabel": (gaps: { readonly name: string }) => "Unterhaltung mit " + gaps.name,
+    "helperChat.speaker": (gaps: { readonly name: string }) => gaps.name + ":",
+    "helperChat.you": "Du",
     "legalLinks.name": "Rechtliches",
 };
 export type Key = keyof Words;
