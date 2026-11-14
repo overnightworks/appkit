@@ -163,19 +163,31 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 		test.describe('with a finger at 390 px', () => {
 			test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 800 } });
 
-			test('lets the visible body of each chip belong to that chip at the edges that face each other', async ({ page }) => {
-				await open(page);
+			const reach = 20;
+
+			async function tapsLandOnChip(page: Page, chip: Locator, directions: readonly (readonly [number, number])[]) {
+				const box = (await chip.boundingBox())!;
+				for (const [dx, dy] of directions) {
+					const point = { x: box.x + box.width / 2 + dx * reach, y: box.y + box.height / 2 + dy * reach };
+					expect(
+						await chip.evaluate((node, at) => node.contains(document.elementFromPoint(at.x, at.y)), point)
+					).toBe(true);
+					const before = await chip.getAttribute('aria-checked');
+					await page.touchscreen.tap(point.x, point.y);
+					await expect(chip).toHaveAttribute('aria-checked', String(before !== 'true'));
+				}
+			}
+
+			test('reaches a compact chip from 20 px off its centre in every direction', async ({ page }) => {
+				await open(page, 'narrow');
 				expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true);
-				const lands = async (chip: Locator, edge: 'bottom' | 'top') => {
-					const box = (await chip.boundingBox())!;
-					const y = edge === 'bottom' ? box.y + box.height - 2 : box.y + 2;
-					return chip.evaluate((node, point) => node.contains(document.elementFromPoint(point.x, point.y)), {
-						x: box.x + box.width / 2,
-						y
-					});
-				};
-				expect(await lands(chipOf(page, 'hear'), 'bottom')).toBe(true);
-				expect(await lands(chipOf(page, 'listen'), 'top')).toBe(true);
+				await tapsLandOnChip(page, chipOf(page, 'see'), [[0, -1], [0, 1], [-1, 0]]);
+			});
+
+			test('reaches a full chip from 20 px off its centre, away from the chip beside it', async ({ page }) => {
+				await open(page);
+				await tapsLandOnChip(page, chipOf(page, 'hear'), [[0, -1], [-1, 0], [1, 0]]);
+				await tapsLandOnChip(page, chipOf(page, 'listen'), [[0, 1], [-1, 0], [1, 0]]);
 			});
 		});
 

@@ -158,6 +158,17 @@
 		height: 1px;
 		clip-path: inset(50%);
 	}
+	@media (any-pointer: coarse) {
+		.hearing-switch::before {
+			content: '';
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			width: max(100%, 44px);
+			height: 44px;
+			transform: translate(-50%, -50%);
+		}
+	}
 	@media (prefers-reduced-motion: no-preference) {
 		.compact .icon {
 			transition: transform 0.2s;
