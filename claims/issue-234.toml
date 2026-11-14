@@ -1,8 +1,0 @@
-claim_id = "13a0461b3f4c46b4a6d1892f126884e4"
-agent = "Claude 019c230b-7e16-4294-87f3-af95e9827632"
-role = "builder"
-base = "3e376f8c0d446012bd116629b3d04b51fe1893b0"
-branch = "claude/issue-234-see-switch"
-scope = ["README.md", "docs/ARCHITECTURE.md", "docs/stylesheet.md", "package.json", "pyproject.toml", "src/catalogs", "src/design/words.py", "src/lib/HearingSwitch.ssr.test.ts", "src/lib/HearingSwitch.svelte", "src/lib/HearingSwitch.test.ts", "src/lib/types.ts", "src/lib/words", "tests/e2e", "uv.lock"]
-opened_commit = "9c5e67a93bea9954bcc81120294c6d5d50ce931d"
-whole_reason = "One switch kind, its words, the words generated from them, its proofs, its documentation and its release go together."
