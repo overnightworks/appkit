@@ -9,6 +9,7 @@ product apps that load the stylesheet (and, for SvelteKit apps, the components),
 the Keycloak themes and the legal pages, which take the wheel's stylesheet and fonts through the
 repository that builds them, the GitHub release that distributes it, and the shared quality gate that checks every pull request and every release.
 Page layout and product-specific JavaScript stay in the products.
+`TurnOutcome` is generated from agents' release wheel, pinned by url and sha256 in `scripts/agents_vocabulary_pin.toml`; CI fails when regenerating it changes the type.
 
 ```mermaid
 flowchart LR

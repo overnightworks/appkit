@@ -1,4 +1,5 @@
 import type { Snippet } from 'svelte';
+import type { TurnOutcome } from './turn-outcome.ts';
 import type { Words as KitWords } from './words/de.ts';
 
 /**
@@ -106,11 +107,7 @@ export interface SignInPageProps {
 	words: KitWords;
 }
 
-/**
- * Why an agent's turns at a place do not answer, as the agents service states it (`StopOutcome`); apps
- * pass the stated value unchanged.
- */
-export type TurnOutcome = 'not_enabled' | 'busy' | 'budget_spent' | 'unavailable';
+export type { TurnOutcome };
 
 /**
  * The mark and the kit's word for a stated turn outcome, meant to sit beside an agent's name. Without an

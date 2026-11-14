@@ -1,0 +1,4 @@
+# The agents release whose vocabulary design generates TurnOutcome from. Raise it with
+# `uv run python scripts/generate_turn_outcome.py --pin <url> <sha256>`.
+url = "https://github.com/overnightworks/agents/releases/download/v0.44.0/overnightworks_agents-0.44.0-py3-none-any.whl"
+sha256 = "e0fe3378011d4b5c55a7f2eea85ddb6001e932f27bf1357697345689e11c240e"
