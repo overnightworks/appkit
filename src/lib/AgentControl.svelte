@@ -134,8 +134,9 @@
 	}
 	.agent {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 10px;
+		gap: 4px 10px;
 		min-height: 40px;
 		padding: 0 8px 0 14px;
 	}
@@ -144,7 +145,7 @@
 	}
 	.who {
 		display: flex;
-		flex: 1;
+		flex: 1 1 0;
 		flex-wrap: wrap;
 		align-items: center;
 		column-gap: 8px;
@@ -157,6 +158,10 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+	.act,
+	.pending {
+		margin-left: auto;
 	}
 	.act {
 		position: relative;

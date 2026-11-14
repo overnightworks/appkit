@@ -71,11 +71,17 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 					expect(partBox.x).toBeGreaterThanOrEqual(rowBox.x);
 					expect(partBox.x + partBox.width).toBeLessThanOrEqual(rowBox.x + rowBox.width);
 					expect(await part.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
-					const buttonBox = (await long.getByRole('button').boundingBox())!;
-					expect(partBox.x + partBox.width).toBeLessThanOrEqual(buttonBox.x);
-					const shortRow = rows.first();
-					const shortPart = (await shortRow.locator('.turn-state').boundingBox())!;
-					expect(shortPart.x + shortPart.width).toBeLessThanOrEqual((await shortRow.getByRole('button').boundingBox())!.x);
+					const rowInnerRight = await long.evaluate((node) => {
+						const box = node.getBoundingClientRect();
+						return box.right - parseFloat(getComputedStyle(node).paddingRight);
+					});
+					for (const row of [rows.first(), long]) {
+						const rowPart = (await row.locator('.turn-state').boundingBox())!;
+						const button = (await row.getByRole('button').boundingBox())!;
+						const clearOfPart = rowPart.x + rowPart.width <= button.x || rowPart.y + rowPart.height <= button.y;
+						expect(clearOfPart).toBe(true);
+						expect(button.x + button.width).toBeLessThanOrEqual(rowInnerRight);
+					}
 					expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
 					await expect(rows.nth(2).locator('.turn-state')).toHaveCount(0);
