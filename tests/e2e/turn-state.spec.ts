@@ -54,7 +54,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 					expect(box.height).toBeLessThan(2 * markBox.height);
 				});
 
-				test(`keeps the part whole beside a long name in a here row, in ${colorScheme} at ${width} px`, async ({ page }) => {
+				test(`keeps the part whole and the leave button inside the row beside a long name, in ${colorScheme} at ${width} px`, async ({ page }) => {
 					await page.emulateMedia({ colorScheme });
 					await page.setViewportSize({ width, height: 800 });
 					await open(page, 'here');
