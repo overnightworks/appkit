@@ -50,6 +50,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 8px;
+		min-width: 0;
 		max-width: 100%;
 		height: 28px;
 		padding: 0 5px 0 10px;
