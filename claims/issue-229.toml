@@ -1,8 +1,0 @@
-claim_id = "a0c46d57eaed4922ae2451003b7216a6"
-agent = "Claude 019c230b-7e16-4294-87f3-af95e9827632"
-role = "builder"
-base = "3c972db389a2bf964959e4beb1578c1c576c849f"
-branch = "claude/issue-229-helper-chat-speaker"
-scope = ["README.md", "docs/stylesheet.md", "src/catalogs", "src/design/words.py", "src/lib/HelperChat.ssr.test.ts", "src/lib/HelperChat.svelte", "src/lib/HelperChat.test.ts", "src/lib/words", "tests/e2e"]
-opened_commit = "74487622f7bf317e44c9e6a1d25518c0c436b643"
-whole_reason = "The speaker line, its two kit words, the words generated from them, its proofs and its documentation go together."
