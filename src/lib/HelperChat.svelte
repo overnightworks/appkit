@@ -78,6 +78,9 @@
 				<ol role="list" aria-label={words['helperChat.listLabel']({ name: helperName })}>
 					{#each messages as message, index (index)}
 						<li class="message {message.role}">
+							<span class="visually-hidden">{words['helperChat.speaker']({
+								name: message.role === 'user' ? words['helperChat.you'] : helperName
+							})}</span>
 							{#if hasContent(message) || (thinking && index === messages.length - 1)}
 								<div class="bubble">
 									{#if message.role === 'assistant'}
@@ -124,7 +127,7 @@
 			<button class="send" type="button" disabled={!sendable} onclick={send}>{words['helperChat.send']}</button>
 		</div>
 	</div>
-	<p class="status" role="status">{thinking ? thinkingWord : ''}</p>
+	<p class="visually-hidden" role="status">{thinking ? thinkingWord : ''}</p>
 </div>
 
 <style>
@@ -213,7 +216,7 @@
 		margin: 0;
 		color: var(--text-muted);
 	}
-	.status {
+	.visually-hidden {
 		position: absolute;
 		width: 1px;
 		height: 1px;

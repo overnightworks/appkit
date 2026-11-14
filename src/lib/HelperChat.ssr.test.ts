@@ -32,6 +32,8 @@ describe.each(languages)('HelperChat server-rendered in the %s words', (language
 		expect(body).toContain(words['helperChat.composerLabel']({ name: 'Mozart' }));
 		expect(body).toContain(`aria-label="${words['helperChat.listLabel']({ name: 'Mozart' })}"`);
 		expect(body).toMatch(/<ol\b[^>]*role="list"/);
+		expect(body).toContain(words['helperChat.speaker']({ name: words['helperChat.you'] }));
+		expect(body).toContain(words['helperChat.speaker']({ name: 'Mozart' }));
 		expect(body).toMatch(/<textarea\b[^>]*>/);
 		expect(body).toMatch(/role="status"/);
 		expect(body).not.toMatch(/<script\b/);

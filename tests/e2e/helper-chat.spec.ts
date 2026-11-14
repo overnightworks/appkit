@@ -141,6 +141,16 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			await expect(bubbleOf(page, 'Make the second verse').locator('.ai-mark')).toHaveCount(0);
 		});
 
+		for (const language of languages) {
+			test(`tells the person's messages from the helper's by the speaker line in the ${language} words`, async ({ page }) => {
+				const words = wordsOf[language];
+				await open(page, 'base', language);
+				const messages = page.getByRole('list', { name: words['helperChat.listLabel']({ name: 'Mozart' }), exact: true }).getByRole('listitem');
+				await expect(messages.filter({ hasText: words['helperChat.speaker']({ name: words['helperChat.you'] }) })).toHaveCount(2);
+				await expect(messages.filter({ hasText: words['helperChat.speaker']({ name: 'Mozart' }) })).toHaveCount(2);
+			});
+		}
+
 		test('shows message text as written, with its line breaks', async ({ page }) => {
 			await open(page, 'base');
 			const person = bubbleOf(page, 'Make the second verse').locator('.text');

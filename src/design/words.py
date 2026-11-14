@@ -49,6 +49,8 @@ type Key = Literal[
     'helperChat.loading',
     'helperChat.composerLabel',
     'helperChat.listLabel',
+    'helperChat.speaker',
+    'helperChat.you',
     'legalLinks.name',
 ]
 type Language = Literal[
@@ -113,6 +115,8 @@ WORDS: Mapping[Language, Mapping[Key, str | Mapping[Category, str]]] = {
         'helperChat.loading': 'Chat wird geladen…',
         'helperChat.composerLabel': 'Nachricht an {name}',
         'helperChat.listLabel': 'Unterhaltung mit {name}',
+        'helperChat.speaker': '{name}:',
+        'helperChat.you': 'Du',
         'legalLinks.name': 'Rechtliches',
     },
     'en': {
@@ -158,6 +162,8 @@ WORDS: Mapping[Language, Mapping[Key, str | Mapping[Category, str]]] = {
         'helperChat.loading': 'Loading chat…',
         'helperChat.composerLabel': 'Message to {name}',
         'helperChat.listLabel': 'Conversation with {name}',
+        'helperChat.speaker': '{name}:',
+        'helperChat.you': 'You',
         'legalLinks.name': 'Legal',
     },
 }
