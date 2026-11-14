@@ -113,7 +113,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 		for (const colorScheme of colorSchemes) {
 			for (const width of widths) {
 				for (const language of languages) {
-					test(`keeps the compact see chip whole, pressable and inside a 120 px container beside the hearing chip in ${language}, ${colorScheme} at ${width} px`, async ({
+					test(`keeps the compact see chip whole, pressable and inside a 140 px container beside the hearing chip in ${language}, ${colorScheme} at ${width} px`, async ({
 						page
 					}) => {
 						await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
@@ -181,7 +181,7 @@ for (const consumer of ['imported', 'linked'] as const satisfies ConsumerName[])
 			test('reaches a compact chip from 20 px off its centre in every direction', async ({ page }) => {
 				await open(page, 'narrow');
 				expect(await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true);
-				await tapsLandOnChip(page, chipOf(page, 'see'), [[0, -1], [0, 1], [-1, 0]]);
+				await tapsLandOnChip(page, chipOf(page, 'see'), [[0, -1], [0, 1], [-1, 0], [1, 0]]);
 			});
 
 			test('reaches a full chip from 20 px off its centre, away from the chip beside it', async ({ page }) => {

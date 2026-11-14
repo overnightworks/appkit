@@ -159,6 +159,9 @@
 		clip-path: inset(50%);
 	}
 	@media (any-pointer: coarse) {
+		.compact {
+			margin-inline: 9px;
+		}
 		.hearing-switch::before {
 			content: '';
 			position: absolute;
